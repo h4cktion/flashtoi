@@ -6,7 +6,10 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "seed": "node scripts/seed.js",
+    "seed:clean": "node scripts/seed.js --clean",
+    "hash": "node scripts/generate-hash.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",
@@ -26,6 +29,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "dotenv": "^17.2.3",
     "eslint": "^9",
     "eslint-config-next": "15.5.5",
     "tailwindcss": "^4",
