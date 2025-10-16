@@ -96,6 +96,7 @@ OrderSchema.index({ studentIds: 1, createdAt: -1 })
 
 // Prevent model recompilation in development (Next.js hot reload)
 const Order: Model<IOrder> =
-  mongoose.models.Order || mongoose.model<IOrder>('Order', OrderSchema)
+  (mongoose.models?.Order as Model<IOrder>) ||
+  mongoose.model<IOrder>('Order', OrderSchema)
 
 export default Order

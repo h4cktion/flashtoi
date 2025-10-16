@@ -53,7 +53,7 @@ async function seed() {
       throw new Error('MONGODB_URI non définie dans .env.local');
     }
 
-    console.log('📡 Connexion à MongoDB...');
+    console.log('📡 Connexion à MongoDB...',process.env.MONGODB_URI);
     await mongoose.connect(process.env.MONGODB_URI);
     console.log('✅ Connecté à MongoDB\n');
 

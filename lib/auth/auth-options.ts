@@ -30,7 +30,7 @@ export const authOptions: NextAuthConfig = {
               { loginCode: credentials.identifier },
             ],
           }).select('+password')
-
+console.log('student',student)
           if (!student) {
             return null
           }
@@ -40,7 +40,7 @@ export const authOptions: NextAuthConfig = {
             credentials.password as string,
             student.password
           )
-
+console.log("isPasswordValid",isPasswordValid)
           if (!isPasswordValid) {
             return null
           }

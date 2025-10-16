@@ -90,6 +90,7 @@ StudentSchema.index({ schoolId: 1, classId: 1 })
 
 // Prevent model recompilation in development (Next.js hot reload)
 const Student: Model<IStudent> =
-  mongoose.models.Student || mongoose.model<IStudent>('Student', StudentSchema)
+  (mongoose.models?.Student as Model<IStudent>) ||
+  mongoose.model<IStudent>('Student', StudentSchema)
 
 export default Student

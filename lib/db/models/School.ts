@@ -46,6 +46,7 @@ const SchoolSchema = new Schema<ISchool>(
 
 // Prevent model recompilation in development (Next.js hot reload)
 const School: Model<ISchool> =
-  mongoose.models.School || mongoose.model<ISchool>('School', SchoolSchema)
+  (mongoose.models?.School as Model<ISchool>) ||
+  mongoose.model<ISchool>('School', SchoolSchema)
 
 export default School
