@@ -1,7 +1,9 @@
 import { getStudentById } from '@/lib/actions/student'
+import { getAvailablePacksForStudent } from '@/lib/actions/pack'
 import { notFound } from 'next/navigation'
 import { PhotoCard } from '@/components/cart/photo-card'
 import { CartSummary } from '@/components/cart/cart-summary'
+import { PacksSection } from '@/components/cart/packs-section'
 
 interface GalleryPageProps {
   params: {
@@ -11,13 +13,19 @@ interface GalleryPageProps {
 
 export default async function GalleryPage({ params }: GalleryPageProps) {
   const { id } = params
-  const result = await getStudentById(id)
 
-  if (!result.success || !result.data) {
+  // Récupérer l'étudiant et les packs disponibles en parallèle
+  const [studentResult, packsResult] = await Promise.all([
+    getStudentById(id),
+    getAvailablePacksForStudent(id),
+  ])
+
+  if (!studentResult.success || !studentResult.data) {
     notFound()
   }
 
-  const student = result.data
+  const student = studentResult.data
+  const packs = packsResult.success ? packsResult.data || [] : []
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -30,9 +38,12 @@ export default async function GalleryPage({ params }: GalleryPageProps) {
           <p className="text-gray-600 mt-2">Classe: {student.classId}</p>
         </div>
 
+        {/* Section des packs */}
+        <PacksSection packs={packs} />
+
         {/* Galerie de photos */}
         <div className="bg-white rounded-lg shadow-sm p-6">
-          <h2 className="text-xl font-semibold mb-6">Vos photos</h2>
+          <h2 className="text-xl font-semibold mb-6">Photos individuelles</h2>
 
           {student.photos && student.photos.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

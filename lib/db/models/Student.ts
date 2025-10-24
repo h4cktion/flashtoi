@@ -63,6 +63,11 @@ const StudentSchema = new Schema<IStudent>(
           required: true,
           min: 0,
         },
+        planche: {
+          type: String,
+          enum: ['classe', 'planche1', 'planche2', 'planche4', 'mixte', 'rotation'],
+          required: true,
+        },
       },
     ],
     siblings: [

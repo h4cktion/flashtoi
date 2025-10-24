@@ -1,12 +1,15 @@
 'use client'
 
 import { createContext, useContext, useState, ReactNode } from 'react'
-import { CartItem, Cart } from '@/types'
+import { CartItem, Cart, PackCartItem } from '@/types'
 
 interface CartContextType {
   cart: Cart
   addToCart: (item: Omit<CartItem, 'quantity'>) => void
   removeFromCart: (photoUrl: string, format: string) => void
+  addPackToCart: (pack: Omit<PackCartItem, 'quantity'>) => void
+  removePackFromCart: (packId: string) => void
+  updatePackQuantity: (packId: string, quantity: number) => void
   clearCart: () => void
   updateQuantity: (photoUrl: string, format: string, quantity: number) => void
 }
@@ -16,6 +19,7 @@ const CartContext = createContext<CartContextType | undefined>(undefined)
 export function CartProvider({ children }: { children: ReactNode }) {
   const [cart, setCart] = useState<Cart>({
     items: [],
+    packs: [],
     totalItems: 0,
     totalAmount: 0,
   })
@@ -39,14 +43,23 @@ export function CartProvider({ children }: { children: ReactNode }) {
       }
 
       // Recalculer les totaux
-      const totalItems = newItems.reduce((sum, item) => sum + item.quantity, 0)
-      const totalAmount = newItems.reduce(
+      const itemsTotal = newItems.reduce((sum, item) => sum + item.quantity, 0)
+      const packsTotal = prevCart.packs.reduce((sum, pack) => sum + pack.quantity, 0)
+      const totalItems = itemsTotal + packsTotal
+
+      const itemsAmount = newItems.reduce(
         (sum, item) => sum + item.unitPrice * item.quantity,
         0
       )
+      const packsAmount = prevCart.packs.reduce(
+        (sum, pack) => sum + pack.packPrice * pack.quantity,
+        0
+      )
+      const totalAmount = itemsAmount + packsAmount
 
       return {
         items: newItems,
+        packs: prevCart.packs,
         totalItems,
         totalAmount,
       }
@@ -59,14 +72,23 @@ export function CartProvider({ children }: { children: ReactNode }) {
         (item) => !(item.photoUrl === photoUrl && item.format === format)
       )
 
-      const totalItems = newItems.reduce((sum, item) => sum + item.quantity, 0)
-      const totalAmount = newItems.reduce(
+      const itemsTotal = newItems.reduce((sum, item) => sum + item.quantity, 0)
+      const packsTotal = prevCart.packs.reduce((sum, pack) => sum + pack.quantity, 0)
+      const totalItems = itemsTotal + packsTotal
+
+      const itemsAmount = newItems.reduce(
         (sum, item) => sum + item.unitPrice * item.quantity,
         0
       )
+      const packsAmount = prevCart.packs.reduce(
+        (sum, pack) => sum + pack.packPrice * pack.quantity,
+        0
+      )
+      const totalAmount = itemsAmount + packsAmount
 
       return {
         items: newItems,
+        packs: prevCart.packs,
         totalItems,
         totalAmount,
       }
@@ -86,14 +108,124 @@ export function CartProvider({ children }: { children: ReactNode }) {
           : item
       )
 
-      const totalItems = newItems.reduce((sum, item) => sum + item.quantity, 0)
-      const totalAmount = newItems.reduce(
+      const itemsTotal = newItems.reduce((sum, item) => sum + item.quantity, 0)
+      const packsTotal = prevCart.packs.reduce((sum, pack) => sum + pack.quantity, 0)
+      const totalItems = itemsTotal + packsTotal
+
+      const itemsAmount = newItems.reduce(
         (sum, item) => sum + item.unitPrice * item.quantity,
         0
       )
+      const packsAmount = prevCart.packs.reduce(
+        (sum, pack) => sum + pack.packPrice * pack.quantity,
+        0
+      )
+      const totalAmount = itemsAmount + packsAmount
 
       return {
         items: newItems,
+        packs: prevCart.packs,
+        totalItems,
+        totalAmount,
+      }
+    })
+  }
+
+  const addPackToCart = (pack: Omit<PackCartItem, 'quantity'>) => {
+    setCart((prevCart) => {
+      // Vérifier si le pack existe déjà
+      const existingIndex = prevCart.packs.findIndex((p) => p.packId === pack.packId)
+
+      let newPacks: PackCartItem[]
+
+      if (existingIndex >= 0) {
+        // Incrémenter la quantité
+        newPacks = [...prevCart.packs]
+        newPacks[existingIndex].quantity += 1
+      } else {
+        // Ajouter un nouveau pack
+        newPacks = [...prevCart.packs, { ...pack, quantity: 1 }]
+      }
+
+      // Recalculer les totaux
+      const itemsTotal = prevCart.items.reduce((sum, item) => sum + item.quantity, 0)
+      const packsTotal = newPacks.reduce((sum, pack) => sum + pack.quantity, 0)
+      const totalItems = itemsTotal + packsTotal
+
+      const itemsAmount = prevCart.items.reduce(
+        (sum, item) => sum + item.unitPrice * item.quantity,
+        0
+      )
+      const packsAmount = newPacks.reduce(
+        (sum, pack) => sum + pack.packPrice * pack.quantity,
+        0
+      )
+      const totalAmount = itemsAmount + packsAmount
+
+      return {
+        items: prevCart.items,
+        packs: newPacks,
+        totalItems,
+        totalAmount,
+      }
+    })
+  }
+
+  const removePackFromCart = (packId: string) => {
+    setCart((prevCart) => {
+      const newPacks = prevCart.packs.filter((pack) => pack.packId !== packId)
+
+      const itemsTotal = prevCart.items.reduce((sum, item) => sum + item.quantity, 0)
+      const packsTotal = newPacks.reduce((sum, pack) => sum + pack.quantity, 0)
+      const totalItems = itemsTotal + packsTotal
+
+      const itemsAmount = prevCart.items.reduce(
+        (sum, item) => sum + item.unitPrice * item.quantity,
+        0
+      )
+      const packsAmount = newPacks.reduce(
+        (sum, pack) => sum + pack.packPrice * pack.quantity,
+        0
+      )
+      const totalAmount = itemsAmount + packsAmount
+
+      return {
+        items: prevCart.items,
+        packs: newPacks,
+        totalItems,
+        totalAmount,
+      }
+    })
+  }
+
+  const updatePackQuantity = (packId: string, quantity: number) => {
+    if (quantity <= 0) {
+      removePackFromCart(packId)
+      return
+    }
+
+    setCart((prevCart) => {
+      const newPacks = prevCart.packs.map((pack) =>
+        pack.packId === packId ? { ...pack, quantity } : pack
+      )
+
+      const itemsTotal = prevCart.items.reduce((sum, item) => sum + item.quantity, 0)
+      const packsTotal = newPacks.reduce((sum, pack) => sum + pack.quantity, 0)
+      const totalItems = itemsTotal + packsTotal
+
+      const itemsAmount = prevCart.items.reduce(
+        (sum, item) => sum + item.unitPrice * item.quantity,
+        0
+      )
+      const packsAmount = newPacks.reduce(
+        (sum, pack) => sum + pack.packPrice * pack.quantity,
+        0
+      )
+      const totalAmount = itemsAmount + packsAmount
+
+      return {
+        items: prevCart.items,
+        packs: newPacks,
         totalItems,
         totalAmount,
       }
@@ -103,6 +235,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const clearCart = () => {
     setCart({
       items: [],
+      packs: [],
       totalItems: 0,
       totalAmount: 0,
     })
@@ -114,6 +247,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
         cart,
         addToCart,
         removeFromCart,
+        addPackToCart,
+        removePackFromCart,
+        updatePackQuantity,
         clearCart,
         updateQuantity,
       }}

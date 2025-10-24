@@ -9,12 +9,14 @@ export type UserRole = 'parent' | 'school'
 // PHOTO TYPES
 // ============================================
 export type PhotoFormat = '10x15' | '13x18' | 'identite'
+export type PhotoPlanche = 'classe' | 'planche1' | 'planche2' | 'planche4' | 'mixte' | 'rotation'
 
 export interface Photo {
   s3Key: string
   cloudFrontUrl: string
   format: PhotoFormat
   price: number
+  planche: PhotoPlanche
 }
 
 // ============================================
@@ -114,6 +116,27 @@ export interface ActionResponse<T = unknown> {
 }
 
 // ============================================
+// PACK TYPES
+// ============================================
+export type PackName = 'S' | 'M' | 'L' | 'XL' | 'XXL'
+
+export interface IPack {
+  _id: Types.ObjectId | string
+  name: PackName
+  price: number
+  description: string
+  planches: PhotoPlanche[]
+  order: number
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface Pack {
+  pack: IPack
+  photos: Photo[]
+}
+
+// ============================================
 // CART TYPES (Client-side state)
 // ============================================
 export interface CartItem {
@@ -123,8 +146,17 @@ export interface CartItem {
   unitPrice: number
 }
 
+export interface PackCartItem {
+  packId: string
+  packName: PackName
+  packPrice: number
+  photos: Photo[]
+  quantity: number
+}
+
 export interface Cart {
   items: CartItem[]
+  packs: PackCartItem[]
   totalItems: number
   totalAmount: number
 }
