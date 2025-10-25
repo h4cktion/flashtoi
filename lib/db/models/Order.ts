@@ -51,6 +51,39 @@ const OrderSchema = new Schema<IOrder>(
         },
       },
     ],
+    packs: [
+      {
+        packId: {
+          type: String,
+          required: true,
+        },
+        packName: {
+          type: String,
+          enum: ['S', 'M', 'L', 'XL', 'XXL'],
+          required: true,
+        },
+        packPrice: {
+          type: Number,
+          required: true,
+          min: 0,
+        },
+        quantity: {
+          type: Number,
+          required: true,
+          min: 1,
+        },
+        subtotal: {
+          type: Number,
+          required: true,
+          min: 0,
+        },
+        photosCount: {
+          type: Number,
+          required: true,
+          min: 1,
+        },
+      },
+    ],
     totalAmount: {
       type: Number,
       required: [true, 'Total amount is required'],

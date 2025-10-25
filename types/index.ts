@@ -77,12 +77,22 @@ export interface OrderItem {
   subtotal: number
 }
 
+export interface OrderPackItem {
+  packId: string
+  packName: PackName
+  packPrice: number
+  quantity: number
+  subtotal: number
+  photosCount: number
+}
+
 export interface IOrder {
   _id: Types.ObjectId | string
   orderNumber: string
   studentIds: (Types.ObjectId | string)[]
   schoolId: Types.ObjectId | string
   items: OrderItem[]
+  packs?: OrderPackItem[]
   totalAmount: number
   paymentMethod: PaymentMethod
   status: OrderStatus

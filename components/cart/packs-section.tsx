@@ -10,6 +10,9 @@ export function PacksSection({ packs }: PacksSectionProps) {
     return null
   }
 
+  // Trier les packs par prix décroissant (du plus cher au moins cher)
+  const sortedPacks = [...packs].sort((a, b) => b.pack.price - a.pack.price)
+
   return (
     <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
       <div className="mb-6">
@@ -17,13 +20,12 @@ export function PacksSection({ packs }: PacksSectionProps) {
           Nos Packs Photos
         </h2>
         <p className="text-gray-600">
-          Profitez de nos packs avantageux pour commander plusieurs photos à
-          prix réduit
+          Profitez de nos packs avantageux pour commander plusieurs photos à prix réduit
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-        {packs.map((pack) => (
+      <div className="flex flex-col gap-6">
+        {sortedPacks.map((pack) => (
           <PackCard key={pack.pack._id.toString()} pack={pack} />
         ))}
       </div>

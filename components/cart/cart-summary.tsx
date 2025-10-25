@@ -1,33 +1,36 @@
 'use client'
 
-import { useCart } from './cart-context'
+import { useCartStore } from '@/lib/stores/cart-store'
+import { useRouter } from 'next/navigation'
 
 export function CartSummary() {
-  const {
-    cart,
-    removeFromCart,
-    removePackFromCart,
-    updateQuantity,
-    updatePackQuantity,
-  } = useCart()
+  const router = useRouter()
+  const items = useCartStore((state) => state.items)
+  const packs = useCartStore((state) => state.packs)
+  const totalItems = useCartStore((state) => state.totalItems)
+  const totalAmount = useCartStore((state) => state.totalAmount)
+  const removeFromCart = useCartStore((state) => state.removeFromCart)
+  const removePackFromCart = useCartStore((state) => state.removePackFromCart)
+  const updateQuantity = useCartStore((state) => state.updateQuantity)
+  const updatePackQuantity = useCartStore((state) => state.updatePackQuantity)
 
-  if (cart.totalItems === 0) {
+  if (totalItems === 0) {
     return null
   }
 
-  const hasItems = cart.items.length > 0
-  const hasPacks = cart.packs.length > 0
+  const hasItems = items.length > 0
+  const hasPacks = packs.length > 0
 
   return (
     <div className="fixed bottom-6 right-6 bg-white rounded-lg shadow-xl p-4 border border-gray-200 min-w-[300px] max-w-[400px] max-h-[80vh] overflow-y-auto">
-      <h3 className="font-bold text-lg mb-3">Panier</h3>
+      <h3 className="font-bold text-lg mb-3 pb-3 border-b">Panier</h3>
 
       {/* Packs */}
       {hasPacks && (
         <div className="mb-4">
           <h4 className="font-semibold text-sm text-gray-700 mb-2">Packs</h4>
           <div className="space-y-2">
-            {cart.packs.map((pack) => (
+            {packs.map((pack) => (
               <div
                 key={pack.packId}
                 className="flex items-center justify-between text-sm bg-blue-50 p-2 rounded"
@@ -50,7 +53,7 @@ export function CartSummary() {
                   />
                   <button
                     onClick={() => removePackFromCart(pack.packId)}
-                    className="text-red-500 hover:text-red-700"
+                    className="text-red-500 hover:text-red-700 text-lg"
                     title="Supprimer"
                   >
                     ×
@@ -69,7 +72,7 @@ export function CartSummary() {
             Photos individuelles
           </h4>
           <div className="space-y-2">
-            {cart.items.map((item, index) => (
+            {items.map((item, index) => (
               <div
                 key={`${item.photoUrl}-${item.format}-${index}`}
                 className="flex items-center justify-between text-sm bg-gray-50 p-2 rounded"
@@ -94,7 +97,7 @@ export function CartSummary() {
                   />
                   <button
                     onClick={() => removeFromCart(item.photoUrl, item.format)}
-                    className="text-red-500 hover:text-red-700"
+                    className="text-red-500 hover:text-red-700 text-lg"
                     title="Supprimer"
                   >
                     ×
@@ -110,15 +113,18 @@ export function CartSummary() {
       <div className="border-t pt-3 mb-3">
         <div className="flex justify-between items-center mb-2">
           <span className="text-sm text-gray-600">
-            {cart.totalItems} article{cart.totalItems > 1 ? 's' : ''}
+            {totalItems} article{totalItems > 1 ? 's' : ''}
           </span>
           <span className="text-xl font-bold text-blue-600">
-            {cart.totalAmount.toFixed(2)} €
+            {totalAmount.toFixed(2)} €
           </span>
         </div>
       </div>
 
-      <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded transition-colors">
+      <button
+        onClick={() => router.push('/checkout')}
+        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded transition-colors"
+      >
         Passer commande
       </button>
     </div>
