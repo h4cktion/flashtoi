@@ -11,7 +11,9 @@ export default auth((req) => {
   const isPublicRoute = nextUrl.pathname === '/login' || nextUrl.pathname === '/school/login'
   const isParentRoute = nextUrl.pathname.startsWith('/gallery') ||
     nextUrl.pathname.startsWith('/cart') ||
-    nextUrl.pathname.startsWith('/orders')
+    nextUrl.pathname.startsWith('/orders') ||
+    nextUrl.pathname.startsWith('/checkout') ||
+    nextUrl.pathname.startsWith('/order-confirmation')
   const isSchoolRoute = nextUrl.pathname.startsWith('/school/dashboard') ||
     nextUrl.pathname.startsWith('/school/orders')
 
@@ -28,8 +30,8 @@ export default auth((req) => {
     if (userRole === 'school') {
       return NextResponse.redirect(new URL('/school/dashboard', nextUrl))
     }
-    if (userRole === 'parent') {
-      return NextResponse.redirect(new URL('/gallery', nextUrl))
+    if (userRole === 'parent' && auth?.user?.studentId) {
+      return NextResponse.redirect(new URL(`/gallery/${auth.user.studentId}`, nextUrl))
     }
   }
 
