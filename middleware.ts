@@ -8,7 +8,9 @@ export default auth((req) => {
   const userRole = auth?.user?.role
 
   // Define route patterns
-  const isPublicRoute = nextUrl.pathname === '/login' || nextUrl.pathname === '/school/login'
+  const isPublicRoute = nextUrl.pathname === '/login' ||
+    nextUrl.pathname === '/school/login' ||
+    nextUrl.pathname === '/backoffice/login'
   const isParentRoute = nextUrl.pathname.startsWith('/gallery') ||
     nextUrl.pathname.startsWith('/cart') ||
     nextUrl.pathname.startsWith('/orders') ||
@@ -16,17 +18,27 @@ export default auth((req) => {
     nextUrl.pathname.startsWith('/order-confirmation')
   const isSchoolRoute = nextUrl.pathname.startsWith('/school/dashboard') ||
     nextUrl.pathname.startsWith('/school/orders')
+  const isAdminRoute = nextUrl.pathname.startsWith('/backoffice/dashboard') ||
+    nextUrl.pathname.startsWith('/backoffice/schools') ||
+    nextUrl.pathname.startsWith('/backoffice/orders') ||
+    nextUrl.pathname.startsWith('/backoffice/students')
 
   // Redirect to login if trying to access protected routes while not logged in
-  if (!isLoggedIn && (isParentRoute || isSchoolRoute)) {
+  if (!isLoggedIn && (isParentRoute || isSchoolRoute || isAdminRoute)) {
     if (isSchoolRoute) {
       return NextResponse.redirect(new URL('/school/login', nextUrl))
+    }
+    if (isAdminRoute) {
+      return NextResponse.redirect(new URL('/backoffice/login', nextUrl))
     }
     return NextResponse.redirect(new URL('/login', nextUrl))
   }
 
   // Redirect logged-in users away from login pages
   if (isLoggedIn && isPublicRoute) {
+    if (userRole === 'admin') {
+      return NextResponse.redirect(new URL('/backoffice/dashboard', nextUrl))
+    }
     if (userRole === 'school') {
       return NextResponse.redirect(new URL('/school/dashboard', nextUrl))
     }
@@ -37,6 +49,17 @@ export default auth((req) => {
 
   // Prevent role-based access violations
   if (isLoggedIn) {
+    // Non-admins trying to access admin routes
+    if (userRole !== 'admin' && isAdminRoute) {
+      if (userRole === 'school') {
+        return NextResponse.redirect(new URL('/school/dashboard', nextUrl))
+      }
+      if (userRole === 'parent' && auth?.user?.studentId) {
+        return NextResponse.redirect(new URL(`/gallery/${auth.user.studentId}`, nextUrl))
+      }
+      return NextResponse.redirect(new URL('/login', nextUrl))
+    }
+
     // Parents trying to access school routes
     if (userRole === 'parent' && isSchoolRoute) {
       return NextResponse.redirect(new URL('/gallery', nextUrl))

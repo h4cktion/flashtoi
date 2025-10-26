@@ -3,7 +3,7 @@ import { Types } from 'mongoose'
 // ============================================
 // USER ROLES
 // ============================================
-export type UserRole = 'parent' | 'school'
+export type UserRole = 'parent' | 'school' | 'admin'
 
 // ============================================
 // PHOTO TYPES
@@ -53,6 +53,18 @@ export interface ISchool {
   password: string
   address: string
   phone: string
+  createdAt: Date
+  updatedAt: Date
+}
+
+// ============================================
+// ADMIN TYPES
+// ============================================
+export interface IAdmin {
+  _id: Types.ObjectId | string
+  email: string
+  password: string
+  name: string
   createdAt: Date
   updatedAt: Date
 }

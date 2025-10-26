@@ -126,3 +126,136 @@ export async function getStudentsByClass(
     }
   }
 }
+
+/**
+ * Get all orders for a school with student information
+ */
+export async function getSchoolOrders(schoolId: string): Promise<
+  ActionResponse<
+    Array<{
+      _id: string
+      orderNumber: string
+      createdAt: string
+      studentNames: string[]
+      totalAmount: number
+      paymentMethod: string
+      status: string
+      notes?: string
+    }>
+  >
+> {
+  try {
+    await connectDB()
+
+    // Récupérer toutes les commandes de l'école avec les IDs des étudiants
+    const orders = await Order.find({ schoolId })
+      .select(
+        'orderNumber studentIds totalAmount paymentMethod status notes createdAt'
+      )
+      .sort({ createdAt: -1 })
+      .lean()
+
+    // Récupérer tous les étudiants pour mapper les noms
+    const studentIds = [
+      ...new Set(orders.flatMap((order) => order.studentIds)),
+    ]
+    const students = await Student.find({
+      _id: { $in: studentIds },
+    })
+      .select('firstName lastName')
+      .lean()
+
+    // Créer un map des étudiants pour un accès rapide
+    const studentMap = new Map(
+      students.map((s: any) => [
+        s._id.toString(),
+        `${s.firstName} ${s.lastName}`,
+      ])
+    )
+
+    // Formatter les commandes avec les noms des étudiants
+    const formattedOrders = orders.map((order: any) => ({
+      _id: order._id.toString(),
+      orderNumber: order.orderNumber,
+      createdAt: order.createdAt.toISOString(),
+      studentNames: order.studentIds.map(
+        (id: any) => studentMap.get(id.toString()) || 'Inconnu'
+      ),
+      totalAmount: order.totalAmount,
+      paymentMethod: order.paymentMethod,
+      status: order.status,
+      notes: order.notes,
+    }))
+
+    return {
+      success: true,
+      data: formattedOrders,
+    }
+  } catch (error) {
+    console.error('getSchoolOrders error:', error)
+    return {
+      success: false,
+      error: 'Erreur lors de la récupération des commandes',
+    }
+  }
+}
+
+/**
+ * Mark an order as paid
+ */
+export async function markOrderAsPaid(
+  orderId: string,
+  schoolId: string
+): Promise<ActionResponse<{ success: boolean }>> {
+  try {
+    await connectDB()
+
+    // Vérifier que la commande appartient bien à cette école
+    const order = await Order.findOne({ _id: orderId, schoolId }).lean()
+
+    if (!order) {
+      return {
+        success: false,
+        error: 'Commande non trouvée',
+      }
+    }
+
+    // Vérifier que le paiement est en espèces ou chèque
+    if (order.paymentMethod !== 'cash' && order.paymentMethod !== 'check') {
+      return {
+        success: false,
+        error: 'Cette commande ne peut pas être marquée comme payée manuellement',
+      }
+    }
+
+    // Vérifier que le statut est pending
+    if (order.status !== 'pending') {
+      return {
+        success: false,
+        error: 'Cette commande a déjà été traitée',
+      }
+    }
+
+    // Mettre à jour le statut
+    await Order.updateOne(
+      { _id: orderId },
+      {
+        $set: {
+          status: 'paid',
+          paidAt: new Date(),
+        },
+      }
+    )
+
+    return {
+      success: true,
+      data: { success: true },
+    }
+  } catch (error) {
+    console.error('markOrderAsPaid error:', error)
+    return {
+      success: false,
+      error: 'Erreur lors de la mise à jour de la commande',
+    }
+  }
+}

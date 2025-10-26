@@ -4,6 +4,7 @@ import bcrypt from 'bcryptjs'
 import { connectDB } from '@/lib/db/mongodb'
 import Student from '@/lib/db/models/Student'
 import School from '@/lib/db/models/School'
+import Admin from '@/lib/db/models/Admin'
 
 export const authOptions: NextAuthConfig = {
   providers: [
@@ -109,6 +110,55 @@ export const authOptions: NextAuthConfig = {
         }
       },
     }),
+
+    // Provider 3: Admin Authentication (Email/Password)
+    Credentials({
+      id: 'admin',
+      name: 'Admin',
+      credentials: {
+        email: { label: 'Email', type: 'email' },
+        password: { label: 'Password', type: 'password' },
+      },
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) {
+          return null
+        }
+
+        try {
+          await connectDB()
+
+          // Find admin by email
+          const admin = await Admin.findOne({
+            email: credentials.email,
+          }).select('+password')
+
+          if (!admin) {
+            return null
+          }
+
+          // Verify password
+          const isPasswordValid = await bcrypt.compare(
+            credentials.password as string,
+            admin.password
+          )
+
+          if (!isPasswordValid) {
+            return null
+          }
+
+          // Return user object for session
+          return {
+            id: admin._id.toString(),
+            name: admin.name,
+            email: admin.email,
+            role: 'admin' as const,
+          }
+        } catch (error) {
+          console.error('Admin auth error:', error)
+          return null
+        }
+      },
+    }),
   ],
 
   pages: {
@@ -131,7 +181,7 @@ export const authOptions: NextAuthConfig = {
       // Add custom fields to session
       if (token && session.user) {
         session.user.id = token.id as string
-        session.user.role = token.role as 'parent' | 'school'
+        session.user.role = token.role as 'parent' | 'school' | 'admin'
         session.user.schoolId = token.schoolId as string | undefined
         session.user.studentId = token.studentId as string | undefined
       }
