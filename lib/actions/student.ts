@@ -24,9 +24,12 @@ export async function getStudentById(
       }
     }
 
+    // Convertir en plain object pour éviter les problèmes de sérialisation
+    const plainStudent = JSON.parse(JSON.stringify(student))
+
     return {
       success: true,
-      data: student as IStudent,
+      data: plainStudent,
     }
   } catch (error) {
     console.error('Error fetching student:', error)

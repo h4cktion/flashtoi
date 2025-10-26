@@ -1,33 +1,33 @@
-'use client'
+"use client";
 
-import { useState, useTransition } from 'react'
-import { useRouter } from 'next/navigation'
-import { authenticateSchool } from './actions'
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { authenticateSchool } from "./actions";
 
 export default function SchoolLoginPage() {
-  const router = useRouter()
-  const [isPending, startTransition] = useTransition()
-  const [error, setError] = useState<string>('')
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+  const [error, setError] = useState<string>("");
 
   // Form states
-  const [loginCode, setLoginCode] = useState('')
-  const [password, setPassword] = useState('')
+  const [loginCode, setLoginCode] = useState("");
+  const [password, setPassword] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError('')
+    e.preventDefault();
+    setError("");
 
     startTransition(async () => {
-      const result = await authenticateSchool(loginCode, password)
+      const result = await authenticateSchool(loginCode, password);
 
       if (result.success && result.data) {
-        router.push(result.data.redirectUrl)
-        router.refresh()
+        router.push(result.data.redirectUrl);
+        router.refresh();
       } else {
-        setError(result.error || 'Erreur d\'authentification')
+        setError(result.error || "Erreur d'authentification");
       }
-    })
-  }
+    });
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 to-purple-100 px-4">
@@ -54,9 +54,7 @@ export default function SchoolLoginPage() {
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
               Espace Établissement
             </h1>
-            <p className="text-gray-600">
-              Gérez les commandes de votre école
-            </p>
+            <p className="text-gray-600">Gérez les commandes de votre école</p>
           </div>
 
           {/* Error Message */}
@@ -82,7 +80,7 @@ export default function SchoolLoginPage() {
                 onChange={(e) => setLoginCode(e.target.value)}
                 placeholder="Votre code établissement"
                 required
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                className="w-full px-4 py-2.5 border text-slate-500 border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                 disabled={isPending}
               />
             </div>
@@ -101,7 +99,7 @@ export default function SchoolLoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Votre mot de passe"
                 required
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                className="w-full px-4 py-2.5 border text-slate-500 border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                 disabled={isPending}
               />
             </div>
@@ -111,14 +109,14 @@ export default function SchoolLoginPage() {
               disabled={isPending}
               className="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white font-semibold rounded-lg transition-colors shadow-md hover:shadow-lg"
             >
-              {isPending ? 'Connexion en cours...' : 'Se connecter'}
+              {isPending ? "Connexion en cours..." : "Se connecter"}
             </button>
           </form>
 
           {/* Footer */}
           <div className="mt-6 pt-6 border-t border-gray-200">
             <p className="text-center text-sm text-gray-600">
-              Vous êtes parent ?{' '}
+              Vous êtes parent ?{" "}
               <a
                 href="/login"
                 className="text-indigo-600 hover:text-indigo-700 font-medium"
@@ -138,5 +136,5 @@ export default function SchoolLoginPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

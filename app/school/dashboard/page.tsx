@@ -2,6 +2,7 @@ import { auth } from '@/lib/auth/auth'
 import { redirect } from 'next/navigation'
 import { getSchoolDashboard } from '@/lib/actions/school'
 import { SignOutButton } from '@/components/auth/sign-out-button'
+import { StudentsTable } from '@/components/school/students-table'
 
 export default async function SchoolDashboardPage() {
   // Vérifier l'authentification
@@ -26,15 +27,6 @@ export default async function SchoolDashboardPage() {
   }
 
   const { school, students, stats } = result.data
-
-  // Grouper les étudiants par classe
-  const studentsByClass = students.reduce((acc, student) => {
-    if (!acc[student.classId]) {
-      acc[student.classId] = []
-    }
-    acc[student.classId].push(student)
-    return acc
-  }, {} as Record<string, typeof students>)
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -120,74 +112,18 @@ export default async function SchoolDashboardPage() {
           </div>
         </div>
 
-        {/* Liste des étudiants par classe */}
+        {/* Liste des étudiants */}
         <div className="bg-white rounded-lg shadow-sm p-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-6">
-            Étudiants par classe
+            Liste des étudiants
           </h2>
 
-          {stats.classesList.length === 0 ? (
+          {students.length === 0 ? (
             <p className="text-gray-500 text-center py-8">
               Aucun étudiant enregistré pour le moment
             </p>
           ) : (
-            <div className="space-y-6">
-              {stats.classesList.map((classId) => (
-                <div key={classId} className="border-b border-gray-200 last:border-0 pb-6 last:pb-0">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                    Classe: {classId}
-                    <span className="ml-2 text-sm font-normal text-gray-500">
-                      ({studentsByClass[classId].length} étudiant{studentsByClass[classId].length > 1 ? 's' : ''})
-                    </span>
-                  </h3>
-
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                      <thead>
-                        <tr>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                            Nom
-                          </th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                            Prénom
-                          </th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                            Code Login
-                          </th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                            QR Code
-                          </th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                            Photos
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
-                        {studentsByClass[classId].map((student) => (
-                          <tr key={student._id.toString()} className="hover:bg-gray-50">
-                            <td className="px-4 py-3 text-sm text-gray-900">
-                              {student.lastName}
-                            </td>
-                            <td className="px-4 py-3 text-sm text-gray-900">
-                              {student.firstName}
-                            </td>
-                            <td className="px-4 py-3 text-sm font-mono text-gray-600">
-                              {student.loginCode}
-                            </td>
-                            <td className="px-4 py-3 text-sm font-mono text-gray-600">
-                              {student.qrCode}
-                            </td>
-                            <td className="px-4 py-3 text-sm text-gray-600">
-                              {student.photos?.length || 0}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <StudentsTable students={students} />
           )}
         </div>
       </main>

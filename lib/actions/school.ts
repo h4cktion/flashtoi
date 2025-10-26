@@ -70,11 +70,15 @@ export async function getSchoolDashboard(
       ...new Set(students.map((student) => student.classId)),
     ].sort()
 
+    // Convertir en plain objects pour éviter les problèmes de sérialisation
+    const plainSchool = JSON.parse(JSON.stringify(school))
+    const plainStudents = JSON.parse(JSON.stringify(students))
+
     return {
       success: true,
       data: {
-        school: school as ISchool,
-        students: students as IStudent[],
+        school: plainSchool,
+        students: plainStudents,
         stats: {
           totalStudents,
           totalOrders,
@@ -107,9 +111,12 @@ export async function getStudentsByClass(
       .select('firstName lastName qrCode loginCode photos')
       .lean()
 
+    // Convertir en plain objects pour éviter les problèmes de sérialisation
+    const plainStudents = JSON.parse(JSON.stringify(students))
+
     return {
       success: true,
-      data: students as IStudent[],
+      data: plainStudents,
     }
   } catch (error) {
     console.error('getStudentsByClass error:', error)
