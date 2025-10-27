@@ -1,56 +1,56 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { SchoolWithStats } from '@/lib/actions/admin'
+import { useState } from "react";
+import { SchoolWithStats } from "@/lib/actions/admin";
 
 interface SchoolsTableProps {
-  schools: SchoolWithStats[]
+  schools: SchoolWithStats[];
 }
 
 export function SchoolsTable({ schools }: SchoolsTableProps) {
-  const [currentPage, setCurrentPage] = useState(1)
-  const [searchTerm, setSearchTerm] = useState('')
-  const itemsPerPage = 10
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState("");
+  const itemsPerPage = 10;
 
   // Filter schools based on search
   const filteredSchools = schools.filter((school) => {
-    if (!searchTerm) return true
+    if (!searchTerm) return true;
 
-    const search = searchTerm.toLowerCase()
+    const search = searchTerm.toLowerCase();
     return (
       school.name.toLowerCase().includes(search) ||
       school.loginCode.toLowerCase().includes(search)
-    )
-  })
+    );
+  });
 
   // Calculate pagination
-  const totalPages = Math.ceil(filteredSchools.length / itemsPerPage)
-  const startIndex = (currentPage - 1) * itemsPerPage
-  const endIndex = startIndex + itemsPerPage
-  const currentSchools = filteredSchools.slice(startIndex, endIndex)
+  const totalPages = Math.ceil(filteredSchools.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentSchools = filteredSchools.slice(startIndex, endIndex);
 
   // Reset to page 1 when search changes
   const handleSearch = (value: string) => {
-    setSearchTerm(value)
-    setCurrentPage(1)
-  }
+    setSearchTerm(value);
+    setCurrentPage(1);
+  };
 
   // Format currency
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('fr-FR', {
-      style: 'currency',
-      currency: 'EUR',
-    }).format(amount)
-  }
+    return new Intl.NumberFormat("fr-FR", {
+      style: "currency",
+      currency: "EUR",
+    }).format(amount);
+  };
 
   // Format date
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('fr-FR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-    })
-  }
+    return new Date(dateString).toLocaleDateString("fr-FR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+  };
 
   return (
     <div className="space-y-4">
@@ -62,7 +62,7 @@ export function SchoolsTable({ schools }: SchoolsTableProps) {
             placeholder="Rechercher par nom d'école ou code de connexion..."
             value={searchTerm}
             onChange={(e) => handleSearch(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+            className="w-full px-4 py-2 border border-gray-300  text-slate-500 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent"
           />
         </div>
         <div className="text-sm text-gray-600">
@@ -165,7 +165,9 @@ export function SchoolsTable({ schools }: SchoolsTableProps) {
                   Précédent
                 </button>
                 <button
-                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  onClick={() =>
+                    setCurrentPage((p) => Math.min(totalPages, p + 1))
+                  }
                   disabled={currentPage === totalPages}
                   className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
@@ -177,5 +179,5 @@ export function SchoolsTable({ schools }: SchoolsTableProps) {
         </>
       )}
     </div>
-  )
+  );
 }

@@ -129,7 +129,7 @@ export function StudentsTable({ students }: StudentsTableProps) {
             />
           </svg>
           <p className="mt-4 text-gray-500">
-            Aucun étudiant trouvé pour "{searchTerm}"
+            Aucun étudiant trouvé pour &ldquo;{searchTerm}&ldquo;
           </p>
           <button
             onClick={() => handleSearch("")}
@@ -169,11 +169,14 @@ export function StudentsTable({ students }: StudentsTableProps) {
                 {currentStudents.map((student) => {
                   // Trouver la planche1 pour afficher la photo individuelle
                   const planche1 = student.photos?.find(
-                    (photo) => photo.planche === "planche1"
+                    (photo) => photo.planche === "18x24"
                   );
 
                   return (
-                    <tr key={student._id.toString()} className="hover:bg-gray-50">
+                    <tr
+                      key={student._id.toString()}
+                      className="hover:bg-gray-50"
+                    >
                       <td className="px-4 py-4">
                         {planche1 ? (
                           <div className="relative w-16 h-16 rounded-lg overflow-hidden border border-gray-200">
@@ -203,22 +206,22 @@ export function StudentsTable({ students }: StudentsTableProps) {
                           </div>
                         )}
                       </td>
-                    <td className="px-4 py-4 text-sm text-gray-900">
-                      {student.lastName}
-                    </td>
-                    <td className="px-4 py-4 text-sm text-gray-900">
-                      {student.firstName}
-                    </td>
-                    <td className="px-4 py-4 text-sm text-gray-600">
-                      {student.classId}
-                    </td>
-                    <td className="px-4 py-4 text-sm font-mono text-gray-600">
-                      {student.loginCode}
-                    </td>
-                    <td className="px-4 py-4 text-sm text-gray-600">
-                      {student.photos?.length || 0}
-                    </td>
-                  </tr>
+                      <td className="px-4 py-4 text-sm text-gray-900">
+                        {student.lastName}
+                      </td>
+                      <td className="px-4 py-4 text-sm text-gray-900">
+                        {student.firstName}
+                      </td>
+                      <td className="px-4 py-4 text-sm text-gray-600">
+                        {student.classId}
+                      </td>
+                      <td className="px-4 py-4 text-sm font-mono text-gray-600">
+                        {student.loginCode}
+                      </td>
+                      <td className="px-4 py-4 text-sm text-gray-600">
+                        {student.photos?.length || 0}
+                      </td>
+                    </tr>
                   );
                 })}
               </tbody>

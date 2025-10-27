@@ -1,125 +1,130 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { OrderWithDetails } from '@/lib/actions/admin'
+import { useState } from "react";
+import { OrderWithDetails } from "@/lib/actions/admin";
 
 interface OrdersTableProps {
-  orders: OrderWithDetails[]
+  orders: OrderWithDetails[];
 }
 
 export function OrdersTable({ orders }: OrdersTableProps) {
-  const [currentPage, setCurrentPage] = useState(1)
-  const [searchTerm, setSearchTerm] = useState('')
-  const [statusFilter, setStatusFilter] = useState<string>('all')
-  const [paymentFilter, setPaymentFilter] = useState<string>('all')
-  const itemsPerPage = 20
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [paymentFilter, setPaymentFilter] = useState<string>("all");
+  const itemsPerPage = 20;
 
   // Filter orders based on search and filters
   const filteredOrders = orders.filter((order) => {
     // Search filter
     if (searchTerm) {
-      const search = searchTerm.toLowerCase()
+      const search = searchTerm.toLowerCase();
       const matchesSearch =
         order.orderNumber.toLowerCase().includes(search) ||
         order.schoolName.toLowerCase().includes(search) ||
-        order.studentNames.some((name) => name.toLowerCase().includes(search))
+        order.studentNames.some((name) => name.toLowerCase().includes(search));
 
-      if (!matchesSearch) return false
+      if (!matchesSearch) return false;
     }
 
     // Status filter
-    if (statusFilter !== 'all' && order.status !== statusFilter) return false
+    if (statusFilter !== "all" && order.status !== statusFilter) return false;
 
     // Payment filter
-    if (paymentFilter !== 'all' && order.paymentMethod !== paymentFilter) return false
+    if (paymentFilter !== "all" && order.paymentMethod !== paymentFilter)
+      return false;
 
-    return true
-  })
+    return true;
+  });
 
   // Calculate pagination
-  const totalPages = Math.ceil(filteredOrders.length / itemsPerPage)
-  const startIndex = (currentPage - 1) * itemsPerPage
-  const endIndex = startIndex + itemsPerPage
-  const currentOrders = filteredOrders.slice(startIndex, endIndex)
+  const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentOrders = filteredOrders.slice(startIndex, endIndex);
 
   // Reset to page 1 when filters change
   const handleSearch = (value: string) => {
-    setSearchTerm(value)
-    setCurrentPage(1)
-  }
+    setSearchTerm(value);
+    setCurrentPage(1);
+  };
 
   const handleStatusFilter = (value: string) => {
-    setStatusFilter(value)
-    setCurrentPage(1)
-  }
+    setStatusFilter(value);
+    setCurrentPage(1);
+  };
 
   const handlePaymentFilter = (value: string) => {
-    setPaymentFilter(value)
-    setCurrentPage(1)
-  }
+    setPaymentFilter(value);
+    setCurrentPage(1);
+  };
 
   // Format currency
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('fr-FR', {
-      style: 'currency',
-      currency: 'EUR',
-    }).format(amount)
-  }
+    return new Intl.NumberFormat("fr-FR", {
+      style: "currency",
+      currency: "EUR",
+    }).format(amount);
+  };
 
   // Format date
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('fr-FR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    })
-  }
+    return new Date(dateString).toLocaleDateString("fr-FR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
 
   // Get status badge
   const getStatusBadge = (status: string) => {
     const statusConfig = {
-      pending: { label: 'En attente', color: 'bg-yellow-100 text-yellow-800' },
-      paid: { label: 'Payée', color: 'bg-green-100 text-green-800' },
-      validated: { label: 'Validée', color: 'bg-blue-100 text-blue-800' },
-      processing: { label: 'En cours', color: 'bg-purple-100 text-purple-800' },
-      shipped: { label: 'Expédiée', color: 'bg-indigo-100 text-indigo-800' },
-      completed: { label: 'Terminée', color: 'bg-gray-100 text-gray-800' },
-    }
+      pending: { label: "En attente", color: "bg-yellow-100 text-yellow-800" },
+      paid: { label: "Payée", color: "bg-green-100 text-green-800" },
+      validated: { label: "Validée", color: "bg-blue-100 text-blue-800" },
+      processing: { label: "En cours", color: "bg-purple-100 text-purple-800" },
+      shipped: { label: "Expédiée", color: "bg-indigo-100 text-indigo-800" },
+      completed: { label: "Terminée", color: "bg-gray-100 text-gray-800" },
+    };
 
     const config = statusConfig[status as keyof typeof statusConfig] || {
       label: status,
-      color: 'bg-gray-100 text-gray-800',
-    }
+      color: "bg-gray-100 text-gray-800",
+    };
 
     return (
-      <span className={`px-2 py-1 text-xs font-medium rounded-full ${config.color}`}>
+      <span
+        className={`px-2 py-1 text-xs font-medium rounded-full ${config.color}`}
+      >
         {config.label}
       </span>
-    )
-  }
+    );
+  };
 
   // Get payment method badge
   const getPaymentBadge = (method: string) => {
     const methodConfig = {
-      online: { label: 'En ligne', color: 'bg-blue-100 text-blue-800' },
-      cash: { label: 'Espèces', color: 'bg-green-100 text-green-800' },
-      check: { label: 'Chèque', color: 'bg-purple-100 text-purple-800' },
-      pending: { label: 'En attente', color: 'bg-gray-100 text-gray-800' },
-    }
+      online: { label: "En ligne", color: "bg-blue-100 text-blue-800" },
+      cash: { label: "Espèces", color: "bg-green-100 text-green-800" },
+      check: { label: "Chèque", color: "bg-purple-100 text-purple-800" },
+      pending: { label: "En attente", color: "bg-gray-100 text-gray-800" },
+    };
 
     const config = methodConfig[method as keyof typeof methodConfig] || {
       label: method,
-      color: 'bg-gray-100 text-gray-800',
-    }
+      color: "bg-gray-100 text-gray-800",
+    };
 
     return (
-      <span className={`px-2 py-1 text-xs font-medium rounded-full ${config.color}`}>
+      <span
+        className={`px-2 py-1 text-xs font-medium rounded-full ${config.color}`}
+      >
         {config.label}
       </span>
-    )
-  }
+    );
+  };
 
   return (
     <div className="space-y-4">
@@ -131,14 +136,14 @@ export function OrdersTable({ orders }: OrdersTableProps) {
             placeholder="Rechercher par numéro, école ou nom d'étudiant..."
             value={searchTerm}
             onChange={(e) => handleSearch(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+            className="w-full px-4 py-2 border border-gray-300 text-slate-500 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent"
           />
         </div>
         <div className="flex gap-2 flex-wrap">
           <select
             value={statusFilter}
             onChange={(e) => handleStatusFilter(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+            className="px-4 py-2 border border-gray-300 rounded-lg  text-slate-500 focus:ring-2 focus:ring-gray-900 focus:border-transparent"
           >
             <option value="all">Tous les statuts</option>
             <option value="pending">En attente</option>
@@ -152,7 +157,7 @@ export function OrdersTable({ orders }: OrdersTableProps) {
           <select
             value={paymentFilter}
             onChange={(e) => handlePaymentFilter(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+            className="px-4 py-2 border border-gray-300 rounded-lg  text-slate-500 focus:ring-2 focus:ring-gray-900 focus:border-transparent"
           >
             <option value="all">Tous les paiements</option>
             <option value="online">En ligne</option>
@@ -218,7 +223,9 @@ export function OrdersTable({ orders }: OrdersTableProps) {
                       )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{order.schoolName}</div>
+                      <div className="text-sm text-gray-900">
+                        {order.schoolName}
+                      </div>
                     </td>
                     <td className="px-6 py-4">
                       <div className="text-sm text-gray-900">
@@ -284,7 +291,9 @@ export function OrdersTable({ orders }: OrdersTableProps) {
                   Précédent
                 </button>
                 <button
-                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  onClick={() =>
+                    setCurrentPage((p) => Math.min(totalPages, p + 1))
+                  }
                   disabled={currentPage === totalPages}
                   className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
@@ -296,5 +305,5 @@ export function OrdersTable({ orders }: OrdersTableProps) {
         </>
       )}
     </div>
-  )
+  );
 }

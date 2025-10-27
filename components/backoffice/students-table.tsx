@@ -1,97 +1,103 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { StudentWithDetails } from '@/lib/actions/admin'
-import Image from 'next/image'
+import { useState } from "react";
+import { StudentWithDetails } from "@/lib/actions/admin";
+import Image from "next/image";
 
 interface StudentsTableProps {
-  students: StudentWithDetails[]
+  students: StudentWithDetails[];
 }
 
 export function StudentsTable({ students }: StudentsTableProps) {
-  const [currentPage, setCurrentPage] = useState(1)
-  const [searchTerm, setSearchTerm] = useState('')
-  const [statusFilter, setStatusFilter] = useState<'all' | 'with-order' | 'without-order'>('all')
-  const itemsPerPage = 20
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<
+    "all" | "with-order" | "without-order"
+  >("all");
+  const itemsPerPage = 20;
 
   // Filter students based on search and status
   const filteredStudents = students.filter((student) => {
     // Search filter
     if (searchTerm) {
-      const search = searchTerm.toLowerCase()
+      const search = searchTerm.toLowerCase();
       const matchesSearch =
         student.firstName.toLowerCase().includes(search) ||
         student.lastName.toLowerCase().includes(search) ||
         student.loginCode.toLowerCase().includes(search) ||
         student.classId.toLowerCase().includes(search) ||
-        student.schoolName.toLowerCase().includes(search)
+        student.schoolName.toLowerCase().includes(search);
 
-      if (!matchesSearch) return false
+      if (!matchesSearch) return false;
     }
 
     // Status filter
-    if (statusFilter === 'with-order' && !student.hasOrder) return false
-    if (statusFilter === 'without-order' && student.hasOrder) return false
+    if (statusFilter === "with-order" && !student.hasOrder) return false;
+    if (statusFilter === "without-order" && student.hasOrder) return false;
 
-    return true
-  })
+    return true;
+  });
 
   // Calculate pagination
-  const totalPages = Math.ceil(filteredStudents.length / itemsPerPage)
-  const startIndex = (currentPage - 1) * itemsPerPage
-  const endIndex = startIndex + itemsPerPage
-  const currentStudents = filteredStudents.slice(startIndex, endIndex)
+  const totalPages = Math.ceil(filteredStudents.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentStudents = filteredStudents.slice(startIndex, endIndex);
 
   // Reset to page 1 when filters change
   const handleSearch = (value: string) => {
-    setSearchTerm(value)
-    setCurrentPage(1)
-  }
+    setSearchTerm(value);
+    setCurrentPage(1);
+  };
 
-  const handleStatusFilter = (value: 'all' | 'with-order' | 'without-order') => {
-    setStatusFilter(value)
-    setCurrentPage(1)
-  }
+  const handleStatusFilter = (
+    value: "all" | "with-order" | "without-order"
+  ) => {
+    setStatusFilter(value);
+    setCurrentPage(1);
+  };
 
   // Format currency
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('fr-FR', {
-      style: 'currency',
-      currency: 'EUR',
-    }).format(amount)
-  }
+    return new Intl.NumberFormat("fr-FR", {
+      style: "currency",
+      currency: "EUR",
+    }).format(amount);
+  };
 
   // Format date
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('fr-FR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-    })
-  }
+    return new Date(dateString).toLocaleDateString("fr-FR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+  };
 
   // Get status badge
   const getStatusBadge = (status: string | null) => {
-    if (!status) return null
+    if (!status) return null;
 
     const statusConfig = {
-      pending: { label: 'En attente', color: 'bg-yellow-100 text-yellow-800' },
-      paid: { label: 'Payée', color: 'bg-green-100 text-green-800' },
-      validated: { label: 'Validée', color: 'bg-blue-100 text-blue-800' },
-      processing: { label: 'En cours', color: 'bg-purple-100 text-purple-800' },
-      shipped: { label: 'Expédiée', color: 'bg-indigo-100 text-indigo-800' },
-      completed: { label: 'Terminée', color: 'bg-gray-100 text-gray-800' },
-    }
+      pending: { label: "En attente", color: "bg-yellow-100 text-yellow-800" },
+      paid: { label: "Payée", color: "bg-green-100 text-green-800" },
+      validated: { label: "Validée", color: "bg-blue-100 text-blue-800" },
+      processing: { label: "En cours", color: "bg-purple-100 text-purple-800" },
+      shipped: { label: "Expédiée", color: "bg-indigo-100 text-indigo-800" },
+      completed: { label: "Terminée", color: "bg-gray-100 text-gray-800" },
+    };
 
-    const config = statusConfig[status as keyof typeof statusConfig]
-    if (!config) return null
+    const config = statusConfig[status as keyof typeof statusConfig];
+    if (!config) return null;
 
     return (
-      <span className={`px-2 py-1 text-xs font-medium rounded-full ${config.color}`}>
+      <span
+        className={`px-2 py-1 text-xs font-medium rounded-full ${config.color}`}
+      >
         {config.label}
       </span>
-    )
-  }
+    );
+  };
 
   return (
     <div className="space-y-4">
@@ -103,14 +109,14 @@ export function StudentsTable({ students }: StudentsTableProps) {
             placeholder="Rechercher par nom, prénom, classe, école ou code..."
             value={searchTerm}
             onChange={(e) => handleSearch(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+            className="w-full px-4 py-2 border border-gray-300  text-slate-500 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent"
           />
         </div>
         <div className="flex gap-2">
           <select
             value={statusFilter}
             onChange={(e) => handleStatusFilter(e.target.value as any)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+            className="px-4 py-2 border border-gray-300 rounded-lg  text-slate-500 focus:ring-2 focus:ring-gray-900 focus:border-transparent"
           >
             <option value="all">Tous les étudiants</option>
             <option value="with-order">Avec commande</option>
@@ -196,10 +202,14 @@ export function StudentsTable({ students }: StudentsTableProps) {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{student.classId}</div>
+                      <div className="text-sm text-gray-900">
+                        {student.classId}
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{student.schoolName}</div>
+                      <div className="text-sm text-gray-900">
+                        {student.schoolName}
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900 font-mono">
@@ -243,7 +253,9 @@ export function StudentsTable({ students }: StudentsTableProps) {
                   Précédent
                 </button>
                 <button
-                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  onClick={() =>
+                    setCurrentPage((p) => Math.min(totalPages, p + 1))
+                  }
                   disabled={currentPage === totalPages}
                   className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
@@ -255,5 +267,5 @@ export function StudentsTable({ students }: StudentsTableProps) {
         </>
       )}
     </div>
-  )
+  );
 }

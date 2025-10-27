@@ -6,13 +6,13 @@ import { CartSummary } from '@/components/cart/cart-summary'
 import { PacksSection } from '@/components/cart/packs-section'
 
 interface GalleryPageProps {
-  params: {
+  params: Promise<{
     id: string
-  }
+  }>
 }
 
 export default async function GalleryPage({ params }: GalleryPageProps) {
-  const { id } = params
+  const { id } = await params
 
   // Récupérer l'étudiant et les packs disponibles en parallèle
   const [studentResult, packsResult] = await Promise.all([

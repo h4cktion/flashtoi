@@ -1,46 +1,47 @@
-import mongoose, { Model, Schema } from 'mongoose'
-import { IStudent } from '@/types'
+import mongoose, { Model, Schema } from "mongoose";
+import { IStudent } from "@/types";
+import { PLANCHE_NAMES, PHOTO_FORMATS } from "@/constants/constants";
 
 const StudentSchema = new Schema<IStudent>(
   {
     firstName: {
       type: String,
-      required: [true, 'First name is required'],
+      required: [true, "First name is required"],
       trim: true,
     },
     lastName: {
       type: String,
-      required: [true, 'Last name is required'],
+      required: [true, "Last name is required"],
       trim: true,
     },
     qrCode: {
       type: String,
-      required: [true, 'QR code is required'],
+      required: [true, "QR code is required"],
       unique: true,
       trim: true,
       index: true,
     },
     loginCode: {
       type: String,
-      required: [true, 'Login code is required'],
+      required: [true, "Login code is required"],
       unique: true,
       trim: true,
       index: true,
     },
     password: {
       type: String,
-      required: [true, 'Password is required'],
-      minlength: [4, 'Password must be at least 4 characters'],
+      required: [true, "Password is required"],
+      minlength: [4, "Password must be at least 4 characters"],
     },
     schoolId: {
       type: Schema.Types.ObjectId,
-      ref: 'School',
-      required: [true, 'School ID is required'],
+      ref: "School",
+      required: [true, "School ID is required"],
       index: true,
     },
     classId: {
       type: String,
-      required: [true, 'Class ID is required'],
+      required: [true, "Class ID is required"],
       trim: true,
     },
     photos: [
@@ -55,7 +56,7 @@ const StudentSchema = new Schema<IStudent>(
         },
         format: {
           type: String,
-          enum: ['10x15', '13x18', 'identite'],
+          enum: PHOTO_FORMATS,
           required: true,
         },
         price: {
@@ -65,7 +66,7 @@ const StudentSchema = new Schema<IStudent>(
         },
         planche: {
           type: String,
-          enum: ['classe', 'planche1', 'planche2', 'planche4', 'mixte', 'rotation'],
+          enum: PLANCHE_NAMES,
           required: true,
         },
       },
@@ -74,7 +75,7 @@ const StudentSchema = new Schema<IStudent>(
       {
         studentId: {
           type: Schema.Types.ObjectId,
-          ref: 'Student',
+          ref: "Student",
           required: true,
         },
         firstName: {
@@ -88,14 +89,14 @@ const StudentSchema = new Schema<IStudent>(
   {
     timestamps: true,
   }
-)
+);
 
 // Compound index for efficient queries
-StudentSchema.index({ schoolId: 1, classId: 1 })
+StudentSchema.index({ schoolId: 1, classId: 1 });
 
 // Prevent model recompilation in development (Next.js hot reload)
 const Student: Model<IStudent> =
   (mongoose.models?.Student as Model<IStudent>) ||
-  mongoose.model<IStudent>('Student', StudentSchema)
+  mongoose.model<IStudent>("Student", StudentSchema);
 
-export default Student
+export default Student;

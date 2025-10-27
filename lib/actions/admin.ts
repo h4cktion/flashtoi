@@ -251,8 +251,8 @@ export async function getAllStudentsForAdmin(): Promise<
       const studentId = student._id.toString()
       const orderInfo = studentOrdersMap.get(studentId)
 
-      // Find planche1 photo
-      const planche1 = student.photos?.find((photo) => photo.planche === 'planche1')
+      // Find first available photo for display
+      const firstPhoto = student.photos?.[0]
 
       return {
         _id: studentId,
@@ -262,7 +262,7 @@ export async function getAllStudentsForAdmin(): Promise<
         classId: student.classId,
         schoolName: (student.schoolId as any)?.name || 'N/A',
         schoolId: (student.schoolId as any)?._id?.toString() || '',
-        photoUrl: planche1?.cloudFrontUrl || null,
+        photoUrl: firstPhoto?.cloudFrontUrl || null,
         hasOrder: orderInfo?.hasOrder || false,
         orderStatus: orderInfo?.status || null,
         orderAmount: orderInfo?.amount || null,

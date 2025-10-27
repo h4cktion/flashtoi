@@ -1,130 +1,134 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { markOrderAsPaid } from '@/lib/actions/school'
-import { useRouter } from 'next/navigation'
+import { useState } from "react";
+import { markOrderAsPaid } from "@/lib/actions/school";
+import { useRouter } from "next/navigation";
 
 interface Order {
-  _id: string
-  orderNumber: string
-  createdAt: string
-  studentNames: string[]
-  totalAmount: number
-  paymentMethod: string
-  status: string
-  notes?: string
+  _id: string;
+  orderNumber: string;
+  createdAt: string;
+  studentNames: string[];
+  totalAmount: number;
+  paymentMethod: string;
+  status: string;
+  notes?: string;
 }
 
 interface OrdersTableProps {
-  orders: Order[]
-  schoolId: string
+  orders: Order[];
+  schoolId: string;
 }
 
-const ORDERS_PER_PAGE = 10
+const ORDERS_PER_PAGE = 10;
 
 // Mappage des statuts vers des couleurs
 const STATUS_COLORS = {
-  pending: 'bg-orange-100 text-orange-800',
-  paid: 'bg-blue-100 text-blue-800',
-  validated: 'bg-purple-100 text-purple-800',
-  processing: 'bg-yellow-100 text-yellow-800',
-  shipped: 'bg-indigo-100 text-indigo-800',
-  completed: 'bg-green-100 text-green-800',
-}
+  pending: "bg-orange-100 text-orange-800",
+  paid: "bg-blue-100 text-blue-800",
+  validated: "bg-purple-100 text-purple-800",
+  processing: "bg-yellow-100 text-yellow-800",
+  shipped: "bg-indigo-100 text-indigo-800",
+  completed: "bg-green-100 text-green-800",
+};
 
 const STATUS_LABELS = {
-  pending: 'En attente',
-  paid: 'Payé',
-  validated: 'Validé',
-  processing: 'En traitement',
-  shipped: 'Expédié',
-  completed: 'Terminé',
-}
+  pending: "En attente",
+  paid: "Payé",
+  validated: "Validé",
+  processing: "En traitement",
+  shipped: "Expédié",
+  completed: "Terminé",
+};
 
 const PAYMENT_LABELS = {
-  check: 'Chèque',
-  cash: 'Espèces',
-  online: 'En ligne',
-  pending: 'En attente',
-}
+  check: "Chèque",
+  cash: "Espèces",
+  online: "En ligne",
+  pending: "En attente",
+};
 
 export function OrdersTable({ orders, schoolId }: OrdersTableProps) {
-  const router = useRouter()
-  const [currentPage, setCurrentPage] = useState(1)
-  const [searchTerm, setSearchTerm] = useState('')
-  const [statusFilter, setStatusFilter] = useState<string>('all')
-  const [paymentFilter, setPaymentFilter] = useState<string>('all')
-  const [processingOrderId, setProcessingOrderId] = useState<string | null>(null)
+  const router = useRouter();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [paymentFilter, setPaymentFilter] = useState<string>("all");
+  const [processingOrderId, setProcessingOrderId] = useState<string | null>(
+    null
+  );
 
   // Filtrer les commandes
   const filteredOrders = orders.filter((order) => {
     // Filtre de recherche
     if (searchTerm) {
-      const search = searchTerm.toLowerCase()
-      const matchesOrderNumber = order.orderNumber.toLowerCase().includes(search)
+      const search = searchTerm.toLowerCase();
+      const matchesOrderNumber = order.orderNumber
+        .toLowerCase()
+        .includes(search);
       const matchesStudentName = order.studentNames.some((name) =>
         name.toLowerCase().includes(search)
-      )
-      if (!matchesOrderNumber && !matchesStudentName) return false
+      );
+      if (!matchesOrderNumber && !matchesStudentName) return false;
     }
 
     // Filtre de statut
-    if (statusFilter !== 'all' && order.status !== statusFilter) return false
+    if (statusFilter !== "all" && order.status !== statusFilter) return false;
 
     // Filtre de mode de paiement
-    if (paymentFilter !== 'all' && order.paymentMethod !== paymentFilter)
-      return false
+    if (paymentFilter !== "all" && order.paymentMethod !== paymentFilter)
+      return false;
 
-    return true
-  })
+    return true;
+  });
 
   // Pagination
-  const totalPages = Math.ceil(filteredOrders.length / ORDERS_PER_PAGE)
-  const startIndex = (currentPage - 1) * ORDERS_PER_PAGE
-  const endIndex = startIndex + ORDERS_PER_PAGE
-  const currentOrders = filteredOrders.slice(startIndex, endIndex)
+  const totalPages = Math.ceil(filteredOrders.length / ORDERS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ORDERS_PER_PAGE;
+  const endIndex = startIndex + ORDERS_PER_PAGE;
+  const currentOrders = filteredOrders.slice(startIndex, endIndex);
 
   const goToPage = (page: number) => {
-    setCurrentPage(Math.max(1, Math.min(page, totalPages)))
-  }
+    setCurrentPage(Math.max(1, Math.min(page, totalPages)));
+  };
 
   const handleSearch = (value: string) => {
-    setSearchTerm(value)
-    setCurrentPage(1)
-  }
+    setSearchTerm(value);
+    setCurrentPage(1);
+  };
 
   const handleStatusFilter = (value: string) => {
-    setStatusFilter(value)
-    setCurrentPage(1)
-  }
+    setStatusFilter(value);
+    setCurrentPage(1);
+  };
 
   const handlePaymentFilter = (value: string) => {
-    setPaymentFilter(value)
-    setCurrentPage(1)
-  }
+    setPaymentFilter(value);
+    setCurrentPage(1);
+  };
 
   const handleMarkAsPaid = async (orderId: string) => {
-    if (!confirm('Confirmer que cette commande a été payée ?')) {
-      return
+    if (!confirm("Confirmer que cette commande a été payée ?")) {
+      return;
     }
 
-    setProcessingOrderId(orderId)
+    setProcessingOrderId(orderId);
 
     try {
-      const result = await markOrderAsPaid(orderId, schoolId)
+      const result = await markOrderAsPaid(orderId, schoolId);
 
       if (result.success) {
         // Recharger la page pour afficher les données mises à jour
-        router.refresh()
+        router.refresh();
       } else {
-        alert(result.error || 'Erreur lors de la mise à jour')
+        alert(result.error || "Erreur lors de la mise à jour");
       }
     } catch (error) {
-      alert('Une erreur est survenue')
+      alert("Une erreur est survenue");
     } finally {
-      setProcessingOrderId(null)
+      setProcessingOrderId(null);
     }
-  }
+  };
 
   return (
     <div>
@@ -133,12 +137,15 @@ export function OrdersTable({ orders, schoolId }: OrdersTableProps) {
         <h3 className="text-lg font-semibold text-gray-900">
           Liste des commandes
           <span className="ml-2 text-sm font-normal text-gray-500">
-            ({filteredOrders.length}{' '}
-            {searchTerm || statusFilter !== 'all' || paymentFilter !== 'all'
-              ? 'résultat(s)'
-              : `commande${orders.length > 1 ? 's' : ''}`}{' '}
-            {(searchTerm || statusFilter !== 'all' || paymentFilter !== 'all') &&
-              `sur ${orders.length}`})
+            ({filteredOrders.length}{" "}
+            {searchTerm || statusFilter !== "all" || paymentFilter !== "all"
+              ? "résultat(s)"
+              : `commande${orders.length > 1 ? "s" : ""}`}{" "}
+            {(searchTerm ||
+              statusFilter !== "all" ||
+              paymentFilter !== "all") &&
+              `sur ${orders.length}`}
+            )
           </span>
         </h3>
 
@@ -158,7 +165,7 @@ export function OrdersTable({ orders, schoolId }: OrdersTableProps) {
             value={searchTerm}
             onChange={(e) => handleSearch(e.target.value)}
             placeholder="Rechercher par n° ou étudiant..."
-            className="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg text-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-4 py-2 pl-10 border border-gray-300  text-slate-500 rounded-lg text-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
           <svg
             className="absolute left-3 top-2.5 h-5 w-5 text-gray-400"
@@ -175,7 +182,7 @@ export function OrdersTable({ orders, schoolId }: OrdersTableProps) {
           </svg>
           {searchTerm && (
             <button
-              onClick={() => handleSearch('')}
+              onClick={() => handleSearch("")}
               className="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600"
             >
               <svg
@@ -245,12 +252,14 @@ export function OrdersTable({ orders, schoolId }: OrdersTableProps) {
             />
           </svg>
           <p className="mt-4 text-gray-500">Aucune commande trouvée</p>
-          {(searchTerm || statusFilter !== 'all' || paymentFilter !== 'all') && (
+          {(searchTerm ||
+            statusFilter !== "all" ||
+            paymentFilter !== "all") && (
             <button
               onClick={() => {
-                handleSearch('')
-                handleStatusFilter('all')
-                handlePaymentFilter('all')
+                handleSearch("");
+                handleStatusFilter("all");
+                handlePaymentFilter("all");
               }}
               className="mt-2 text-blue-600 hover:text-blue-700 text-sm font-medium"
             >
@@ -291,9 +300,10 @@ export function OrdersTable({ orders, schoolId }: OrdersTableProps) {
               <tbody className="bg-white divide-y divide-gray-200">
                 {currentOrders.map((order) => {
                   const canMarkAsPaid =
-                    order.status === 'pending' &&
-                    (order.paymentMethod === 'cash' || order.paymentMethod === 'check')
-                  const isProcessing = processingOrderId === order._id
+                    order.status === "pending" &&
+                    (order.paymentMethod === "cash" ||
+                      order.paymentMethod === "check");
+                  const isProcessing = processingOrderId === order._id;
 
                   return (
                     <tr key={order._id} className="hover:bg-gray-50">
@@ -301,31 +311,34 @@ export function OrdersTable({ orders, schoolId }: OrdersTableProps) {
                         {order.orderNumber}
                       </td>
                       <td className="px-4 py-4 text-sm text-gray-600">
-                        {new Date(order.createdAt).toLocaleDateString('fr-FR', {
-                          day: '2-digit',
-                          month: '2-digit',
-                          year: 'numeric',
+                        {new Date(order.createdAt).toLocaleDateString("fr-FR", {
+                          day: "2-digit",
+                          month: "2-digit",
+                          year: "numeric",
                         })}
                       </td>
                       <td className="px-4 py-4 text-sm text-gray-900">
-                        {order.studentNames.join(', ')}
+                        {order.studentNames.join(", ")}
                       </td>
                       <td className="px-4 py-4 text-sm font-semibold text-gray-900">
                         {order.totalAmount.toFixed(2)} €
                       </td>
                       <td className="px-4 py-4 text-sm text-gray-600">
-                        {PAYMENT_LABELS[order.paymentMethod as keyof typeof PAYMENT_LABELS] ||
-                          order.paymentMethod}
+                        {PAYMENT_LABELS[
+                          order.paymentMethod as keyof typeof PAYMENT_LABELS
+                        ] || order.paymentMethod}
                       </td>
                       <td className="px-4 py-4">
                         <span
                           className={`px-2 py-1 text-xs font-medium rounded-full ${
-                            STATUS_COLORS[order.status as keyof typeof STATUS_COLORS] ||
-                            'bg-gray-100 text-gray-800'
+                            STATUS_COLORS[
+                              order.status as keyof typeof STATUS_COLORS
+                            ] || "bg-gray-100 text-gray-800"
                           }`}
                         >
-                          {STATUS_LABELS[order.status as keyof typeof STATUS_LABELS] ||
-                            order.status}
+                          {STATUS_LABELS[
+                            order.status as keyof typeof STATUS_LABELS
+                          ] || order.status}
                         </span>
                       </td>
                       <td className="px-4 py-4">
@@ -335,12 +348,12 @@ export function OrdersTable({ orders, schoolId }: OrdersTableProps) {
                             disabled={isProcessing}
                             className="px-3 py-1 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                           >
-                            {isProcessing ? 'En cours...' : 'Marquer payé'}
+                            {isProcessing ? "En cours..." : "Marquer payé"}
                           </button>
                         )}
                       </td>
                     </tr>
-                  )
+                  );
                 })}
               </tbody>
             </table>
@@ -350,10 +363,10 @@ export function OrdersTable({ orders, schoolId }: OrdersTableProps) {
           {totalPages > 1 && (
             <div className="flex items-center justify-between mt-6 px-4">
               <div className="text-sm text-gray-700">
-                Affichage de {startIndex + 1} à{' '}
-                {Math.min(endIndex, filteredOrders.length)} sur{' '}
+                Affichage de {startIndex + 1} à{" "}
+                {Math.min(endIndex, filteredOrders.length)} sur{" "}
                 {filteredOrders.length} commande
-                {filteredOrders.length > 1 ? 's' : ''}
+                {filteredOrders.length > 1 ? "s" : ""}
               </div>
 
               <div className="flex items-center gap-2">
@@ -373,7 +386,7 @@ export function OrdersTable({ orders, schoolId }: OrdersTableProps) {
                         page === totalPages ||
                         page === currentPage ||
                         page === currentPage - 1 ||
-                        page === currentPage + 1
+                        page === currentPage + 1;
 
                       if (!showPage) {
                         if (
@@ -384,9 +397,9 @@ export function OrdersTable({ orders, schoolId }: OrdersTableProps) {
                             <span key={page} className="px-2 text-gray-400">
                               ...
                             </span>
-                          )
+                          );
                         }
-                        return null
+                        return null;
                       }
 
                       return (
@@ -395,13 +408,13 @@ export function OrdersTable({ orders, schoolId }: OrdersTableProps) {
                           onClick={() => goToPage(page)}
                           className={`px-3 py-1 border rounded-md text-sm font-medium ${
                             currentPage === page
-                              ? 'bg-blue-600 text-white border-blue-600'
-                              : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                              ? "bg-blue-600 text-white border-blue-600"
+                              : "border-gray-300 text-gray-700 hover:bg-gray-50"
                           }`}
                         >
                           {page}
                         </button>
-                      )
+                      );
                     }
                   )}
                 </div>
@@ -419,5 +432,5 @@ export function OrdersTable({ orders, schoolId }: OrdersTableProps) {
         </>
       )}
     </div>
-  )
+  );
 }
