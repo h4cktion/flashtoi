@@ -1,83 +1,85 @@
 'use client'
 
 import Image from 'next/image'
+import Link from 'next/link'
 import { Pack } from '@/types'
-import { useCartStore } from '@/lib/stores/cart-store'
-import { useState } from 'react'
+import { useParams } from 'next/navigation'
 
 interface PackCardProps {
   pack: Pack
 }
 
 export function PackCard({ pack }: PackCardProps) {
-  const addPackToCart = useCartStore((state) => state.addPackToCart)
-  const [isAdding, setIsAdding] = useState(false)
+  const params = useParams()
+  const studentId = params.id as string
 
-  const handleAddToCart = () => {
-    setIsAdding(true)
-    addPackToCart({
-      packId: pack.pack._id.toString(),
-      packName: pack.pack.name,
-      packPrice: pack.pack.price,
-      photos: pack.photos,
-    })
-    setTimeout(() => setIsAdding(false), 500)
-  }
+  // Afficher TOUTES les photos dans l'aperçu
+  const totalPhotos = pack.photos.length
+  const photoWidth = 110
+  const photoHeight = 132
+  const horizontalSpacing = 12
 
-  // Afficher jusqu'à 4 photos en aperçu
-  const previewPhotos = pack.photos.slice(0, 4)
+  // Calculer la largeur totale nécessaire pour toutes les photos
+  const totalWidth = photoWidth + (totalPhotos - 1) * horizontalSpacing
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:border-blue-400 transition-colors">
-      {/* En-tête avec nom et prix */}
-      <div className="bg-blue-600 text-white p-4">
-        <div className="flex justify-between items-center">
-          <h3 className="text-xl font-bold">Pack {pack.pack.name}</h3>
-          <p className="text-2xl font-bold">{pack.pack.price}€</p>
-        </div>
-        <p className="text-blue-100 text-sm mt-2">{pack.pack.description}</p>
-        <p className="text-blue-100 text-xs mt-1">
-          {pack.photos.length} photo{pack.photos.length > 1 ? 's' : ''} incluse{pack.photos.length > 1 ? 's' : ''}
-        </p>
-      </div>
-
-      {/* Aperçu des photos */}
-      <div className="p-4">
-        <div className="grid grid-cols-2 gap-2 mb-4">
-          {previewPhotos.map((photo, index) => (
+    <div className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow">
+      {/* Aperçu visuel du pack avec TOUTES les photos empilées */}
+      <div className="relative h-48 bg-gradient-to-br from-gray-50 to-gray-100 p-6 flex items-center justify-center overflow-hidden">
+        <div className="relative" style={{ width: `${totalWidth}px`, height: `${photoHeight}px` }}>
+          {pack.photos.map((photo, index) => (
             <div
               key={index}
-              className="relative aspect-square bg-gray-100 rounded overflow-hidden"
+              className="absolute bg-white rounded-lg shadow-lg overflow-hidden border-2 border-white"
+              style={{
+                width: `${photoWidth}px`,
+                height: `${photoHeight}px`,
+                transform: `translate(${index * horizontalSpacing}px, ${index * -6}px) rotate(${(index % 3) * 3 - 3}deg)`,
+                zIndex: pack.photos.length - index,
+              }}
             >
               <Image
                 src={photo.cloudFrontUrl}
-                alt={`Photo ${photo.planche}`}
+                alt={`Preview ${index + 1}`}
                 fill
                 className="object-cover"
-                sizes="(max-width: 768px) 50vw, 25vw"
+                sizes="110px"
               />
+              <div className="absolute bottom-1 left-1 bg-white px-1.5 py-0.5 rounded text-xs font-semibold text-gray-700">
+                {photo.format}
+              </div>
             </div>
           ))}
         </div>
+      </div>
 
-        {pack.photos.length > 4 && (
-          <p className="text-center text-sm text-gray-500 mb-3">
-            + {pack.photos.length - 4} autre{pack.photos.length - 4 > 1 ? 's' : ''} photo{pack.photos.length - 4 > 1 ? 's' : ''}
-          </p>
-        )}
+      {/* Infos du pack */}
+      <div className="p-4">
+        <div className="flex items-start justify-between gap-4 mb-2">
+          <div className="flex-1">
+            <h3 className="text-xl font-bold text-gray-900 mb-1">
+              Pack {pack.pack.name}
+            </h3>
 
-        {/* Bouton d'ajout au panier */}
-        <button
-          onClick={handleAddToCart}
-          disabled={isAdding}
-          className={`w-full py-2.5 rounded font-medium transition-colors ${
-            isAdding
-              ? 'bg-green-500 text-white'
-              : 'bg-blue-600 hover:bg-blue-700 text-white'
-          }`}
-        >
-          {isAdding ? '✓ Ajouté' : 'Ajouter au panier'}
-        </button>
+            <div className="flex items-baseline gap-2 mb-1">
+              <span className="text-2xl font-bold text-gray-900">
+                {pack.pack.price.toFixed(2)} €
+              </span>
+            </div>
+
+            <p className="text-sm text-gray-600">
+              {pack.photos.length} photo{pack.photos.length > 1 ? 's' : ''} incluse{pack.photos.length > 1 ? 's' : ''}
+            </p>
+          </div>
+
+          {/* Bouton VOIR réduit à droite */}
+          <Link
+            href={`/gallery/${studentId}/pack/${pack.pack._id}`}
+            className="px-6 py-2.5 rounded-full font-semibold text-center transition-colors bg-[#192F84] hover:bg-[#1a3699] text-white flex-shrink-0"
+          >
+            VOIR
+          </Link>
+        </div>
       </div>
     </div>
   )

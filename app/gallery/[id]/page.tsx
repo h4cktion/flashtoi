@@ -42,11 +42,11 @@ export default async function GalleryPage({ params }: GalleryPageProps) {
         <PacksSection packs={packs} />
 
         {/* Galerie de photos */}
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <h2 className="text-xl font-semibold mb-6">Photos individuelles</h2>
+        <div className="bg-white rounded-lg shadow-sm p-4">
+          <h2 className="text-xl font-semibold mb-4">Photos individuelles</h2>
 
           {student.photos && student.photos.length > 0 ? (
-            <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-3">
               {student.photos.map((photo, index) => (
                 <PhotoCard key={index} photo={photo} index={index} />
               ))}

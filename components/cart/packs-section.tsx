@@ -14,13 +14,13 @@ export function PacksSection({ packs }: PacksSectionProps) {
   const sortedPacks = [...packs].sort((a, b) => b.pack.price - a.pack.price)
 
   return (
-    <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">
-          Nos Packs Photos
+    <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
+      <div className="mb-4">
+        <h2 className="text-xl font-bold text-gray-900 mb-1">
+          Packs
         </h2>
-        <p className="text-gray-600">
-          Profitez de nos packs avantageux pour commander plusieurs photos à prix réduit
+        <p className="text-sm text-gray-600">
+          Profitez de nos offres groupées
         </p>
       </div>
 
