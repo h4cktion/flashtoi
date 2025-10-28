@@ -1,33 +1,33 @@
-'use client'
+"use client";
 
-import { useState, useTransition } from 'react'
-import { useRouter } from 'next/navigation'
-import { authenticateAdmin } from './actions'
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { authenticateAdmin } from "./actions";
 
 export default function BackofficeLoginPage() {
-  const router = useRouter()
-  const [isPending, startTransition] = useTransition()
-  const [error, setError] = useState<string>('')
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+  const [error, setError] = useState<string>("");
 
   // Form states
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError('')
+    e.preventDefault();
+    setError("");
 
     startTransition(async () => {
-      const result = await authenticateAdmin(email, password)
+      const result = await authenticateAdmin(email, password);
 
       if (result.success && result.data) {
-        router.push(result.data.redirectUrl)
-        router.refresh()
+        router.push(result.data.redirectUrl);
+        router.refresh();
       } else {
-        setError(result.error || "Erreur d'authentification")
+        setError(result.error || "Erreur d'authentification");
       }
-    })
-  }
+    });
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-gray-700 px-4">
@@ -80,7 +80,7 @@ export default function BackofficeLoginPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 disabled={isPending}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed text-slate-500 "
                 placeholder="admin@example.com"
               />
             </div>
@@ -99,7 +99,7 @@ export default function BackofficeLoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 disabled={isPending}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed text-slate-500 "
                 placeholder="••••••••"
               />
             </div>
@@ -109,7 +109,7 @@ export default function BackofficeLoginPage() {
               disabled={isPending}
               className="w-full bg-gray-900 hover:bg-gray-800 text-white font-semibold py-3 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isPending ? 'Connexion en cours...' : 'Se connecter'}
+              {isPending ? "Connexion en cours..." : "Se connecter"}
             </button>
           </form>
         </div>
@@ -120,5 +120,5 @@ export default function BackofficeLoginPage() {
         </p>
       </div>
     </div>
-  )
+  );
 }

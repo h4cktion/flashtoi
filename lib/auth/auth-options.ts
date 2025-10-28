@@ -1,10 +1,10 @@
 import type { NextAuthConfig } from 'next-auth'
 import Credentials from 'next-auth/providers/credentials'
-import bcrypt from 'bcryptjs'
 import { connectDB } from '@/lib/db/mongodb'
 import Student from '@/lib/db/models/Student'
 import School from '@/lib/db/models/School'
 import Admin from '@/lib/db/models/Admin'
+import { verifyPassword } from './password'
 
 export const authOptions: NextAuthConfig = {
   providers: [
@@ -36,7 +36,7 @@ export const authOptions: NextAuthConfig = {
           }
 
           // Verify password
-          const isPasswordValid = await bcrypt.compare(
+          const isPasswordValid = await verifyPassword(
             credentials.password as string,
             student.password
           )
@@ -87,7 +87,7 @@ export const authOptions: NextAuthConfig = {
           }
 
           // Verify password
-          const isPasswordValid = await bcrypt.compare(
+          const isPasswordValid = await verifyPassword(
             credentials.password as string,
             school.password
           )
@@ -137,7 +137,7 @@ export const authOptions: NextAuthConfig = {
           }
 
           // Verify password
-          const isPasswordValid = await bcrypt.compare(
+          const isPasswordValid = await verifyPassword(
             credentials.password as string,
             admin.password
           )

@@ -3,9 +3,11 @@ import { PackCard } from './pack-card'
 
 interface PacksSectionProps {
   packs: Pack[]
+  studentId?: string
+  studentName?: string
 }
 
-export function PacksSection({ packs }: PacksSectionProps) {
+export function PacksSection({ packs, studentId, studentName }: PacksSectionProps) {
   if (packs.length === 0) {
     return null
   }
@@ -26,7 +28,12 @@ export function PacksSection({ packs }: PacksSectionProps) {
 
       <div className="flex flex-col gap-6">
         {sortedPacks.map((pack) => (
-          <PackCard key={pack.pack._id.toString()} pack={pack} />
+          <PackCard
+            key={pack.pack._id.toString()}
+            pack={pack}
+            studentId={studentId}
+            studentName={studentName}
+          />
         ))}
       </div>
     </div>

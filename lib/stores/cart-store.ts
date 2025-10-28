@@ -4,11 +4,11 @@ import { CartItem, PackCartItem, Cart } from '@/types';
 
 interface CartStore extends Cart {
   addToCart: (item: Omit<CartItem, 'quantity'>) => void;
-  removeFromCart: (photoUrl: string, format: string) => void;
-  updateQuantity: (photoUrl: string, format: string, quantity: number) => void;
+  removeFromCart: (photoUrl: string, format: string, studentId: string) => void;
+  updateQuantity: (photoUrl: string, format: string, studentId: string, quantity: number) => void;
   addPackToCart: (pack: Omit<PackCartItem, 'quantity'>) => void;
-  removePackFromCart: (packId: string) => void;
-  updatePackQuantity: (packId: string, quantity: number) => void;
+  removePackFromCart: (packId: string, studentId: string) => void;
+  updatePackQuantity: (packId: string, studentId: string, quantity: number) => void;
   clearCart: () => void;
 }
 
@@ -41,7 +41,10 @@ export const useCartStore = create<CartStore>()(
       addToCart: (item) => {
         set((state) => {
           const existingIndex = state.items.findIndex(
-            (i) => i.photoUrl === item.photoUrl && i.format === item.format
+            (i) =>
+              i.photoUrl === item.photoUrl &&
+              i.format === item.format &&
+              i.studentId === item.studentId
           );
 
           let newItems: CartItem[];
@@ -64,10 +67,15 @@ export const useCartStore = create<CartStore>()(
         });
       },
 
-      removeFromCart: (photoUrl, format) => {
+      removeFromCart: (photoUrl, format, studentId) => {
         set((state) => {
           const newItems = state.items.filter(
-            (item) => !(item.photoUrl === photoUrl && item.format === format)
+            (item) =>
+              !(
+                item.photoUrl === photoUrl &&
+                item.format === format &&
+                item.studentId === studentId
+              )
           );
 
           const { totalItems, totalAmount } = calculateTotals(newItems, state.packs);
@@ -81,15 +89,17 @@ export const useCartStore = create<CartStore>()(
         });
       },
 
-      updateQuantity: (photoUrl, format, quantity) => {
+      updateQuantity: (photoUrl, format, studentId, quantity) => {
         if (quantity <= 0) {
-          get().removeFromCart(photoUrl, format);
+          get().removeFromCart(photoUrl, format, studentId);
           return;
         }
 
         set((state) => {
           const newItems = state.items.map((item) =>
-            item.photoUrl === photoUrl && item.format === format
+            item.photoUrl === photoUrl &&
+            item.format === format &&
+            item.studentId === studentId
               ? { ...item, quantity }
               : item
           );
@@ -107,7 +117,9 @@ export const useCartStore = create<CartStore>()(
 
       addPackToCart: (pack) => {
         set((state) => {
-          const existingIndex = state.packs.findIndex((p) => p.packId === pack.packId);
+          const existingIndex = state.packs.findIndex(
+            (p) => p.packId === pack.packId && p.studentId === pack.studentId
+          );
 
           let newPacks: PackCartItem[];
 
@@ -129,9 +141,11 @@ export const useCartStore = create<CartStore>()(
         });
       },
 
-      removePackFromCart: (packId) => {
+      removePackFromCart: (packId, studentId) => {
         set((state) => {
-          const newPacks = state.packs.filter((pack) => pack.packId !== packId);
+          const newPacks = state.packs.filter(
+            (pack) => !(pack.packId === packId && pack.studentId === studentId)
+          );
 
           const { totalItems, totalAmount } = calculateTotals(state.items, newPacks);
 
@@ -144,15 +158,17 @@ export const useCartStore = create<CartStore>()(
         });
       },
 
-      updatePackQuantity: (packId, quantity) => {
+      updatePackQuantity: (packId, studentId, quantity) => {
         if (quantity <= 0) {
-          get().removePackFromCart(packId);
+          get().removePackFromCart(packId, studentId);
           return;
         }
 
         set((state) => {
           const newPacks = state.packs.map((pack) =>
-            pack.packId === packId ? { ...pack, quantity } : pack
+            pack.packId === packId && pack.studentId === studentId
+              ? { ...pack, quantity }
+              : pack
           );
 
           const { totalItems, totalAmount } = calculateTotals(state.items, newPacks);

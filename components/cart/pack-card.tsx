@@ -7,11 +7,14 @@ import { useParams } from 'next/navigation'
 
 interface PackCardProps {
   pack: Pack
+  studentId?: string
+  studentName?: string
 }
 
-export function PackCard({ pack }: PackCardProps) {
+export function PackCard({ pack, studentId: propsStudentId }: PackCardProps) {
   const params = useParams()
-  const studentId = params.id as string
+  const urlStudentId = params.id as string
+  const studentId = propsStudentId || urlStudentId
 
   // Afficher TOUTES les photos dans l'aperçu
   const totalPhotos = pack.photos.length

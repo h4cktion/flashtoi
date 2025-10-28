@@ -1,60 +1,60 @@
-'use client'
+"use client";
 
-import { useState, useTransition, useEffect, Suspense } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
-import { authenticateWithCredentials } from './actions'
+import { useState, useTransition, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { authenticateWithCredentials } from "./actions";
 
 function ParentLoginContent() {
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const [isPending, startTransition] = useTransition()
-  const [error, setError] = useState<string>('')
-  const [isAutoLogging, setIsAutoLogging] = useState(false)
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [isPending, startTransition] = useTransition();
+  const [error, setError] = useState<string>("");
+  const [isAutoLogging, setIsAutoLogging] = useState(false);
 
   // Form states
-  const [loginCode, setLoginCode] = useState('')
-  const [password, setPassword] = useState('')
+  const [loginCode, setLoginCode] = useState("");
+  const [password, setPassword] = useState("");
 
   // Auto-login via URL params
   useEffect(() => {
-    const login = searchParams.get('login')
-    const pwd = searchParams.get('password')
-    const autologin = searchParams.get('autologin')
+    const login = searchParams.get("login");
+    const pwd = searchParams.get("password");
+    const autologin = searchParams.get("autologin");
 
-    if (autologin === 'true' && login && pwd) {
-      setIsAutoLogging(true)
-      setLoginCode(login)
-      setPassword(pwd)
+    if (autologin === "true" && login && pwd) {
+      setIsAutoLogging(true);
+      setLoginCode(login);
+      setPassword(pwd);
 
       startTransition(async () => {
-        const result = await authenticateWithCredentials(login, pwd)
+        const result = await authenticateWithCredentials(login, pwd);
 
         if (result.success && result.data) {
-          router.push(result.data.redirectUrl)
-          router.refresh()
+          router.push(result.data.redirectUrl);
+          router.refresh();
         } else {
-          setIsAutoLogging(false)
-          setError(result.error || 'Échec de la connexion automatique')
+          setIsAutoLogging(false);
+          setError(result.error || "Échec de la connexion automatique");
         }
-      })
+      });
     }
-  }, [searchParams, router, startTransition])
+  }, [searchParams, router, startTransition]);
 
   const handleCredentialsLogin = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError('')
+    e.preventDefault();
+    setError("");
 
     startTransition(async () => {
-      const result = await authenticateWithCredentials(loginCode, password)
+      const result = await authenticateWithCredentials(loginCode, password);
 
       if (result.success && result.data) {
-        router.push(result.data.redirectUrl)
-        router.refresh()
+        router.push(result.data.redirectUrl);
+        router.refresh();
       } else {
-        setError(result.error || 'Erreur d\'authentification')
+        setError(result.error || "Erreur d'authentification");
       }
-    })
-  }
+    });
+  };
 
   // Show auto-login loader
   if (isAutoLogging) {
@@ -92,7 +92,7 @@ function ParentLoginContent() {
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -105,9 +105,7 @@ function ParentLoginContent() {
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
               Espace Parents
             </h1>
-            <p className="text-gray-600">
-              Connectez-vous pour voir vos photos
-            </p>
+            <p className="text-gray-600">Connectez-vous pour voir vos photos</p>
           </div>
 
           {/* Error Message */}
@@ -133,7 +131,7 @@ function ParentLoginContent() {
                 onChange={(e) => setLoginCode(e.target.value)}
                 placeholder="Votre identifiant"
                 required
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                className="text-slate-500 w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 disabled={isPending}
               />
             </div>
@@ -152,7 +150,7 @@ function ParentLoginContent() {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Votre mot de passe"
                 required
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                className="text-slate-500  w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 disabled={isPending}
               />
             </div>
@@ -162,14 +160,14 @@ function ParentLoginContent() {
               disabled={isPending}
               className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold rounded-lg transition-colors shadow-md hover:shadow-lg"
             >
-              {isPending ? 'Connexion...' : 'Se connecter'}
+              {isPending ? "Connexion..." : "Se connecter"}
             </button>
           </form>
 
           {/* Footer */}
           <div className="mt-6 pt-6 border-t border-gray-200">
             <p className="text-center text-sm text-gray-600">
-              Vous êtes un établissement ?{' '}
+              Vous êtes un établissement ?{" "}
               <a
                 href="/school/login"
                 className="text-blue-600 hover:text-blue-700 font-medium"
@@ -181,21 +179,23 @@ function ParentLoginContent() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 export default function ParentLoginPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4">
-        <div className="w-full max-w-md">
-          <div className="bg-white rounded-2xl shadow-xl p-8 text-center">
-            <p>Chargement...</p>
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4">
+          <div className="w-full max-w-md">
+            <div className="bg-white rounded-2xl shadow-xl p-8 text-center">
+              <p>Chargement...</p>
+            </div>
           </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <ParentLoginContent />
     </Suspense>
-  )
+  );
 }

@@ -167,6 +167,8 @@ export interface CartItem {
   format: PhotoFormat;
   quantity: number;
   unitPrice: number;
+  studentId: string;
+  studentName: string;
 }
 
 export interface PackCartItem {
@@ -175,6 +177,8 @@ export interface PackCartItem {
   packPrice: number;
   photos: Photo[];
   quantity: number;
+  studentId: string;
+  studentName: string;
 }
 
 export interface Cart {

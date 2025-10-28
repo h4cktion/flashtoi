@@ -93,7 +93,11 @@ export default async function PhotoDetailPage({ params }: PhotoDetailPageProps) 
               </p>
             </div>
 
-            <AddPhotoToCartButton photo={photo} />
+            <AddPhotoToCartButton
+              photo={photo}
+              studentId={id}
+              studentName={`${student.firstName} ${student.lastName}`}
+            />
           </div>
         </div>
 

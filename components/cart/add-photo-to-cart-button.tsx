@@ -6,9 +6,11 @@ import { useState } from 'react'
 
 interface AddPhotoToCartButtonProps {
   photo: Photo
+  studentId: string
+  studentName: string
 }
 
-export function AddPhotoToCartButton({ photo }: AddPhotoToCartButtonProps) {
+export function AddPhotoToCartButton({ photo, studentId, studentName }: AddPhotoToCartButtonProps) {
   const addToCart = useCartStore((state) => state.addToCart)
   const [isAdding, setIsAdding] = useState(false)
 
@@ -18,6 +20,8 @@ export function AddPhotoToCartButton({ photo }: AddPhotoToCartButtonProps) {
       photoUrl: photo.cloudFrontUrl,
       format: photo.format,
       unitPrice: photo.price,
+      studentId,
+      studentName,
     })
     setTimeout(() => setIsAdding(false), 1000)
   }

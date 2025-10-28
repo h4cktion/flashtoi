@@ -120,6 +120,8 @@ export default async function PackDetailPage({ params }: PackDetailPageProps) {
                 packName: pack.pack.name,
                 packPrice: pack.pack.price,
                 photos: pack.photos,
+                studentId: id,
+                studentName: `${student.firstName} ${student.lastName}`,
               }}
             />
           </div>

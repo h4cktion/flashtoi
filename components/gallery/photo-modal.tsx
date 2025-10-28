@@ -9,9 +9,11 @@ interface PhotoModalProps {
   photo: Photo
   isOpen: boolean
   onClose: () => void
+  studentId: string
+  studentName: string
 }
 
-export function PhotoModal({ photo, isOpen, onClose }: PhotoModalProps) {
+export function PhotoModal({ photo, isOpen, onClose, studentId, studentName }: PhotoModalProps) {
   const addToCart = useCartStore((state) => state.addToCart)
   const [isAdding, setIsAdding] = useState(false)
 
@@ -36,6 +38,8 @@ export function PhotoModal({ photo, isOpen, onClose }: PhotoModalProps) {
       photoUrl: photo.cloudFrontUrl,
       format: photo.format,
       unitPrice: photo.price,
+      studentId,
+      studentName,
     })
     setTimeout(() => {
       setIsAdding(false)

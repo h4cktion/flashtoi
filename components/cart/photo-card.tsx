@@ -10,12 +10,14 @@ import { PhotoModal } from "@/components/gallery/photo-modal";
 interface PhotoCardProps {
   photo: Photo;
   index: number;
+  studentId: string;
+  studentName: string;
 }
 
-export function PhotoCard({ photo, index }: PhotoCardProps) {
+export function PhotoCard({ photo, index, studentId, studentName }: PhotoCardProps) {
   const router = useRouter();
   const params = useParams();
-  const studentId = params.id as string;
+  const urlStudentId = params.id as string;
   const addToCart = useCartStore((state) => state.addToCart);
   const [isAdding, setIsAdding] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -27,6 +29,8 @@ export function PhotoCard({ photo, index }: PhotoCardProps) {
       photoUrl: photo.cloudFrontUrl,
       format: photo.format,
       unitPrice: photo.price,
+      studentId,
+      studentName,
     });
 
     // Feedback visuel
@@ -44,7 +48,7 @@ export function PhotoCard({ photo, index }: PhotoCardProps) {
       setIsModalOpen(true);
     } else {
       // Mobile: naviguer vers page détail
-      router.push(`/gallery/${studentId}/photo/${index}`);
+      router.push(`/gallery/${urlStudentId}/photo/${index}`);
     }
   };
 
@@ -92,6 +96,8 @@ export function PhotoCard({ photo, index }: PhotoCardProps) {
         photo={photo}
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
+        studentId={studentId}
+        studentName={studentName}
       />
     </>
   );
