@@ -1,10 +1,10 @@
 'use client'
 
-import { useState, useTransition, useEffect } from 'react'
+import { useState, useTransition, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { authenticateWithCredentials } from './actions'
 
-export default function ParentLoginPage() {
+function ParentLoginContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [isPending, startTransition] = useTransition()
@@ -181,5 +181,21 @@ export default function ParentLoginPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function ParentLoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4">
+        <div className="w-full max-w-md">
+          <div className="bg-white rounded-2xl shadow-xl p-8 text-center">
+            <p>Chargement...</p>
+          </div>
+        </div>
+      </div>
+    }>
+      <ParentLoginContent />
+    </Suspense>
   )
 }

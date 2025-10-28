@@ -1,35 +1,37 @@
-'use client'
+"use client";
 
-import { useCartStore } from '@/lib/stores/cart-store'
-import { createOrder } from '@/lib/actions/order'
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { PaymentMethod } from '@/types'
-import { useSession } from 'next-auth/react'
+import { useCartStore } from "@/lib/stores/cart-store";
+import { createOrder } from "@/lib/actions/order";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { PaymentMethod } from "@/types";
+import { useSession } from "next-auth/react";
 
 export default function CheckoutPage() {
-  const router = useRouter()
-  const { data: session, status } = useSession()
-  const items = useCartStore((state) => state.items)
-  const packs = useCartStore((state) => state.packs)
-  const totalAmount = useCartStore((state) => state.totalAmount)
-  const clearCart = useCartStore((state) => state.clearCart)
+  const router = useRouter();
+  const { data: session, status } = useSession();
+  const items = useCartStore((state) => state.items);
+  const packs = useCartStore((state) => state.packs);
+  const totalAmount = useCartStore((state) => state.totalAmount);
+  const clearCart = useCartStore((state) => state.clearCart);
 
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | ''>('')
-  const [notes, setNotes] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState('')
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | null>(
+    null
+  );
+  const [notes, setNotes] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
   // Vérifier l'authentification
   useEffect(() => {
-    if (status === 'loading') return
+    if (status === "loading") return;
 
-    if (status === 'unauthenticated' || !session?.user?.studentId) {
-      router.push('/')
+    if (status === "unauthenticated" || !session?.user?.studentId) {
+      router.push("/");
     }
-  }, [status, session, router])
+  }, [status, session, router]);
 
-  if (status === 'loading') {
+  if (status === "loading") {
     return (
       <div className="min-h-screen bg-gray-50 py-8">
         <div className="max-w-3xl mx-auto px-4">
@@ -38,31 +40,31 @@ export default function CheckoutPage() {
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   if (!session?.user?.studentId) {
-    return null
+    return null;
   }
 
   const handleSubmitOrder = async () => {
-    if (!paymentMethod || paymentMethod === '') {
-      setError('Veuillez sélectionner un mode de paiement')
-      return
+    if (!paymentMethod || paymentMethod === null) {
+      setError("Veuillez sélectionner un mode de paiement");
+      return;
     }
 
-    if (paymentMethod === 'online') {
-      setError('Le paiement en ligne sera bientôt disponible')
-      return
+    if (paymentMethod === "online") {
+      setError("Le paiement en ligne sera bientôt disponible");
+      return;
     }
 
-    setIsLoading(true)
-    setError('')
+    setIsLoading(true);
+    setError("");
 
     try {
       if (!session?.user?.studentId) {
-        setError('Session expirée, veuillez vous reconnecter')
-        return
+        setError("Session expirée, veuillez vous reconnecter");
+        return;
       }
 
       // Préparer les données de la commande
@@ -86,26 +88,28 @@ export default function CheckoutPage() {
         totalAmount,
         paymentMethod: paymentMethod as PaymentMethod,
         notes: notes.trim() || undefined,
-      }
+      };
 
-      const result = await createOrder(orderData)
+      const result = await createOrder(orderData);
 
       if (result.success) {
         // Vider le panier
-        clearCart()
+        clearCart();
 
         // Rediriger vers la page de confirmation
-        router.push(`/order-confirmation?orderNumber=${result.data?.orderNumber}`)
+        router.push(
+          `/order-confirmation?orderNumber=${result.data?.orderNumber}`
+        );
       } else {
-        setError(result.error || 'Une erreur est survenue')
+        setError(result.error || "Une erreur est survenue");
       }
     } catch (err) {
-      console.error('Error submitting order:', err)
-      setError('Une erreur est survenue lors de la création de la commande')
+      console.error("Error submitting order:", err);
+      setError("Une erreur est survenue lors de la création de la commande");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   if (items.length === 0 && packs.length === 0) {
     return (
@@ -127,7 +131,7 @@ export default function CheckoutPage() {
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -220,8 +224,10 @@ export default function CheckoutPage() {
                 type="radio"
                 name="paymentMethod"
                 value="check"
-                checked={paymentMethod === 'check'}
-                onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
+                checked={paymentMethod === "check"}
+                onChange={(e) =>
+                  setPaymentMethod(e.target.value as PaymentMethod)
+                }
                 className="mt-1 mr-3"
               />
               <div className="flex-1">
@@ -238,8 +244,10 @@ export default function CheckoutPage() {
                 type="radio"
                 name="paymentMethod"
                 value="cash"
-                checked={paymentMethod === 'cash'}
-                onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
+                checked={paymentMethod === "cash"}
+                onChange={(e) =>
+                  setPaymentMethod(e.target.value as PaymentMethod)
+                }
                 className="mt-1 mr-3"
               />
               <div className="flex-1">
@@ -304,10 +312,10 @@ export default function CheckoutPage() {
             disabled={isLoading || !paymentMethod}
             className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isLoading ? 'Création en cours...' : 'Confirmer la commande'}
+            {isLoading ? "Création en cours..." : "Confirmer la commande"}
           </button>
         </div>
       </div>
     </div>
-  )
+  );
 }
