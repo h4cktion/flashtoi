@@ -123,7 +123,7 @@ export function OrdersTable({ orders, schoolId }: OrdersTableProps) {
       } else {
         alert(result.error || "Erreur lors de la mise à jour");
       }
-    } catch (error) {
+    } catch {
       alert("Une erreur est survenue");
     } finally {
       setProcessingOrderId(null);

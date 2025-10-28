@@ -139,7 +139,7 @@ export default async function BackofficeDashboardPage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <div className="text-sm font-medium text-gray-600">
-                        Chiffre d'affaires
+                        Chiffre d&apos;affaires
                       </div>
                       <div className="text-2xl font-bold text-gray-900 mt-2">
                         {new Intl.NumberFormat('fr-FR', {

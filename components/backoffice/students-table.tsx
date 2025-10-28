@@ -115,7 +115,7 @@ export function StudentsTable({ students }: StudentsTableProps) {
         <div className="flex gap-2">
           <select
             value={statusFilter}
-            onChange={(e) => handleStatusFilter(e.target.value as any)}
+            onChange={(e) => handleStatusFilter(e.target.value as 'all' | 'with-order' | 'without-order')}
             className="px-4 py-2 border border-gray-300 rounded-lg  text-slate-500 focus:ring-2 focus:ring-gray-900 focus:border-transparent"
           >
             <option value="all">Tous les étudiants</option>

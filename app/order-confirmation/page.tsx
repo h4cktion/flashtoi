@@ -20,7 +20,7 @@ function OrderConfirmationContent() {
               onClick={() => router.push('/')}
               className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded transition-colors"
             >
-              Retour à l'accueil
+              Retour à l&apos;accueil
             </button>
           </div>
         </div>
@@ -79,7 +79,7 @@ function OrderConfirmationContent() {
               <li className="flex items-start">
                 <span className="text-blue-600 mr-2">2.</span>
                 <span>
-                  Remettez le paiement à l'école avec le numéro de commande
+                  Remettez le paiement à l&apos;école avec le numéro de commande
                 </span>
               </li>
               <li className="flex items-start">
@@ -91,7 +91,7 @@ function OrderConfirmationContent() {
               <li className="flex items-start">
                 <span className="text-blue-600 mr-2">4.</span>
                 <span>
-                  Vous recevrez vos photos à l'école dans les délais indiqués
+                  Vous recevrez vos photos à l&apos;école dans les délais indiqués
                 </span>
               </li>
             </ul>
@@ -103,7 +103,7 @@ function OrderConfirmationContent() {
               onClick={() => router.push('/')}
               className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded transition-colors"
             >
-              Retour à l'accueil
+              Retour à l&apos;accueil
             </button>
             <button
               onClick={() => window.print()}

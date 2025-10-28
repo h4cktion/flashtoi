@@ -24,6 +24,17 @@ export interface SchoolWithStats {
   paidOrders: number
 }
 
+// Helper types for populated fields
+interface PopulatedSchool {
+  _id: string
+  name: string
+}
+
+interface PopulatedStudent {
+  firstName: string
+  lastName: string
+}
+
 export interface GlobalStats {
   totalSchools: number
   totalStudents: number
@@ -260,8 +271,8 @@ export async function getAllStudentsForAdmin(): Promise<
         lastName: student.lastName,
         loginCode: student.loginCode,
         classId: student.classId,
-        schoolName: (student.schoolId as any)?.name || 'N/A',
-        schoolId: (student.schoolId as any)?._id?.toString() || '',
+        schoolName: (student.schoolId as PopulatedSchool | null)?.name || 'N/A',
+        schoolId: (student.schoolId as PopulatedSchool | null)?._id?.toString() || '',
         photoUrl: firstPhoto?.cloudFrontUrl || null,
         hasOrder: orderInfo?.hasOrder || false,
         orderStatus: orderInfo?.status || null,
@@ -311,7 +322,7 @@ export async function getAllOrdersForAdmin(): Promise<
     const ordersWithDetails: OrderWithDetails[] = orders.map((order) => {
       // Get student names
       const studentNames = Array.isArray(order.studentIds)
-        ? (order.studentIds as any[])
+        ? (order.studentIds as PopulatedStudent[])
             .filter((student) => student && student.firstName && student.lastName)
             .map((student) => `${student.firstName} ${student.lastName}`)
         : []
@@ -319,8 +330,8 @@ export async function getAllOrdersForAdmin(): Promise<
       return {
         _id: order._id.toString(),
         orderNumber: order.orderNumber,
-        schoolName: (order.schoolId as any)?.name || 'N/A',
-        schoolId: (order.schoolId as any)?._id?.toString() || '',
+        schoolName: (order.schoolId as PopulatedSchool | null)?.name || 'N/A',
+        schoolId: (order.schoolId as PopulatedSchool | null)?._id?.toString() || '',
         studentNames: studentNames.length > 0 ? studentNames : ['N/A'],
         totalAmount: order.totalAmount ?? 0,
         paymentMethod: order.paymentMethod,

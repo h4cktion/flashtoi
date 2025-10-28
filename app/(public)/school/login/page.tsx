@@ -71,7 +71,7 @@ export default function SchoolLoginPage() {
                 htmlFor="loginCode"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
-                Code d'accès
+                Code d&apos;accès
               </label>
               <input
                 id="loginCode"
@@ -129,7 +129,7 @@ export default function SchoolLoginPage() {
 
         {/* Info Box */}
         <div className="mt-6 bg-white/50 backdrop-blur rounded-lg p-4 text-sm text-gray-700">
-          <p className="font-medium mb-1">Besoin d'aide ?</p>
+          <p className="font-medium mb-1">Besoin d&apos;aide ?</p>
           <p className="text-gray-600">
             Contactez le support pour obtenir vos identifiants de connexion.
           </p>
