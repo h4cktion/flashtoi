@@ -1,83 +1,92 @@
-import { auth } from '@/lib/auth/auth'
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
+import { auth } from "@/lib/auth/auth";
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
 export default auth((req) => {
-  const { nextUrl, auth } = req
-  const isLoggedIn = !!auth?.user
-  const userRole = auth?.user?.role
+  const { nextUrl, auth } = req;
+  const isLoggedIn = !!auth?.user;
+  const userRole = auth?.user?.role;
 
   // Define route patterns
-  const isPublicRoute = nextUrl.pathname === '/login' ||
-    nextUrl.pathname === '/school/login' ||
-    nextUrl.pathname === '/backoffice/login'
-  const isParentRoute = nextUrl.pathname.startsWith('/gallery') ||
-    nextUrl.pathname.startsWith('/cart') ||
-    nextUrl.pathname.startsWith('/orders') ||
-    nextUrl.pathname.startsWith('/checkout') ||
-    nextUrl.pathname.startsWith('/order-confirmation')
-  const isSchoolRoute = nextUrl.pathname.startsWith('/school/dashboard') ||
-    nextUrl.pathname.startsWith('/school/orders')
-  const isAdminRoute = nextUrl.pathname.startsWith('/backoffice/dashboard') ||
-    nextUrl.pathname.startsWith('/backoffice/schools') ||
-    nextUrl.pathname.startsWith('/backoffice/orders') ||
-    nextUrl.pathname.startsWith('/backoffice/students')
+  const isPublicRoute =
+    nextUrl.pathname === "/login" ||
+    nextUrl.pathname === "/school/login" ||
+    nextUrl.pathname === "" ||
+    nextUrl.pathname === "/backoffice/login";
+  const isParentRoute =
+    nextUrl.pathname.startsWith("/gallery") ||
+    nextUrl.pathname.startsWith("/cart") ||
+    nextUrl.pathname.startsWith("/orders") ||
+    nextUrl.pathname.startsWith("/checkout") ||
+    nextUrl.pathname.startsWith("/order-confirmation");
+  const isSchoolRoute =
+    nextUrl.pathname.startsWith("/school/dashboard") ||
+    nextUrl.pathname.startsWith("/school/orders");
+  const isAdminRoute =
+    nextUrl.pathname.startsWith("/backoffice/dashboard") ||
+    nextUrl.pathname.startsWith("/backoffice/schools") ||
+    nextUrl.pathname.startsWith("/backoffice/orders") ||
+    nextUrl.pathname.startsWith("/backoffice/students");
 
   // Redirect to login if trying to access protected routes while not logged in
   if (!isLoggedIn && (isParentRoute || isSchoolRoute || isAdminRoute)) {
     if (isSchoolRoute) {
-      return NextResponse.redirect(new URL('/school/login', nextUrl))
+      return NextResponse.redirect(new URL("/school/login", nextUrl));
     }
     if (isAdminRoute) {
-      return NextResponse.redirect(new URL('/backoffice/login', nextUrl))
+      return NextResponse.redirect(new URL("/backoffice/login", nextUrl));
     }
-    return NextResponse.redirect(new URL('/login', nextUrl))
+    return NextResponse.redirect(new URL("/login", nextUrl));
   }
 
   // Redirect logged-in users away from login pages
   if (isLoggedIn && isPublicRoute) {
-    if (userRole === 'admin') {
-      return NextResponse.redirect(new URL('/backoffice/dashboard', nextUrl))
+    if (userRole === "admin") {
+      return NextResponse.redirect(new URL("/backoffice/dashboard", nextUrl));
     }
-    if (userRole === 'school') {
-      return NextResponse.redirect(new URL('/school/dashboard', nextUrl))
+    if (userRole === "school") {
+      return NextResponse.redirect(new URL("/school/dashboard", nextUrl));
     }
-    if (userRole === 'parent' && auth?.user?.studentId) {
-      return NextResponse.redirect(new URL(`/gallery/${auth.user.studentId}`, nextUrl))
+    if (userRole === "parent" && auth?.user?.studentId) {
+      return NextResponse.redirect(
+        new URL(`/gallery/${auth.user.studentId}`, nextUrl)
+      );
     }
   }
 
   // Prevent role-based access violations
   if (isLoggedIn) {
     // Non-admins trying to access admin routes
-    if (userRole !== 'admin' && isAdminRoute) {
-      if (userRole === 'school') {
-        return NextResponse.redirect(new URL('/school/dashboard', nextUrl))
+    if (userRole !== "admin" && isAdminRoute) {
+      if (userRole === "school") {
+        return NextResponse.redirect(new URL("/school/dashboard", nextUrl));
       }
-      if (userRole === 'parent' && auth?.user?.studentId) {
-        return NextResponse.redirect(new URL(`/gallery/${auth.user.studentId}`, nextUrl))
+      if (userRole === "parent" && auth?.user?.studentId) {
+        return NextResponse.redirect(
+          new URL(`/gallery/${auth.user.studentId}`, nextUrl)
+        );
       }
-      return NextResponse.redirect(new URL('/login', nextUrl))
+      return NextResponse.redirect(new URL("/login", nextUrl));
     }
 
     // Parents trying to access school routes
-    if (userRole === 'parent' && isSchoolRoute) {
-      return NextResponse.redirect(new URL('/gallery', nextUrl))
+    if (userRole === "parent" && isSchoolRoute) {
+      return NextResponse.redirect(new URL("/gallery", nextUrl));
     }
 
     // Schools trying to access parent routes
-    if (userRole === 'school' && isParentRoute) {
-      return NextResponse.redirect(new URL('/school/dashboard', nextUrl))
+    if (userRole === "school" && isParentRoute) {
+      return NextResponse.redirect(new URL("/school/dashboard", nextUrl));
     }
   }
 
   // Redirect root to appropriate login page
-  if (nextUrl.pathname === '/') {
-    return NextResponse.redirect(new URL('/login', nextUrl))
-  }
+  // if (nextUrl.pathname === "/") {
+  //   return NextResponse.redirect(new URL("/login", nextUrl));
+  // }
 
-  return NextResponse.next()
-})
+  return NextResponse.next();
+});
 
 export const config = {
   matcher: [
@@ -88,6 +97,6 @@ export const config = {
      * - _next/image (image optimization files)
      * - favicon.ico, sitemap.xml, robots.txt (metadata files)
      */
-    '/((?!api/auth|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)',
+    "/((?!api/auth|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)",
   ],
-}
+};
