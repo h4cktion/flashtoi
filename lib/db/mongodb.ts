@@ -13,11 +13,10 @@ interface MongooseCache {
 
 // Declare global cache to prevent multiple connections in development
 declare global {
-  // eslint-disable-next-line no-var
   var mongoose: MongooseCache | undefined
 }
 
-let cached: MongooseCache = globalThis.mongoose || { conn: null, promise: null }
+const cached: MongooseCache = globalThis.mongoose || { conn: null, promise: null }
 
 if (!globalThis.mongoose) {
   globalThis.mongoose = cached

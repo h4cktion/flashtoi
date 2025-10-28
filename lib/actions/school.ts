@@ -165,21 +165,39 @@ export async function getSchoolOrders(schoolId: string): Promise<
       .select('firstName lastName')
       .lean()
 
+    // Helper types for populated/lean documents
+    interface StudentDoc {
+      _id: unknown
+      firstName: string
+      lastName: string
+    }
+
+    interface OrderDoc {
+      _id: unknown
+      orderNumber: string
+      createdAt: Date
+      studentIds: unknown[]
+      totalAmount: number
+      paymentMethod: string
+      status: string
+      notes?: string
+    }
+
     // Créer un map des étudiants pour un accès rapide
     const studentMap = new Map(
-      students.map((s: any) => [
+      students.map((s: StudentDoc) => [
         s._id.toString(),
         `${s.firstName} ${s.lastName}`,
       ])
     )
 
     // Formatter les commandes avec les noms des étudiants
-    const formattedOrders = orders.map((order: any) => ({
+    const formattedOrders = orders.map((order: OrderDoc) => ({
       _id: order._id.toString(),
       orderNumber: order.orderNumber,
       createdAt: order.createdAt.toISOString(),
       studentNames: order.studentIds.map(
-        (id: any) => studentMap.get(id.toString()) || 'Inconnu'
+        (id: unknown) => studentMap.get(id.toString()) || 'Inconnu'
       ),
       totalAmount: order.totalAmount,
       paymentMethod: order.paymentMethod,

@@ -227,7 +227,7 @@ export default function CheckoutPage() {
               <div className="flex-1">
                 <p className="font-medium text-gray-900">Chèque</p>
                 <p className="text-sm text-gray-600 mt-1">
-                  Payez par chèque à l'ordre de l'école
+                  Payez par chèque à l&apos;ordre de l&apos;école
                 </p>
               </div>
             </label>
@@ -245,7 +245,7 @@ export default function CheckoutPage() {
               <div className="flex-1">
                 <p className="font-medium text-gray-900">Espèces</p>
                 <p className="text-sm text-gray-600 mt-1">
-                  Payez en espèces directement à l'école
+                  Payez en espèces directement à l&apos;école
                 </p>
               </div>
             </label>

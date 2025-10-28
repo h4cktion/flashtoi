@@ -1,19 +1,19 @@
-import { auth } from '@/lib/auth/auth'
-import { redirect } from 'next/navigation'
-import { getAllSchoolsForAdmin } from '@/lib/actions/admin'
-import { SchoolsTable } from '@/components/backoffice/schools-table'
-import Link from 'next/link'
+import { auth } from "@/lib/auth/auth";
+import { redirect } from "next/navigation";
+import { getAllSchoolsForAdmin } from "@/lib/actions/admin";
+import { SchoolsTable } from "@/components/backoffice/schools-table";
+import Link from "next/link";
 
 export default async function BackofficeSchoolsPage() {
   // Vérifier l'authentification
-  const session = await auth()
+  const session = await auth();
 
-  if (!session || session.user.role !== 'admin') {
-    redirect('/backoffice/login')
+  if (!session || session.user.role !== "admin") {
+    redirect("/backoffice/login");
   }
 
   // Récupérer les écoles
-  const result = await getAllSchoolsForAdmin()
+  const result = await getAllSchoolsForAdmin();
 
   if (!result.success || !result.data) {
     return (
@@ -26,17 +26,17 @@ export default async function BackofficeSchoolsPage() {
           </div>
         </div>
       </div>
-    )
+    );
   }
 
-  const { schools } = result.data
+  const { schools } = result.data;
 
   // Calculer les statistiques globales de la page
-  const totalStudents = schools.reduce((sum, s) => sum + s.studentsCount, 0)
-  const totalOrders = schools.reduce((sum, s) => sum + s.ordersCount, 0)
-  const totalRevenue = schools.reduce((sum, s) => sum + s.totalRevenue, 0)
-  const totalPending = schools.reduce((sum, s) => sum + s.pendingOrders, 0)
-  const totalPaid = schools.reduce((sum, s) => sum + s.paidOrders, 0)
+  const totalStudents = schools.reduce((sum, s) => sum + s.studentsCount, 0);
+  const totalOrders = schools.reduce((sum, s) => sum + s.ordersCount, 0);
+  const totalRevenue = schools.reduce((sum, s) => sum + s.totalRevenue, 0);
+  const totalPending = schools.reduce((sum, s) => sum + s.pendingOrders, 0);
+  const totalPaid = schools.reduce((sum, s) => sum + s.paidOrders, 0);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -45,8 +45,12 @@ export default async function BackofficeSchoolsPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Gestion des écoles</h1>
-              <p className="text-gray-600 mt-1">Vue d'ensemble de toutes les écoles</p>
+              <h1 className="text-3xl font-bold text-gray-900">
+                Gestion des écoles
+              </h1>
+              <p className="text-gray-600 mt-1">
+                Vue d&apos;ensemble de toutes les écoles
+              </p>
             </div>
             <Link
               href="/backoffice/dashboard"
@@ -89,12 +93,12 @@ export default async function BackofficeSchoolsPage() {
 
           <div className="bg-white rounded-lg shadow-sm p-6">
             <div className="text-sm font-medium text-gray-600">
-              Chiffre d'affaires
+              Chiffre d&apos;affaires
             </div>
             <div className="text-2xl font-bold text-gray-900 mt-2">
-              {new Intl.NumberFormat('fr-FR', {
-                style: 'currency',
-                currency: 'EUR',
+              {new Intl.NumberFormat("fr-FR", {
+                style: "currency",
+                currency: "EUR",
               }).format(totalRevenue)}
             </div>
           </div>
@@ -105,11 +109,11 @@ export default async function BackofficeSchoolsPage() {
             </div>
             <div className="text-2xl font-bold text-gray-900 mt-2">
               {schools.length > 0
-                ? new Intl.NumberFormat('fr-FR', {
-                    style: 'currency',
-                    currency: 'EUR',
+                ? new Intl.NumberFormat("fr-FR", {
+                    style: "currency",
+                    currency: "EUR",
                   }).format(totalRevenue / schools.length)
-                : '0,00 €'}
+                : "0,00 €"}
             </div>
           </div>
         </div>
@@ -120,5 +124,5 @@ export default async function BackofficeSchoolsPage() {
         </div>
       </main>
     </div>
-  )
+  );
 }

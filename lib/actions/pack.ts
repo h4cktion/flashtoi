@@ -4,7 +4,16 @@ import { connectDB } from '@/lib/db/connect'
 import Pack from '@/lib/db/models/Pack'
 import Student from '@/lib/db/models/Student'
 import mongoose from 'mongoose'
-import { ActionResponse, Pack as PackType, Photo } from '@/types'
+import { ActionResponse, Pack as PackType } from '@/types'
+
+// Type for photo structure in the database
+interface StudentPhoto {
+  planche: string
+  s3Key: string
+  cloudFrontUrl: string
+  format: string
+  price: number
+}
 
 /**
  * Récupère tous les packs disponibles pour un étudiant
@@ -43,7 +52,7 @@ export async function getAvailablePacksForStudent(
     for (const pack of allPacks) {
       // Obtenir les planches disponibles pour cet étudiant
       const studentPlanches = new Set(
-        student.photos.map((photo: any) => photo.planche)
+        student.photos.map((photo: StudentPhoto) => photo.planche)
       )
 
       // Vérifier si toutes les planches du pack sont disponibles
@@ -54,8 +63,8 @@ export async function getAvailablePacksForStudent(
       if (hasAllPlanches) {
         // Récupérer les photos correspondant aux planches du pack
         const packPhotos = student.photos
-          .filter((photo: any) => pack.planches.includes(photo.planche))
-          .map((photo: any) => ({
+          .filter((photo: StudentPhoto) => pack.planches.includes(photo.planche))
+          .map((photo: StudentPhoto) => ({
             s3Key: photo.s3Key,
             cloudFrontUrl: photo.cloudFrontUrl,
             format: photo.format,
