@@ -57,15 +57,15 @@ export function PhotoCard({ photo, index, studentId, studentName }: PhotoCardPro
       <div className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow flex items-center gap-4 p-3">
         {/* Image miniature à gauche - Cliquable */}
         <div
-          className="relative w-20 h-24 bg-gray-100 rounded overflow-hidden flex-shrink-0 cursor-pointer"
+          className="relative w-24 h-24 bg-gray-100 rounded overflow-hidden flex-shrink-0 cursor-pointer flex items-center justify-center"
           onClick={handlePhotoClick}
         >
           <Image
             src={photo.cloudFrontUrl}
             alt={`Photo ${index + 1}`}
             fill
-            className="object-cover"
-            sizes="80px"
+            className="object-contain"
+            sizes="96px"
           />
         </div>
 

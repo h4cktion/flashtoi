@@ -81,9 +81,9 @@ export default auth((req) => {
   }
 
   // Redirect root to appropriate login page
-  // if (nextUrl.pathname === "/") {
-  //   return NextResponse.redirect(new URL("/login", nextUrl));
-  // }
+  if (nextUrl.pathname === "/") {
+    return NextResponse.redirect(new URL("/login", nextUrl));
+  }
 
   return NextResponse.next();
 });

@@ -1,113 +1,121 @@
-'use client'
+"use client";
 
-import { useEffect, useState } from 'react'
-import { useParams } from 'next/navigation'
-import { getStudentById } from '@/lib/actions/student'
-import { getAvailablePacksForStudent } from '@/lib/actions/pack'
-import { IStudent, Pack } from '@/types'
-import { PhotoCard } from '@/components/cart/photo-card'
-import { CartSummary } from '@/components/cart/cart-summary'
-import { MobileCartButton } from '@/components/cart/mobile-cart-button'
-import { PacksSection } from '@/components/cart/packs-section'
-import { AddStudentForm } from '@/components/gallery/add-student-form'
-import { StudentTabs } from '@/components/gallery/student-tabs'
-import { useStudentsStore } from '@/lib/stores/students-store'
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import { getStudentById } from "@/lib/actions/student";
+import { getAvailablePacksForStudent } from "@/lib/actions/pack";
+import { IStudent, Pack } from "@/types";
+import { PhotoCard } from "@/components/cart/photo-card";
+import { CartSummary } from "@/components/cart/cart-summary";
+import { MobileCartButton } from "@/components/cart/mobile-cart-button";
+import { PacksSection } from "@/components/cart/packs-section";
+import { AddStudentForm } from "@/components/gallery/add-student-form";
+import { StudentTabs } from "@/components/gallery/student-tabs";
+import { SignOutButton } from "@/components/auth/sign-out-button";
+import { useStudentsStore } from "@/lib/stores/students-store";
 
 export default function GalleryPage() {
-  const params = useParams()
-  const id = params.id as string
+  const params = useParams();
+  const id = params.id as string;
 
-  const [mounted, setMounted] = useState(false)
-  const students = useStudentsStore((state) => state.students)
-  const activeStudentIndex = useStudentsStore((state) => state.activeStudentIndex)
-  const addStudent = useStudentsStore((state) => state.addStudent)
+  const [mounted, setMounted] = useState(false);
+  const students = useStudentsStore((state) => state.students);
+  const activeStudentIndex = useStudentsStore(
+    (state) => state.activeStudentIndex
+  );
+  const addStudent = useStudentsStore((state) => state.addStudent);
 
-  const [currentStudent, setCurrentStudent] = useState<IStudent | null>(null)
-  const [packs, setPacks] = useState<Pack[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [currentStudent, setCurrentStudent] = useState<IStudent | null>(null);
+  const [packs, setPacks] = useState<Pack[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   // Éviter les erreurs d'hydration avec Zustand
   useEffect(() => {
-    setMounted(true)
-  }, [])
+    setMounted(true);
+  }, []);
 
   // Charger l'élève initial (depuis l'URL) au premier montage
   useEffect(() => {
     const loadInitialStudent = async () => {
-      setLoading(true)
-      setError(null)
+      setLoading(true);
+      setError(null);
 
       try {
-        const result = await getStudentById(id)
+        const result = await getStudentById(id);
 
         if (!result.success || !result.data) {
-          setError(result.error || 'Élève non trouvé')
-          return
+          setError(result.error || "Élève non trouvé");
+          return;
         }
 
         // Ajouter l'élève au store s'il n'est pas déjà ajouté
         if (students.length === 0) {
-          addStudent(result.data)
+          addStudent(result.data);
         }
 
-        setCurrentStudent(result.data)
+        setCurrentStudent(result.data);
 
         // Charger les packs
-        const packsResult = await getAvailablePacksForStudent(id)
-        setPacks(packsResult.success && packsResult.data ? packsResult.data : [])
+        const packsResult = await getAvailablePacksForStudent(id);
+        setPacks(
+          packsResult.success && packsResult.data ? packsResult.data : []
+        );
       } catch (err) {
-        console.error('Error loading student:', err)
-        setError('Erreur lors du chargement des données')
+        console.error("Error loading student:", err);
+        setError("Erreur lors du chargement des données");
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    loadInitialStudent()
-  }, [id]) // eslint-disable-line react-hooks/exhaustive-deps
+    loadInitialStudent();
+  }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Charger l'élève actif quand il change
   useEffect(() => {
     const loadActiveStudent = async () => {
-      if (students.length === 0) return
+      if (students.length === 0) return;
 
-      const activeStudent = students[activeStudentIndex]
-      if (!activeStudent) return
+      const activeStudent = students[activeStudentIndex];
+      if (!activeStudent) return;
 
       // Ne pas recharger si c'est déjà l'élève actuel
-      if (currentStudent && currentStudent._id.toString() === activeStudent.id) {
-        return
+      if (
+        currentStudent &&
+        currentStudent._id.toString() === activeStudent.id
+      ) {
+        return;
       }
 
-      setLoading(true)
-      setError(null)
+      setLoading(true);
+      setError(null);
 
       try {
         const [studentResult, packsResult] = await Promise.all([
           getStudentById(activeStudent.id),
           getAvailablePacksForStudent(activeStudent.id),
-        ])
+        ]);
 
         if (!studentResult.success || !studentResult.data) {
-          setError(studentResult.error || 'Élève non trouvé')
-          return
+          setError(studentResult.error || "Élève non trouvé");
+          return;
         }
 
-        setCurrentStudent(studentResult.data)
+        setCurrentStudent(studentResult.data);
         setPacks(
           packsResult.success && packsResult.data ? packsResult.data : []
-        )
+        );
       } catch (err) {
-        console.error('Error loading active student:', err)
-        setError('Erreur lors du chargement des données')
+        console.error("Error loading active student:", err);
+        setError("Erreur lors du chargement des données");
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    loadActiveStudent()
-  }, [activeStudentIndex, students, currentStudent])
+    loadActiveStudent();
+  }, [activeStudentIndex, students, currentStudent]);
 
   if (loading && !currentStudent) {
     return (
@@ -117,7 +125,7 @@ export default function GalleryPage() {
           <p className="text-gray-600">Chargement...</p>
         </div>
       </div>
-    )
+    );
   }
 
   if (error && !currentStudent) {
@@ -127,11 +135,11 @@ export default function GalleryPage() {
           <p className="text-red-600 mb-4">{error}</p>
         </div>
       </div>
-    )
+    );
   }
 
   if (!currentStudent) {
-    return null
+    return null;
   }
 
   // Ne pas afficher les composants Zustand avant le montage pour éviter les erreurs d'hydration
@@ -145,12 +153,17 @@ export default function GalleryPage() {
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Bouton de déconnexion en haut */}
+        <div className="flex justify-start mb-4">
+          <SignOutButton variant="compact" />
+        </div>
+
         {/* Formulaire d'ajout d'élève */}
         <AddStudentForm />
 
@@ -213,5 +226,5 @@ export default function GalleryPage() {
       {/* Bouton panier mobile (fixe en haut à droite) */}
       <MobileCartButton />
     </div>
-  )
+  );
 }

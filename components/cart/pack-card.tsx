@@ -33,7 +33,7 @@ export function PackCard({ pack, studentId: propsStudentId }: PackCardProps) {
           {pack.photos.map((photo, index) => (
             <div
               key={index}
-              className="absolute bg-white rounded-lg shadow-lg overflow-hidden border-2 border-white"
+              className="absolute bg-white rounded-lg shadow-lg overflow-hidden border-2 border-white flex items-center justify-center"
               style={{
                 width: `${photoWidth}px`,
                 height: `${photoHeight}px`,
@@ -45,7 +45,7 @@ export function PackCard({ pack, studentId: propsStudentId }: PackCardProps) {
                 src={photo.cloudFrontUrl}
                 alt={`Preview ${index + 1}`}
                 fill
-                className="object-cover"
+                className="object-contain"
                 sizes="110px"
               />
               <div className="absolute bottom-1 left-1 bg-white px-1.5 py-0.5 rounded text-xs font-semibold text-gray-700">

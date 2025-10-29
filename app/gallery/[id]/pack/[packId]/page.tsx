@@ -78,12 +78,12 @@ export default async function PackDetailPage({ params }: PackDetailPageProps) {
                 key={index}
                 className="bg-white border-2 border-gray-200 rounded-lg overflow-hidden shadow-sm"
               >
-                <div className="relative aspect-[3/4] bg-gray-100">
+                <div className="relative aspect-square bg-gray-100 flex items-center justify-center">
                   <Image
                     src={photo.cloudFrontUrl}
                     alt={`Photo ${photo.planche}`}
                     fill
-                    className="object-cover"
+                    className="object-contain"
                     sizes="(max-width: 768px) 50vw, 33vw"
                   />
                 </div>
