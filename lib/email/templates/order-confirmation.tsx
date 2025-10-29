@@ -18,7 +18,7 @@ interface OrderConfirmationEmailProps {
     photosCount: number;
   }>;
   totalAmount: number;
-  paymentMethod: "cash" | "check" | "online";
+  paymentMethod: "cash" | "check" | "online" | "pending";
   notes?: string;
 }
 
@@ -38,6 +38,7 @@ export const OrderConfirmationEmail: React.FC<
     cash: "Espèces",
     check: "Chèque",
     online: "En ligne",
+    pending: "En attente",
   };
 
   return (

@@ -21,7 +21,7 @@ interface SendOrderConfirmationParams {
     photosCount: number
   }>
   totalAmount: number
-  paymentMethod: 'cash' | 'check' | 'online'
+  paymentMethod: 'cash' | 'check' | 'online' | 'pending'
   notes?: string
 }
 
