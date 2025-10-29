@@ -49,7 +49,7 @@ export function PackCard({ pack, studentId: propsStudentId }: PackCardProps) {
                 sizes="110px"
               />
               <div className="absolute bottom-1 left-1 bg-white px-1.5 py-0.5 rounded text-xs font-semibold text-gray-700">
-                {photo.format}
+                {photo.planche}
               </div>
             </div>
           ))}

@@ -84,7 +84,7 @@ export type OrderStatus =
 
 export interface OrderItem {
   photoUrl: string;
-  format: PhotoFormat;
+  format: PhotoPlanche;
   quantity: number;
   unitPrice: number;
   subtotal: number;
@@ -165,7 +165,7 @@ export interface Pack {
 // ============================================
 export interface CartItem {
   photoUrl: string;
-  format: PhotoFormat;
+  format: PhotoPlanche;
   quantity: number;
   unitPrice: number;
   studentId: string;

@@ -1,6 +1,6 @@
 import mongoose, { Model, Schema } from "mongoose";
 import { IOrder } from "@/types";
-import { PHOTO_FORMATS } from "@/constants/constants";
+import { PLANCHE_NAMES } from "@/constants/constants";
 
 const OrderSchema = new Schema<IOrder>(
   {
@@ -38,7 +38,7 @@ const OrderSchema = new Schema<IOrder>(
         },
         format: {
           type: String,
-          enum: PHOTO_FORMATS,
+          enum: PLANCHE_NAMES,
           required: true,
         },
         quantity: {

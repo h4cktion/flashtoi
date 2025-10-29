@@ -36,7 +36,7 @@ export function PhotoModal({ photo, isOpen, onClose, studentId, studentName }: P
     setIsAdding(true)
     addToCart({
       photoUrl: photo.cloudFrontUrl,
-      format: photo.format,
+      format: photo.planche,
       unitPrice: photo.price,
       studentId,
       studentName,
@@ -61,7 +61,7 @@ export function PhotoModal({ photo, isOpen, onClose, studentId, studentName }: P
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b">
           <h2 className="text-xl font-bold text-gray-900">
-            {photo.format}
+            {photo.planche}
           </h2>
           <button
             onClick={onClose}
@@ -88,7 +88,7 @@ export function PhotoModal({ photo, isOpen, onClose, studentId, studentName }: P
           <div className="relative aspect-[3/4] bg-gray-100 rounded-lg overflow-hidden mb-6">
             <Image
               src={photo.cloudFrontUrl}
-              alt={`Photo ${photo.format}`}
+              alt={`Photo ${photo.planche}`}
               fill
               className="object-cover"
               sizes="(max-width: 768px) 100vw, 800px"
@@ -99,11 +99,8 @@ export function PhotoModal({ photo, isOpen, onClose, studentId, studentName }: P
           {/* Infos et bouton */}
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 mb-1">Format</p>
+              <p className="text-sm text-gray-600 mb-1">Planche</p>
               <p className="text-lg font-semibold text-gray-900 mb-2">
-                {photo.format}
-              </p>
-              <p className="text-xs text-gray-500 mb-2">
                 {photo.planche}
               </p>
               <p className="text-3xl font-bold text-gray-900">

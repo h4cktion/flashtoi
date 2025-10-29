@@ -14,7 +14,12 @@ interface PhotoCardProps {
   studentName: string;
 }
 
-export function PhotoCard({ photo, index, studentId, studentName }: PhotoCardProps) {
+export function PhotoCard({
+  photo,
+  index,
+  studentId,
+  studentName,
+}: PhotoCardProps) {
   const router = useRouter();
   const params = useParams();
   const urlStudentId = params.id as string;
@@ -27,7 +32,7 @@ export function PhotoCard({ photo, index, studentId, studentName }: PhotoCardPro
     setIsAdding(true);
     addToCart({
       photoUrl: photo.cloudFrontUrl,
-      format: photo.format,
+      format: photo.planche,
       unitPrice: photo.price,
       studentId,
       studentName,
@@ -72,7 +77,7 @@ export function PhotoCard({ photo, index, studentId, studentName }: PhotoCardPro
         {/* Infos photo au centre - Cliquable */}
         <div className="flex-1 cursor-pointer" onClick={handlePhotoClick}>
           <p className="text-base font-semibold text-gray-900 mb-1">
-            {photo.format}
+            {photo.planche}
           </p>
           <p className="text-xl font-bold text-gray-900">
             {photo.price.toFixed(2)} €
@@ -89,7 +94,9 @@ export function PhotoCard({ photo, index, studentId, studentName }: PhotoCardPro
               : "bg-gradient-to-r from-blue-600 to-indigo-700 hover:shadow-lg"
           }`}
         >
-          <span className="hidden sm:inline">{isAdding ? "✓ Ajouté" : "AJOUTER"}</span>
+          <span className="hidden sm:inline">
+            {isAdding ? "✓ Ajouté" : "AJOUTER"}
+          </span>
           <span className="sm:hidden">{isAdding ? "✓" : "AJOUTER"}</span>
         </button>
       </div>

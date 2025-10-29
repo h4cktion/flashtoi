@@ -18,7 +18,7 @@ export function AddPhotoToCartButton({ photo, studentId, studentName }: AddPhoto
     setIsAdding(true)
     addToCart({
       photoUrl: photo.cloudFrontUrl,
-      format: photo.format,
+      format: photo.planche,
       unitPrice: photo.price,
       studentId,
       studentName,
