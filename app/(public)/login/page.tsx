@@ -2,7 +2,10 @@
 
 import { useState, useTransition, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { authenticateWithCredentials } from "./actions";
+import {
+  authenticateWithCredentials,
+  authenticateWithQRCodeAutoLogin,
+} from "./actions";
 
 function ParentLoginContent() {
   const router = useRouter();
@@ -17,10 +20,30 @@ function ParentLoginContent() {
 
   // Auto-login via URL params
   useEffect(() => {
-    const login = searchParams.get("login");
-    const pwd = searchParams.get("password");
     const autologin = searchParams.get("autologin");
 
+    // Check for QR code auto-login
+    const code = searchParams.get("code");
+    if (autologin === "true" && code) {
+      setIsAutoLogging(true);
+
+      startTransition(async () => {
+        const result = await authenticateWithQRCodeAutoLogin(code);
+
+        if (result.success && result.data) {
+          router.push(result.data.redirectUrl);
+          router.refresh();
+        } else {
+          setIsAutoLogging(false);
+          setError(result.error || "Échec de la connexion automatique");
+        }
+      });
+      return;
+    }
+
+    // Check for legacy login/password auto-login
+    const login = searchParams.get("login");
+    const pwd = searchParams.get("password");
     if (autologin === "true" && login && pwd) {
       setIsAutoLogging(true);
       setLoginCode(login);

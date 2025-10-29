@@ -40,7 +40,7 @@ export const authOptions: NextAuthConfig = {
             credentials.password as string,
             student.password
           )
-          
+
           if (!isPasswordValid) {
             return null
           }
@@ -56,6 +56,46 @@ export const authOptions: NextAuthConfig = {
           }
         } catch (error) {
           console.error('Parent auth error:', error)
+          return null
+        }
+      },
+    }),
+
+    // Provider: QR Code Auto-Login (no password required)
+    Credentials({
+      id: 'qr-autologin',
+      name: 'QR Auto Login',
+      credentials: {
+        qrCode: { label: 'QR Code', type: 'text' },
+      },
+      async authorize(credentials) {
+        if (!credentials?.qrCode) {
+          return null
+        }
+
+        try {
+          await connectDB()
+
+          // Find student by QR code only
+          const student = await Student.findOne({
+            qrCode: credentials.qrCode,
+          })
+
+          if (!student) {
+            return null
+          }
+
+          // Return user object for session (no password verification)
+          return {
+            id: student._id.toString(),
+            name: `${student.firstName} ${student.lastName}`,
+            email: null,
+            role: 'parent' as const,
+            studentId: student._id.toString(),
+            schoolId: student.schoolId.toString(),
+          }
+        } catch (error) {
+          console.error('QR autologin error:', error)
           return null
         }
       },

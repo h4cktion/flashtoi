@@ -15,6 +15,10 @@ const qrCodeSchema = z.object({
   password: z.string().min(1, "Password is required"),
 });
 
+const qrCodeAutoLoginSchema = z.object({
+  qrCode: z.string().min(1, "QR code is required"),
+});
+
 const credentialsSchema = z.object({
   loginCode: z.string().min(1, "Login code is required"),
   password: z.string().min(4, "Password must be at least 4 characters"),
@@ -147,6 +151,70 @@ export async function authenticateWithCredentials(
     }
 
     console.error("authenticateWithCredentials error:", error);
+    return {
+      success: false,
+      error: "Une erreur est survenue",
+    };
+  }
+}
+
+/**
+ * Auto-login with QR code (no password required)
+ * Used when user scans QR code with autologin=true parameter
+ */
+export async function authenticateWithQRCodeAutoLogin(
+  qrCode: string
+): Promise<ActionResponse<{ redirectUrl: string }>> {
+  try {
+    // 1. Validate input
+    const validated = qrCodeAutoLoginSchema.parse({ qrCode });
+
+    // 2. Attempt authentication with qr-autologin provider
+    const result = await signIn("qr-autologin", {
+      qrCode: validated.qrCode,
+      redirect: false,
+    });
+
+    if (!result || result.error) {
+      return {
+        success: false,
+        error: "QR code invalide ou expiré",
+      };
+    }
+
+    // 3. Récupérer l'ID de l'étudiant depuis la base de données
+    await connectDB();
+    const student = await Student.findOne({
+      qrCode: validated.qrCode,
+    }).select("_id");
+
+    if (!student) {
+      return {
+        success: false,
+        error: "Erreur lors de la récupération des informations",
+      };
+    }
+
+    return {
+      success: true,
+      data: { redirectUrl: `/gallery/${student._id.toString()}` },
+    };
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return {
+        success: false,
+        error: error.issues[0].message,
+      };
+    }
+
+    if (error instanceof AuthError) {
+      return {
+        success: false,
+        error: "Erreur d'authentification",
+      };
+    }
+
+    console.error("authenticateWithQRCodeAutoLogin error:", error);
     return {
       success: false,
       error: "Une erreur est survenue",
