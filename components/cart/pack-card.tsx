@@ -78,7 +78,7 @@ export function PackCard({ pack, studentId: propsStudentId }: PackCardProps) {
           {/* Bouton VOIR réduit à droite */}
           <Link
             href={`/gallery/${studentId}/pack/${pack.pack._id}`}
-            className="px-6 py-2.5 rounded-full font-semibold text-center transition-colors bg-[#192F84] hover:bg-[#1a3699] text-white flex-shrink-0"
+            className="px-4 py-2 rounded-lg font-medium text-center transition-all duration-300 transform hover:-translate-y-0.5 bg-gradient-to-r from-blue-600 to-indigo-700 hover:shadow-lg text-white flex-shrink-0 text-sm"
           >
             VOIR
           </Link>

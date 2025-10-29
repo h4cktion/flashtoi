@@ -57,10 +57,8 @@ export function AddStudentForm() {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm p-4 mb-4">
-      <h3 className="text-lg font-semibold text-gray-900 mb-3">
-        Ajouter un élève
-      </h3>
+    <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg shadow-sm p-4 mb-4 border-green-200/50">
+      <h3 className="font-semibold text-green-800 mb-1">Ajouter un élève</h3>
 
       <form onSubmit={handleSubmit} className="space-y-3">
         <div className="flex flex-col sm:flex-row gap-2">
@@ -69,7 +67,7 @@ export function AddStudentForm() {
             value={loginCode}
             onChange={(e) => setLoginCode(e.target.value)}
             placeholder="Code de connexion"
-            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#192F84] focus:border-transparent text-slate-500"
+            className="flex-1 px-4 py-2 border-2 border-green-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 text-slate-700 bg-white placeholder:text-gray-400"
             disabled={isLoading}
             autoComplete="username"
           />
@@ -78,14 +76,14 @@ export function AddStudentForm() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Mot de passe"
-            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#192F84] focus:border-transparent text-slate-500"
+            className="flex-1 px-4 py-2 border-2 border-green-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 text-slate-700 bg-white placeholder:text-gray-400"
             disabled={isLoading}
             autoComplete="current-password"
           />
           <button
             type="submit"
             disabled={isLoading}
-            className="px-6 py-2 bg-[#192F84] hover:bg-[#1a3699] text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+            className="bg-gradient-to-r md:mt-0 mt-4 from-green-500 to-emerald-600 text-white px-6 py-3 rounded-xl font-medium hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 flex items-center space-x-2"
           >
             {isLoading ? "Recherche..." : "Ajouter"}
           </button>

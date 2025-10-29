@@ -83,11 +83,13 @@ export function PhotoCard({ photo, index, studentId, studentName }: PhotoCardPro
         <button
           onClick={handleAddToCart}
           disabled={isAdding}
-          className={`px-3 sm:px-6 py-2 sm:py-3 rounded-full font-semibold transition-colors flex-shrink-0 text-white text-xs sm:text-base ${
-            isAdding ? "bg-green-500" : "bg-[#192F84] hover:bg-[#1a3699]"
+          className={`px-3 sm:px-5 py-1.5 sm:py-2 rounded-lg font-medium transition-all duration-300 transform hover:-translate-y-0.5 flex-shrink-0 text-white text-xs sm:text-sm ${
+            isAdding
+              ? "bg-gradient-to-r from-green-500 to-emerald-600 shadow-md"
+              : "bg-gradient-to-r from-blue-600 to-indigo-700 hover:shadow-lg"
           }`}
         >
-          <span className="hidden sm:inline">{isAdding ? "✓ Ajouté" : "AJOUTER AU PANIER"}</span>
+          <span className="hidden sm:inline">{isAdding ? "✓ Ajouté" : "AJOUTER"}</span>
           <span className="sm:hidden">{isAdding ? "✓" : "AJOUTER"}</span>
         </button>
       </div>
