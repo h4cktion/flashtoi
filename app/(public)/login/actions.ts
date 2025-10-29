@@ -166,16 +166,23 @@ export async function authenticateWithQRCodeAutoLogin(
   qrCode: string
 ): Promise<ActionResponse<{ redirectUrl: string }>> {
   try {
+    console.log("[QR AutoLogin] Starting with code:", qrCode);
+
     // 1. Validate input
     const validated = qrCodeAutoLoginSchema.parse({ qrCode });
+    console.log("[QR AutoLogin] Validation passed");
 
     // 2. Attempt authentication with qr-autologin provider
+    console.log("[QR AutoLogin] Attempting signIn with qr-autologin provider");
     const result = await signIn("qr-autologin", {
       qrCode: validated.qrCode,
       redirect: false,
     });
 
+    console.log("[QR AutoLogin] SignIn result:", result);
+
     if (!result || result.error) {
+      console.error("[QR AutoLogin] SignIn failed:", result?.error);
       return {
         success: false,
         error: "QR code invalide ou expiré",
@@ -183,24 +190,30 @@ export async function authenticateWithQRCodeAutoLogin(
     }
 
     // 3. Récupérer l'ID de l'étudiant depuis la base de données
+    console.log("[QR AutoLogin] Connecting to DB");
     await connectDB();
+
+    console.log("[QR AutoLogin] Finding student with qrCode:", validated.qrCode);
     const student = await Student.findOne({
       qrCode: validated.qrCode,
     }).select("_id");
 
     if (!student) {
+      console.error("[QR AutoLogin] Student not found");
       return {
         success: false,
         error: "Erreur lors de la récupération des informations",
       };
     }
 
+    console.log("[QR AutoLogin] Success! Student ID:", student._id.toString());
     return {
       success: true,
       data: { redirectUrl: `/gallery/${student._id.toString()}` },
     };
   } catch (error) {
     if (error instanceof z.ZodError) {
+      console.error("[QR AutoLogin] Validation error:", error.issues);
       return {
         success: false,
         error: error.issues[0].message,
@@ -208,13 +221,14 @@ export async function authenticateWithQRCodeAutoLogin(
     }
 
     if (error instanceof AuthError) {
+      console.error("[QR AutoLogin] Auth error:", error);
       return {
         success: false,
         error: "Erreur d'authentification",
       };
     }
 
-    console.error("authenticateWithQRCodeAutoLogin error:", error);
+    console.error("[QR AutoLogin] Unexpected error:", error);
     return {
       success: false,
       error: "Une erreur est survenue",

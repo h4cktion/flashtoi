@@ -69,21 +69,29 @@ export const authOptions: NextAuthConfig = {
         qrCode: { label: 'QR Code', type: 'text' },
       },
       async authorize(credentials) {
+        console.log('[QR Provider] Starting authorization with credentials:', credentials)
+
         if (!credentials?.qrCode) {
+          console.error('[QR Provider] No qrCode provided')
           return null
         }
 
         try {
+          console.log('[QR Provider] Connecting to MongoDB')
           await connectDB()
 
+          console.log('[QR Provider] Searching for student with qrCode:', credentials.qrCode)
           // Find student by QR code only
           const student = await Student.findOne({
             qrCode: credentials.qrCode,
           })
 
           if (!student) {
+            console.error('[QR Provider] Student not found')
             return null
           }
+
+          console.log('[QR Provider] Student found:', student._id.toString())
 
           // Return user object for session (no password verification)
           return {
@@ -95,7 +103,7 @@ export const authOptions: NextAuthConfig = {
             schoolId: student.schoolId.toString(),
           }
         } catch (error) {
-          console.error('QR autologin error:', error)
+          console.error('[QR Provider] Error:', error)
           return null
         }
       },
