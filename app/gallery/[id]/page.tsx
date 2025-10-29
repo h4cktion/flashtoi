@@ -7,6 +7,7 @@ import { getAvailablePacksForStudent } from '@/lib/actions/pack'
 import { IStudent, Pack } from '@/types'
 import { PhotoCard } from '@/components/cart/photo-card'
 import { CartSummary } from '@/components/cart/cart-summary'
+import { MobileCartButton } from '@/components/cart/mobile-cart-button'
 import { PacksSection } from '@/components/cart/packs-section'
 import { AddStudentForm } from '@/components/gallery/add-student-form'
 import { StudentTabs } from '@/components/gallery/student-tabs'
@@ -206,8 +207,11 @@ export default function GalleryPage() {
         )}
       </div>
 
-      {/* Résumé du panier (flottant) */}
+      {/* Résumé du panier (flottant sur desktop uniquement) */}
       <CartSummary />
+
+      {/* Bouton panier mobile (fixe en haut à droite) */}
+      <MobileCartButton />
     </div>
   )
 }

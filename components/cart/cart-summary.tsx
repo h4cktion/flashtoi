@@ -67,7 +67,7 @@ export function CartSummary() {
   const studentIds = Object.keys(groupedItems)
 
   return (
-    <div className="fixed bottom-6 right-6 bg-white rounded-lg shadow-xl p-4 border border-gray-200 min-w-[350px] max-w-[450px] max-h-[80vh] overflow-y-auto">
+    <div className="hidden md:block fixed bottom-6 right-6 bg-white rounded-lg shadow-xl p-4 border border-gray-200 min-w-[350px] max-w-[450px] max-h-[80vh] overflow-y-auto">
       <h3 className="font-bold text-lg mb-3 pb-3 border-b">Panier</h3>
 
       {/* Affichage groupé par élève */}

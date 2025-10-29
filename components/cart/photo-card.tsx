@@ -79,15 +79,16 @@ export function PhotoCard({ photo, index, studentId, studentName }: PhotoCardPro
           </p>
         </div>
 
-        {/* Bouton AJOUTER AU PAINER à droite */}
+        {/* Bouton AJOUTER AU PANIER à droite */}
         <button
           onClick={handleAddToCart}
           disabled={isAdding}
-          className={`px-6 py-3 rounded-full font-semibold transition-colors flex-shrink-0 text-white ${
+          className={`px-3 sm:px-6 py-2 sm:py-3 rounded-full font-semibold transition-colors flex-shrink-0 text-white text-xs sm:text-base ${
             isAdding ? "bg-green-500" : "bg-[#192F84] hover:bg-[#1a3699]"
           }`}
         >
-          {isAdding ? "✓ Ajouté" : "AJOUTER AU PAINER"}
+          <span className="hidden sm:inline">{isAdding ? "✓ Ajouté" : "AJOUTER AU PANIER"}</span>
+          <span className="sm:hidden">{isAdding ? "✓" : "AJOUTER"}</span>
         </button>
       </div>
 

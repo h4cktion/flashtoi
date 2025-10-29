@@ -63,7 +63,7 @@ export function AddStudentForm() {
       </h3>
 
       <form onSubmit={handleSubmit} className="space-y-3">
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2">
           <input
             type="text"
             value={loginCode}
@@ -85,7 +85,7 @@ export function AddStudentForm() {
           <button
             type="submit"
             disabled={isLoading}
-            className="px-6 py-2 bg-[#192F84] hover:bg-[#1a3699] text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-2 bg-[#192F84] hover:bg-[#1a3699] text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
           >
             {isLoading ? "Recherche..." : "Ajouter"}
           </button>
