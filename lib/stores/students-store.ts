@@ -1,11 +1,12 @@
-import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
-import { IStudent } from '@/types';
+import { create } from "zustand";
+import { persist, createJSONStorage } from "zustand/middleware";
+import { IStudent } from "@/types";
 
 interface StudentInfo {
   id: string;
   firstName: string;
   lastName: string;
+  login: string;
   classId: string;
 }
 
@@ -37,6 +38,7 @@ export const useStudentsStore = create<StudentsStore>()(
           id: student._id.toString(),
           firstName: student.firstName,
           lastName: student.lastName,
+          login: student.loginCode,
           classId: student.classId,
         };
 
@@ -87,7 +89,7 @@ export const useStudentsStore = create<StudentsStore>()(
       },
     }),
     {
-      name: 'students-storage',
+      name: "students-storage",
       storage: createJSONStorage(() => localStorage),
     }
   )

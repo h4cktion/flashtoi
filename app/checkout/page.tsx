@@ -18,6 +18,7 @@ export default function CheckoutPage() {
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | null>(
     null
   );
+  const [email, setEmail] = useState("");
   const [notes, setNotes] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -48,6 +49,11 @@ export default function CheckoutPage() {
   }
 
   const handleSubmitOrder = async () => {
+    if (!email.trim() || !email.includes("@")) {
+      setError("Veuillez entrer une adresse email valide");
+      return;
+    }
+
     if (!paymentMethod || paymentMethod === null) {
       setError("Veuillez sélectionner un mode de paiement");
       return;
@@ -70,6 +76,7 @@ export default function CheckoutPage() {
       // Préparer les données de la commande
       const orderData = {
         studentId: session.user.studentId,
+        email: email.trim(),
         items: items.map((item) => ({
           photoUrl: item.photoUrl,
           format: item.format,
@@ -144,6 +151,22 @@ export default function CheckoutPage() {
           <p className="text-gray-600">
             Vérifiez votre commande et choisissez votre mode de paiement
           </p>
+        </div>
+
+        {/* Email */}
+        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+          <h2 className="text-xl font-semibold mb-4">Email</h2>
+          <p className="text-sm text-gray-600 mb-3">
+            Votre adresse email pour recevoir la confirmation de commande
+          </p>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="votre@email.com"
+            required
+            className="w-full border rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+          />
         </div>
 
         {/* Récapitulatif de la commande */}

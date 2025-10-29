@@ -24,6 +24,12 @@ const OrderSchema = new Schema<IOrder>(
       required: [true, "School ID is required"],
       index: true,
     },
+    email: {
+      type: String,
+      required: [true, "Email is required"],
+      trim: true,
+      lowercase: true,
+    },
     items: [
       {
         photoUrl: {

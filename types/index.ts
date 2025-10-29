@@ -104,6 +104,7 @@ export interface IOrder {
   orderNumber: string;
   studentIds: (Types.ObjectId | string)[];
   schoolId: Types.ObjectId | string;
+  email: string;
   items: OrderItem[];
   packs?: OrderPackItem[];
   totalAmount: number;

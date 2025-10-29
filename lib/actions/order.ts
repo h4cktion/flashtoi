@@ -7,6 +7,7 @@ import { ActionResponse, OrderItem, OrderPackItem, PaymentMethod } from '@/types
 
 interface CreateOrderData {
   studentId: string
+  email: string
   items: OrderItem[]
   packs?: OrderPackItem[]
   totalAmount: number
@@ -80,6 +81,7 @@ export async function createOrder(
       orderNumber,
       studentIds: [data.studentId],
       schoolId: student.schoolId,
+      email: data.email,
       items: itemsWithSubtotal,
       packs: packsWithSubtotal || [],
       totalAmount: data.totalAmount,

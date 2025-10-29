@@ -1,23 +1,29 @@
-'use client'
+"use client";
 
-import { useStudentsStore } from '@/lib/stores/students-store'
+import { useStudentsStore } from "@/lib/stores/students-store";
 
 export function StudentTabs() {
-  const students = useStudentsStore((state) => state.students)
-  const activeStudentIndex = useStudentsStore((state) => state.activeStudentIndex)
-  const setActiveStudent = useStudentsStore((state) => state.setActiveStudent)
-  const removeStudent = useStudentsStore((state) => state.removeStudent)
+  const students = useStudentsStore((state) => state.students);
+  const activeStudentIndex = useStudentsStore(
+    (state) => state.activeStudentIndex
+  );
+  const setActiveStudent = useStudentsStore((state) => state.setActiveStudent);
+  const removeStudent = useStudentsStore((state) => state.removeStudent);
 
   if (students.length === 0) {
-    return null
+    return null;
   }
 
-  const handleRemoveStudent = (studentId: string, index: number, e: React.MouseEvent) => {
-    e.stopPropagation()
-    if (confirm('Voulez-vous vraiment retirer cet élève de la session ?')) {
-      removeStudent(studentId)
+  const handleRemoveStudent = (
+    studentId: string,
+    index: number,
+    e: React.MouseEvent
+  ) => {
+    e.stopPropagation();
+    if (confirm("Voulez-vous vraiment retirer cet élève de la session ?")) {
+      removeStudent(studentId);
     }
-  }
+  };
 
   return (
     <div className="bg-white rounded-lg shadow-sm p-4 mb-4">
@@ -32,24 +38,22 @@ export function StudentTabs() {
             onClick={() => setActiveStudent(index)}
             className={`relative group px-4 py-2 rounded-lg font-medium transition-all ${
               index === activeStudentIndex
-                ? 'bg-[#192F84] text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                ? "bg-[#192F84] text-white"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
             }`}
           >
-            <span className="pr-6">
-              {student.firstName} {student.lastName}
-            </span>
+            <span className="pr-6">{student.login}</span>
 
             {/* Bouton X pour retirer l'élève */}
             <span
               onClick={(e) => handleRemoveStudent(student.id, index, e)}
               className={`absolute right-1 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full flex items-center justify-center transition-colors cursor-pointer ${
                 index === activeStudentIndex
-                  ? 'hover:bg-white/20 text-white'
-                  : 'hover:bg-red-100 text-gray-500 hover:text-red-600'
+                  ? "hover:bg-white/20 text-white"
+                  : "hover:bg-red-100 text-gray-500 hover:text-red-600"
               }`}
               role="button"
-              aria-label={`Retirer ${student.firstName} ${student.lastName}`}
+              aria-label={`Retirer ${student.login}`}
             >
               <svg
                 className="w-3 h-3"
@@ -73,5 +77,5 @@ export function StudentTabs() {
         Classe: {students[activeStudentIndex]?.classId}
       </p>
     </div>
-  )
+  );
 }
