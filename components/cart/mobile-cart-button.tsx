@@ -13,7 +13,10 @@ export function MobileCartButton() {
 
   return (
     <button
-      onClick={() => router.push("/checkout")}
+      onClick={() => {
+        console.log("🛒 [MobileCartButton] Clic - Navigation vers /checkout");
+        router.push("/checkout");
+      }}
       className="fixed top-4 right-4 z-50 bg-[#192F84] hover:bg-[#1a3699] text-white rounded-full p-3 shadow-lg transition-colors md:hidden flex items-center justify-center"
       aria-label="Voir le panier"
     >

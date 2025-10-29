@@ -215,7 +215,10 @@ export function CartSummary() {
       </div>
 
       <button
-        onClick={() => router.push('/checkout')}
+        onClick={() => {
+          console.log("🛒 [CartSummary] Clic sur Passer commande - Navigation vers /checkout");
+          router.push('/checkout');
+        }}
         className="w-full bg-[#192F84] hover:bg-[#1a3699] text-white font-medium py-2 px-4 rounded transition-colors"
       >
         Passer commande

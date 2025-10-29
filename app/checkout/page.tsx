@@ -22,17 +22,34 @@ export default function CheckoutPage() {
   const [notes, setNotes] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [isMounted, setIsMounted] = useState(false);
 
-  // Vérifier l'authentification
+  // Récupérer le studentId depuis les items du panier (tous les items ont le même studentId)
+  const studentId = items.length > 0 ? items[0].studentId : packs.length > 0 ? packs[0].studentId : null;
+
+  // Marquer le composant comme monté pour éviter les problèmes d'hydratation
   useEffect(() => {
-    if (status === "loading") return;
+    console.log("🔵 [Checkout] Composant monté");
+    setIsMounted(true);
+  }, []);
 
-    if (status === "unauthenticated" || !session?.user?.studentId) {
-      router.push("/");
-    }
-  }, [status, session, router]);
+  // Logs pour débugger
+  useEffect(() => {
+    console.log("🔍 [Checkout] État actuel:", {
+      status,
+      hasSession: !!session,
+      sessionStudentId: session?.user?.studentId,
+      cartStudentId: studentId,
+      role: session?.user?.role,
+      itemsCount: items.length,
+      packsCount: packs.length,
+      isMounted,
+    });
+  }, [status, session, items, packs, isMounted, studentId]);
 
-  if (status === "loading") {
+  // Afficher un loader pendant l'hydratation du store SEULEMENT
+  if (!isMounted) {
+    console.log("🔄 [Checkout] Affichage loader (store non hydraté)");
     return (
       <div className="min-h-screen bg-gray-50 py-8">
         <div className="max-w-3xl mx-auto px-4">
@@ -44,11 +61,11 @@ export default function CheckoutPage() {
     );
   }
 
-  if (!session?.user?.studentId) {
-    return null;
-  }
+  console.log("✅ [Checkout] Tout est OK - Affichage du checkout");
 
   const handleSubmitOrder = async () => {
+    console.log("📝 [Checkout] Début handleSubmitOrder");
+
     if (!email.trim() || !email.includes("@")) {
       setError("Veuillez entrer une adresse email valide");
       return;
@@ -68,14 +85,22 @@ export default function CheckoutPage() {
     setError("");
 
     try {
-      if (!session?.user?.studentId) {
-        setError("Session expirée, veuillez vous reconnecter");
+      console.log("🔍 [Checkout] Vérification studentId dans handleSubmitOrder:", {
+        hasSession: !!session,
+        hasUser: !!session?.user,
+        sessionStudentId: session?.user?.studentId,
+        cartStudentId: studentId,
+      });
+
+      if (!studentId) {
+        console.error("❌ [Checkout] Pas de studentId disponible");
+        setError("Erreur: impossible de récupérer l'identifiant de l'élève");
         return;
       }
 
       // Préparer les données de la commande
       const orderData = {
-        studentId: session.user.studentId,
+        studentId: studentId,
         email: email.trim(),
         items: items.map((item) => ({
           photoUrl: item.photoUrl,
@@ -119,6 +144,7 @@ export default function CheckoutPage() {
   };
 
   if (items.length === 0 && packs.length === 0) {
+    console.log("🛒 [Checkout] Panier vide - Affichage message");
     return (
       <div className="min-h-screen bg-gray-50 py-8">
         <div className="max-w-3xl mx-auto px-4">
@@ -130,7 +156,10 @@ export default function CheckoutPage() {
               Ajoutez des photos à votre panier pour passer commande
             </p>
             <button
-              onClick={() => router.back()}
+              onClick={() => {
+                console.log("🔙 [Checkout] Clic sur Retour");
+                router.back();
+              }}
               className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded transition-colors"
             >
               Retour à la galerie
@@ -140,6 +169,8 @@ export default function CheckoutPage() {
       </div>
     );
   }
+
+  console.log("🎉 [Checkout] Rendu final du formulaire checkout");
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">

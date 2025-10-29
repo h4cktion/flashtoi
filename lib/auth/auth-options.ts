@@ -243,4 +243,5 @@ export const authOptions: NextAuthConfig = {
   },
 
   secret: process.env.NEXTAUTH_SECRET,
+  trustHost: true,
 }

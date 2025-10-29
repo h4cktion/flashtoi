@@ -7,6 +7,18 @@ export default auth((req) => {
   const isLoggedIn = !!auth?.user;
   const userRole = auth?.user?.role;
 
+  // Logs de debug pour /checkout
+  if (nextUrl.pathname.startsWith("/checkout")) {
+    console.log("🔍 [Middleware] Route /checkout:", {
+      pathname: nextUrl.pathname,
+      isLoggedIn,
+      userRole,
+      hasAuth: !!auth,
+      hasUser: !!auth?.user,
+      studentId: auth?.user?.studentId,
+    });
+  }
+
   // Define route patterns
   const isPublicRoute =
     nextUrl.pathname === "/login" ||
@@ -30,6 +42,9 @@ export default auth((req) => {
 
   // Redirect to login if trying to access protected routes while not logged in
   if (!isLoggedIn && (isParentRoute || isSchoolRoute || isAdminRoute)) {
+    if (nextUrl.pathname.startsWith("/checkout")) {
+      console.log("❌ [Middleware] /checkout - Non authentifié, redirection vers /login");
+    }
     if (isSchoolRoute) {
       return NextResponse.redirect(new URL("/school/login", nextUrl));
     }
