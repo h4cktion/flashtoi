@@ -122,6 +122,8 @@ export default async function PackDetailPage({ params }: PackDetailPageProps) {
                 photos: pack.photos,
                 studentId: id,
                 studentName: `${student.firstName} ${student.lastName}`,
+                student_id: student.student_id || "",
+                classId: student.classId,
               }}
             />
           </div>

@@ -97,6 +97,8 @@ export default async function PhotoDetailPage({ params }: PhotoDetailPageProps) 
               photo={photo}
               studentId={id}
               studentName={`${student.firstName} ${student.lastName}`}
+              student_id={student.student_id || ""}
+              classId={student.classId}
             />
           </div>
         </div>

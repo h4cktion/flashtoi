@@ -211,6 +211,8 @@ export default function GalleryPage() {
               packs={packs}
               studentId={currentStudent._id.toString()}
               studentName={`${currentStudent.firstName} ${currentStudent.lastName}`}
+              student_id={currentStudent.student_id || ""}
+              classId={currentStudent.classId}
             />
 
             {/* Galerie de photos */}
@@ -228,6 +230,8 @@ export default function GalleryPage() {
                       index={index}
                       studentId={currentStudent._id.toString()}
                       studentName={`${currentStudent.firstName} ${currentStudent.lastName}`}
+                      student_id={currentStudent.student_id || ""}
+                      classId={currentStudent.classId}
                     />
                   ))}
                 </div>

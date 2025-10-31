@@ -30,6 +30,7 @@ export interface Sibling {
 
 export interface IStudent {
   _id: Types.ObjectId | string;
+  student_id?: string;
   firstName: string;
   lastName: string;
   qrCode: string;
@@ -92,6 +93,8 @@ export interface OrderItem {
   quantity: number;
   unitPrice: number;
   subtotal: number;
+  student_id: string;
+  classId: string;
 }
 
 export interface OrderPackItem {
@@ -101,6 +104,8 @@ export interface OrderPackItem {
   quantity: number;
   subtotal: number;
   photosCount: number;
+  student_id: string;
+  classId: string;
 }
 
 export interface IOrder {
@@ -174,6 +179,8 @@ export interface CartItem {
   unitPrice: number;
   studentId: string;
   studentName: string;
+  student_id: string;
+  classId: string;
 }
 
 export interface PackCartItem {
@@ -184,6 +191,8 @@ export interface PackCartItem {
   quantity: number;
   studentId: string;
   studentName: string;
+  student_id: string;
+  classId: string;
 }
 
 export interface Cart {

@@ -11,6 +11,8 @@ interface PhotoModalProps {
   onClose: () => void;
   studentId: string;
   studentName: string;
+  student_id: string;
+  classId: string;
 }
 
 export function PhotoModal({
@@ -19,6 +21,8 @@ export function PhotoModal({
   onClose,
   studentId,
   studentName,
+  student_id,
+  classId,
 }: PhotoModalProps) {
   const addToCart = useCartStore((state) => state.addToCart);
   const [isAdding, setIsAdding] = useState(false);
@@ -46,6 +50,8 @@ export function PhotoModal({
       unitPrice: photo.price,
       studentId,
       studentName,
+      student_id,
+      classId,
     });
     setTimeout(() => {
       setIsAdding(false);

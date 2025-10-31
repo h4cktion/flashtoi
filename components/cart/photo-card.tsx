@@ -12,6 +12,8 @@ interface PhotoCardProps {
   index: number;
   studentId: string;
   studentName: string;
+  student_id: string;
+  classId: string;
 }
 
 export function PhotoCard({
@@ -19,6 +21,8 @@ export function PhotoCard({
   index,
   studentId,
   studentName,
+  student_id,
+  classId,
 }: PhotoCardProps) {
   const router = useRouter();
   const params = useParams();
@@ -36,6 +40,8 @@ export function PhotoCard({
       unitPrice: photo.price,
       studentId,
       studentName,
+      student_id,
+      classId,
     });
 
     // Feedback visuel
@@ -108,6 +114,8 @@ export function PhotoCard({
         onClose={() => setIsModalOpen(false)}
         studentId={studentId}
         studentName={studentName}
+        student_id={student_id}
+        classId={classId}
       />
     </>
   );

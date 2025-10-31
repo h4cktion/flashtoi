@@ -8,9 +8,11 @@ interface AddPhotoToCartButtonProps {
   photo: Photo
   studentId: string
   studentName: string
+  student_id: string
+  classId: string
 }
 
-export function AddPhotoToCartButton({ photo, studentId, studentName }: AddPhotoToCartButtonProps) {
+export function AddPhotoToCartButton({ photo, studentId, studentName, student_id, classId }: AddPhotoToCartButtonProps) {
   const addToCart = useCartStore((state) => state.addToCart)
   const [isAdding, setIsAdding] = useState(false)
 
@@ -22,6 +24,8 @@ export function AddPhotoToCartButton({ photo, studentId, studentName }: AddPhoto
       unitPrice: photo.price,
       studentId,
       studentName,
+      student_id,
+      classId,
     })
     setTimeout(() => setIsAdding(false), 1000)
   }

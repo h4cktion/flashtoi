@@ -56,6 +56,14 @@ const OrderSchema = new Schema<IOrder>(
           required: true,
           min: 0,
         },
+        student_id: {
+          type: String,
+          required: false,
+        },
+        classId: {
+          type: String,
+          required: false,
+        },
       },
     ],
     packs: [
@@ -88,6 +96,14 @@ const OrderSchema = new Schema<IOrder>(
           type: Number,
           required: true,
           min: 1,
+        },
+        student_id: {
+          type: String,
+          required: false,
+        },
+        classId: {
+          type: String,
+          required: false,
         },
       },
     ],

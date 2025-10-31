@@ -108,6 +108,8 @@ export default function CheckoutPage() {
           quantity: item.quantity,
           unitPrice: item.unitPrice,
           subtotal: item.unitPrice * item.quantity,
+          student_id: item.student_id,
+          classId: item.classId,
         })),
         packs: packs.map((pack) => ({
           packId: pack.packId,
@@ -116,6 +118,8 @@ export default function CheckoutPage() {
           quantity: pack.quantity,
           subtotal: pack.packPrice * pack.quantity,
           photosCount: pack.photos.length,
+          student_id: pack.student_id,
+          classId: pack.classId,
         })),
         totalAmount,
         paymentMethod: paymentMethod as PaymentMethod,

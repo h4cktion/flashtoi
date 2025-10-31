@@ -4,6 +4,11 @@ import { PLANCHE_NAMES, PHOTO_FORMATS } from "@/constants/constants";
 
 const StudentSchema = new Schema<IStudent>(
   {
+    student_id: {
+      type: String,
+      required: false,
+      trim: true,
+    },
     firstName: {
       type: String,
       required: [true, "First name is required"],

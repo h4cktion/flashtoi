@@ -5,9 +5,11 @@ interface PacksSectionProps {
   packs: Pack[]
   studentId?: string
   studentName?: string
+  student_id?: string
+  classId?: string
 }
 
-export function PacksSection({ packs, studentId, studentName }: PacksSectionProps) {
+export function PacksSection({ packs, studentId, studentName, student_id, classId }: PacksSectionProps) {
   if (packs.length === 0) {
     return null
   }
