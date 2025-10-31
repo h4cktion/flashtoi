@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import Image from "next/image";
 import { getStudentById } from "@/lib/actions/student";
 import { getAvailablePacksForStudent } from "@/lib/actions/pack";
 import { IStudent, Pack } from "@/types";
@@ -172,10 +173,30 @@ export default function GalleryPage() {
 
         {/* En-tête */}
         <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">
-            Photos de {currentStudent.firstName} {currentStudent.lastName}
-          </h1>
-          <p className="text-gray-600 mt-2">Classe: {currentStudent.classId}</p>
+          <div className="flex items-center gap-6">
+            {/* Miniature de l'élève */}
+            {currentStudent.thumbnail?.cloudFrontUrl && (
+              <div className="relative w-24 h-32 flex-shrink-0">
+                <Image
+                  src={currentStudent.thumbnail.cloudFrontUrl}
+                  alt={`${currentStudent.firstName} ${currentStudent.lastName}`}
+                  fill
+                  className="object-cover rounded-lg shadow-md"
+                  sizes="96px"
+                />
+              </div>
+            )}
+
+            {/* Informations de l'élève */}
+            <div className="flex-1">
+              <h1 className="text-3xl font-bold text-gray-900">
+                {currentStudent.firstName} {currentStudent.lastName}
+              </h1>
+              <p className="text-gray-600 mt-2">
+                Classe: {currentStudent.classId}
+              </p>
+            </div>
+          </div>
         </div>
 
         {loading ? (

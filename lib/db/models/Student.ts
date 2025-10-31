@@ -71,6 +71,16 @@ const StudentSchema = new Schema<IStudent>(
         },
       },
     ],
+    thumbnail: {
+      s3Key: {
+        type: String,
+        required: false,
+      },
+      cloudFrontUrl: {
+        type: String,
+        required: false,
+      },
+    },
     siblings: [
       {
         studentId: {

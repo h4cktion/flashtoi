@@ -38,6 +38,10 @@ export interface IStudent {
   schoolId: Types.ObjectId | string;
   classId: string;
   photos: Photo[];
+  thumbnail?: {
+    s3Key: string;
+    cloudFrontUrl: string;
+  };
   siblings: Sibling[];
   createdAt: Date;
   updatedAt: Date;

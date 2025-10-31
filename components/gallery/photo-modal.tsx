@@ -1,53 +1,59 @@
-'use client'
+"use client";
 
-import Image from 'next/image'
-import { Photo } from '@/types'
-import { useCartStore } from '@/lib/stores/cart-store'
-import { useState, useEffect } from 'react'
+import Image from "next/image";
+import { Photo } from "@/types";
+import { useCartStore } from "@/lib/stores/cart-store";
+import { useState, useEffect } from "react";
 
 interface PhotoModalProps {
-  photo: Photo
-  isOpen: boolean
-  onClose: () => void
-  studentId: string
-  studentName: string
+  photo: Photo;
+  isOpen: boolean;
+  onClose: () => void;
+  studentId: string;
+  studentName: string;
 }
 
-export function PhotoModal({ photo, isOpen, onClose, studentId, studentName }: PhotoModalProps) {
-  const addToCart = useCartStore((state) => state.addToCart)
-  const [isAdding, setIsAdding] = useState(false)
+export function PhotoModal({
+  photo,
+  isOpen,
+  onClose,
+  studentId,
+  studentName,
+}: PhotoModalProps) {
+  const addToCart = useCartStore((state) => state.addToCart);
+  const [isAdding, setIsAdding] = useState(false);
 
   // Fermer avec Escape
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
-    }
+      if (e.key === "Escape") onClose();
+    };
     if (isOpen) {
-      document.addEventListener('keydown', handleEscape)
-      document.body.style.overflow = 'hidden'
+      document.addEventListener("keydown", handleEscape);
+      document.body.style.overflow = "hidden";
     }
     return () => {
-      document.removeEventListener('keydown', handleEscape)
-      document.body.style.overflow = 'unset'
-    }
-  }, [isOpen, onClose])
+      document.removeEventListener("keydown", handleEscape);
+      document.body.style.overflow = "unset";
+    };
+  }, [isOpen, onClose]);
 
   const handleAddToCart = () => {
-    setIsAdding(true)
+    setIsAdding(true);
     addToCart({
       photoUrl: photo.cloudFrontUrl,
       format: photo.planche,
       unitPrice: photo.price,
       studentId,
       studentName,
-    })
+    });
     setTimeout(() => {
-      setIsAdding(false)
-      onClose()
-    }, 1000)
-  }
+      setIsAdding(false);
+      onClose();
+    }, 1000);
+  };
 
-  if (!isOpen) return null
+  if (!isOpen) return null;
 
   return (
     <div
@@ -60,9 +66,7 @@ export function PhotoModal({ photo, isOpen, onClose, studentId, studentName }: P
       >
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b">
-          <h2 className="text-xl font-bold text-gray-900">
-            {photo.planche}
-          </h2>
+          <h2 className="text-xl font-bold text-gray-900">{photo.planche}</h2>
           <button
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700 transition-colors"
@@ -90,7 +94,7 @@ export function PhotoModal({ photo, isOpen, onClose, studentId, studentName }: P
               src={photo.cloudFrontUrl}
               alt={`Photo ${photo.planche}`}
               fill
-              className="object-cover"
+              className="object-contain"
               sizes="(max-width: 768px) 100vw, 800px"
               priority
             />
@@ -112,16 +116,14 @@ export function PhotoModal({ photo, isOpen, onClose, studentId, studentName }: P
               onClick={handleAddToCart}
               disabled={isAdding}
               className={`px-8 py-3 rounded-lg font-semibold transition-colors text-white ${
-                isAdding
-                  ? 'bg-green-500'
-                  : 'bg-[#192F84] hover:bg-[#1a3699]'
+                isAdding ? "bg-green-500" : "bg-[#192F84] hover:bg-[#1a3699]"
               }`}
             >
-              {isAdding ? '✓ Ajouté' : 'Ajouter au panier'}
+              {isAdding ? "✓ Ajouté" : "Ajouter au panier"}
             </button>
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 }
