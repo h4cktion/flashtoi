@@ -17,10 +17,8 @@ const nextConfig = {
       },
     ],
   },
-  experimental: {
-    // Externaliser sharp pour Vercel
-    serverComponentsExternalPackages: ["sharp"],
-  },
+  // Externaliser sharp pour Vercel (syntaxe Next.js 15)
+  serverExternalPackages: ["sharp"],
 };
 
 module.exports = nextConfig;
