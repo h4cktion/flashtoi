@@ -7,6 +7,7 @@
     "build": "next build --turbopack",
     "start": "next start",
     "lint": "eslint",
+    "postinstall": "node scripts/check-sharp.js",
     "seed": "node scripts/seed.js",
     "seed:clean": "node scripts/seed.js --clean",
     "hash": "node scripts/generate-hash.js",

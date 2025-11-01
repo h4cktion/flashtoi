@@ -17,6 +17,10 @@ const nextConfig = {
       },
     ],
   },
+  experimental: {
+    // Externaliser sharp pour Vercel
+    serverComponentsExternalPackages: ["sharp"],
+  },
 };
 
 module.exports = nextConfig;
