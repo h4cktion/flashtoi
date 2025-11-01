@@ -2,6 +2,9 @@ import { auth } from "@/lib/auth/auth";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
+// Utiliser Node.js runtime au lieu de Edge Runtime pour supporter Mongoose
+export const runtime = 'nodejs';
+
 export default auth((req) => {
   const { nextUrl, auth } = req;
   const isLoggedIn = !!auth?.user;

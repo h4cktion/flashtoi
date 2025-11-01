@@ -17,8 +17,11 @@ const nextConfig = {
       },
     ],
   },
-  // Externaliser sharp pour Vercel (syntaxe Next.js 15)
-  serverExternalPackages: ["sharp"],
+  // Configuration webpack pour Sharp sur Vercel
+  webpack: (config: any) => {
+    config.externals = [...config.externals, { sharp: 'commonjs sharp' }];
+    return config;
+  },
 };
 
 module.exports = nextConfig;

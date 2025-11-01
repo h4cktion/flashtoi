@@ -4,10 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build --turbopack",
+    "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "postinstall": "node scripts/check-sharp.js",
+    "check:sharp": "node scripts/check-sharp.js",
     "seed": "node scripts/seed.js",
     "seed:clean": "node scripts/seed.js --clean",
     "hash": "node scripts/generate-hash.js",
