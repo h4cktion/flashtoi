@@ -1,11 +1,5 @@
 import mongoose from 'mongoose'
 
-if (!process.env.MONGODB_URI) {
-  throw new Error('Please define the MONGODB_URI environment variable inside .env.local')
-}
-
-const MONGODB_URI: string = process.env.MONGODB_URI
-
 interface MongooseCache {
   conn: typeof mongoose | null
   promise: Promise<typeof mongoose> | null
@@ -28,6 +22,13 @@ if (!globalThis.mongoose) {
  * in serverless environments (Next.js)
  */
 export async function connectDB(): Promise<typeof mongoose> {
+  // Vérifier la variable d'environnement au moment de la connexion
+  if (!process.env.MONGODB_URI) {
+    throw new Error('Please define the MONGODB_URI environment variable inside .env or .env.local')
+  }
+
+  const MONGODB_URI: string = process.env.MONGODB_URI
+
   // Return existing connection if available
   if (cached.conn) {
     return cached.conn

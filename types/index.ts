@@ -203,6 +203,46 @@ export interface Cart {
 }
 
 // ============================================
+// TEMPLATE TYPES (for dynamic planche generation)
+// ============================================
+export interface ITemplatePhoto {
+  x: number;
+  y: number;
+  width: number;
+  rotation: number;
+  cropTop: number;
+  cropBottom: number;
+  effect?: string;
+  mug?: {
+    radius: number;
+    thickness: number;
+    color: string;
+  };
+  feather?: {
+    intensity: number;
+    irregularity: number;
+  };
+}
+
+export interface ITemplate {
+  _id: Types.ObjectId | string;
+  planche: string;
+  format: string;
+  background: string;
+  backgroundS3Url?: string;
+  price: number;
+  order: number;
+  rotationWeb?: boolean;
+  photos: ITemplatePhoto[];
+  photoWeb?: {
+    planche: string;
+    photos: ITemplatePhoto[];
+  };
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// ============================================
 // ORDER FILTERS (for school dashboard)
 // ============================================
 export interface OrderFilters {
