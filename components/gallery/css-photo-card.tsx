@@ -1,0 +1,129 @@
+"use client";
+
+import { ITemplate, PhotoPlanche } from "@/types";
+import { useCartStore } from "@/lib/stores/cart-store";
+import { useState } from "react";
+import { CssPlanchePreview } from "./css-planche-preview";
+
+interface CssPhotoCardProps {
+  template: ITemplate;
+  studentId: string;
+  studentName: string;
+  student_id: string;
+  classId: string;
+  thumbnailUrl: string;
+}
+
+export function CssPhotoCard({
+  template,
+  studentId,
+  studentName,
+  student_id,
+  classId,
+  thumbnailUrl,
+}: CssPhotoCardProps) {
+  const addToCart = useCartStore((state) => state.addToCart);
+  const [isAdding, setIsAdding] = useState(false);
+  const [showFullPreview, setShowFullPreview] = useState(false);
+
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.stopPropagation();
+
+    setIsAdding(true);
+
+    // Pour l'instant, on utilise une URL factice car on génère en CSS
+    // TODO: Implémenter la capture d'écran ou utiliser l'API Sharp pour les commandes
+    const photoUrl = `/api/generate-planche?studentId=${studentId}&planche=${template.planche}`;
+
+    addToCart({
+      photoUrl,
+      format: template.planche as PhotoPlanche,
+      unitPrice: template.price,
+      studentId,
+      studentName,
+      student_id,
+      classId,
+    });
+
+    // Feedback visuel
+    setTimeout(() => {
+      setIsAdding(false);
+    }, 1000);
+  };
+
+  const handlePhotoClick = () => {
+    setShowFullPreview(true);
+  };
+
+  return (
+    <>
+      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow flex items-center gap-4 p-3">
+        {/* Miniature de la planche à gauche */}
+        <div
+          className="relative w-24 h-24 bg-gray-100 rounded overflow-hidden flex-shrink-0 cursor-pointer"
+          onClick={handlePhotoClick}
+        >
+          <CssPlanchePreview
+            template={template}
+            thumbnailUrl={thumbnailUrl}
+            showWatermark={true}
+            className="w-full h-full"
+          />
+        </div>
+
+        {/* Infos photo au centre */}
+        <div className="flex-1">
+          <p className="text-base font-semibold text-gray-900 mb-1">
+            {template.planche}
+          </p>
+          <p className="text-sm text-gray-600 mb-1">Format: {template.format}</p>
+          <p className="text-xl font-bold text-gray-900">
+            {template.price.toFixed(2)} €
+          </p>
+          <p className="text-xs text-green-600 mt-1">
+            ⚡ Rendu CSS instantané
+          </p>
+        </div>
+
+        {/* Bouton AJOUTER AU PANIER à droite */}
+        <button
+          onClick={handleAddToCart}
+          disabled={isAdding}
+          className={`px-3 sm:px-5 py-1.5 sm:py-2 rounded-lg font-medium transition-all duration-300 transform hover:-translate-y-0.5 flex-shrink-0 text-white text-xs sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed ${
+            isAdding
+              ? "bg-gradient-to-r from-green-500 to-emerald-600 shadow-md"
+              : "bg-gradient-to-r from-blue-600 to-indigo-700 hover:shadow-lg"
+          }`}
+        >
+          <span className="hidden sm:inline">
+            {isAdding ? "✓ Ajouté" : "AJOUTER"}
+          </span>
+          <span className="sm:hidden">{isAdding ? "✓" : "AJOUTER"}</span>
+        </button>
+      </div>
+
+      {/* Modal plein écran pour voir la planche en grand */}
+      {showFullPreview && (
+        <div
+          className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4"
+          onClick={() => setShowFullPreview(false)}
+        >
+          <div className="relative max-w-4xl w-full aspect-[4/3]">
+            <CssPlanchePreview
+              template={template}
+              thumbnailUrl={thumbnailUrl}
+              showWatermark={true}
+              className="w-full h-full bg-white rounded-lg"
+            />
+            <button
+              onClick={() => setShowFullPreview(false)}
+              className="absolute top-4 right-4 bg-white text-gray-800 rounded-full w-10 h-10 flex items-center justify-center hover:bg-gray-100 transition-colors"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
