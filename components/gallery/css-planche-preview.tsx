@@ -3,6 +3,7 @@
  * Place les photos de l'élève sur le background selon template.photos
  */
 
+import React from "react";
 import Image from "next/image";
 import { ITemplate } from "@/types";
 import { CssWatermark } from "./css-watermark";
@@ -20,6 +21,16 @@ export function CssPlanchePreview({
   showWatermark = true,
   className = "",
 }: CssPlanchePreviewProps) {
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  const [bgDimensions, setBgDimensions] = React.useState<{
+    width: number;
+    height: number;
+  } | null>(null);
+  const [containerDimensions, setContainerDimensions] = React.useState<{
+    width: number;
+    height: number;
+  } | null>(null);
+
   // Déterminer si on utilise la version web ou normale
   const useWebVersion = !!template.photoWeb;
 
@@ -41,6 +52,23 @@ export function CssPlanchePreview({
       ? template.photoWeb.photos
       : template.photos;
 
+  // Observer les dimensions du container
+  React.useEffect(() => {
+    if (!containerRef.current) return;
+
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        setContainerDimensions({
+          width: entry.contentRect.width,
+          height: entry.contentRect.height,
+        });
+      }
+    });
+
+    observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, []);
+
   if (!backgroundUrl) {
     return (
       <div
@@ -51,20 +79,60 @@ export function CssPlanchePreview({
     );
   }
 
+  // Calculer les dimensions exactes du background visible (object-contain)
+  let wrapperStyle: React.CSSProperties = {};
+  if (bgDimensions && containerDimensions) {
+    const bgRatio = bgDimensions.width / bgDimensions.height;
+    const containerRatio = containerDimensions.width / containerDimensions.height;
+
+    if (bgRatio > containerRatio) {
+      // Background plus large que le container → prend toute la largeur
+      wrapperStyle = {
+        width: "100%",
+        height: `${(containerDimensions.width / bgRatio)}px`,
+      };
+    } else {
+      // Background plus haut que le container → prend toute la hauteur
+      wrapperStyle = {
+        width: `${(containerDimensions.height * bgRatio)}px`,
+        height: "100%",
+      };
+    }
+  }
+
   return (
-    <div className={`relative overflow-hidden ${className}`}>
+    <div ref={containerRef} className={`relative bg-gray-100 ${className}`}>
       {/* Background de la planche */}
-      <div
-        className="absolute inset-0 bg-cover bg-center"
-        style={{
-          backgroundImage: `url(${backgroundUrl})`,
+      <Image
+        src={backgroundUrl}
+        alt="Background"
+        fill
+        className="object-contain"
+        sizes="(max-width: 768px) 100vw, 600px"
+        priority
+        onLoadingComplete={(img) => {
+          setBgDimensions({
+            width: img.naturalWidth,
+            height: img.naturalHeight,
+          });
         }}
       />
 
-      {/* Toutes les photos de l'élève */}
-      {photosToRender.map((photo, index) => {
+      {/* Wrapper qui a exactement la taille et position du background visible */}
+      {bgDimensions && containerDimensions && (
+        <div
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+          style={wrapperStyle}
+        >
+          <div className="relative w-full h-full">
+        {/* Toutes les photos de l'élève */}
+        {photosToRender.map((photo, index) => {
         // Calculer la hauteur selon le ratio portrait (1:1.33)
-        const heightPercent = photo.width * 1.33;
+        // IMPORTANT: Ajuster pour tenir compte des crops
+        // Le container doit être plus grand car clipPath va retirer des portions
+        const desiredHeight = photo.width * 1.33;
+        const cropFactor = 1 - (photo.cropTop / 100) - (photo.cropBottom / 100);
+        const heightPercent = desiredHeight / cropFactor;
 
         return (
           <div
@@ -102,10 +170,13 @@ export function CssPlanchePreview({
             </div>
           </div>
         );
-      })}
+        })}
 
-      {/* Watermark diagonal */}
-      {showWatermark && <CssWatermark />}
+        {/* Watermark diagonal */}
+        {showWatermark && <CssWatermark />}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
