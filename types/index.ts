@@ -222,6 +222,14 @@ export interface ITemplatePhoto {
     intensity: number;
     irregularity: number;
   };
+  css?: {
+    x?: number;
+    y?: number;
+    width?: number;
+    height?: number;
+    cropTop?: number;
+    cropBottom?: number;
+  };
 }
 
 export interface ITemplate {

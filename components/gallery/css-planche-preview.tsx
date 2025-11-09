@@ -127,21 +127,33 @@ export function CssPlanchePreview({
           <div className="relative w-full h-full">
         {/* Toutes les photos de l'élève */}
         {photosToRender.map((photo, index) => {
-        // Calculer la hauteur selon le ratio portrait (1:1.33)
-        // IMPORTANT: Ajuster pour tenir compte des crops
-        // Le container doit être plus grand car clipPath va retirer des portions
-        const desiredHeight = photo.width * 1.33;
-        const cropFactor = 1 - (photo.cropTop / 100) - (photo.cropBottom / 100);
-        const heightPercent = desiredHeight / cropFactor;
+        // Utiliser les valeurs CSS si disponibles, sinon utiliser les valeurs par défaut
+        const posX = photo.css?.x ?? photo.x;
+        const posY = photo.css?.y ?? photo.y;
+        const photoWidth = photo.css?.width ?? photo.width;
+        const cropTop = photo.css?.cropTop ?? photo.cropTop;
+        const cropBottom = photo.css?.cropBottom ?? photo.cropBottom;
+
+        // Calculer la hauteur
+        let heightPercent: number;
+        if (photo.css?.height !== undefined) {
+          // Utiliser la hauteur CSS spécifiée
+          heightPercent = photo.css.height;
+        } else {
+          // Calculer selon le ratio portrait (1:1.33) ajusté pour les crops
+          const desiredHeight = photoWidth * 1.33;
+          const cropFactor = 1 - (cropTop / 100) - (cropBottom / 100);
+          heightPercent = desiredHeight / cropFactor;
+        }
 
         return (
           <div
             key={index}
             className="absolute overflow-hidden"
             style={{
-              left: `${photo.x}%`,
-              top: `${photo.y}%`,
-              width: `${photo.width}%`,
+              left: `${posX}%`,
+              top: `${posY}%`,
+              width: `${photoWidth}%`,
               height: `${heightPercent}%`,
               transform: `rotate(${photo.rotation}deg)`,
               transformOrigin: "center center",
@@ -152,8 +164,8 @@ export function CssPlanchePreview({
               style={{
                 // Appliquer le crop top et bottom
                 clipPath:
-                  photo.cropTop > 0 || photo.cropBottom > 0
-                    ? `inset(${photo.cropTop}% 0% ${photo.cropBottom}% 0%)`
+                  cropTop > 0 || cropBottom > 0
+                    ? `inset(${cropTop}% 0% ${cropBottom}% 0%)`
                     : undefined,
               }}
             >
