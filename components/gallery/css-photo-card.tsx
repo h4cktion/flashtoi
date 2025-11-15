@@ -3,7 +3,9 @@
 import { ITemplate, PhotoPlanche } from "@/types";
 import { useCartStore } from "@/lib/stores/cart-store";
 import { useState } from "react";
+import { useRouter, useParams } from "next/navigation";
 import { CssPlanchePreview } from "./css-planche-preview";
+import { CssPhotoModal } from "./css-photo-modal";
 
 interface CssPhotoCardProps {
   template: ITemplate;
@@ -22,9 +24,12 @@ export function CssPhotoCard({
   classId,
   thumbnailUrl,
 }: CssPhotoCardProps) {
+  const router = useRouter();
+  const params = useParams();
+  const urlStudentId = params.id as string;
   const addToCart = useCartStore((state) => state.addToCart);
   const [isAdding, setIsAdding] = useState(false);
-  const [showFullPreview, setShowFullPreview] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -52,7 +57,17 @@ export function CssPhotoCard({
   };
 
   const handlePhotoClick = () => {
-    setShowFullPreview(true);
+    // Détecter si desktop ou mobile
+    const isDesktop = window.innerWidth >= 768;
+
+    if (isDesktop) {
+      // Desktop: ouvrir modal
+      setIsModalOpen(true);
+    } else {
+      // Mobile: pour l'instant, ouvrir la modal aussi
+      // TODO: créer une page dédiée si nécessaire
+      setIsModalOpen(true);
+    }
   };
 
   return (
@@ -71,8 +86,8 @@ export function CssPhotoCard({
           />
         </div>
 
-        {/* Infos photo au centre */}
-        <div className="flex-1">
+        {/* Infos photo au centre - Cliquable */}
+        <div className="flex-1 cursor-pointer" onClick={handlePhotoClick}>
           <p className="text-base font-semibold text-gray-900 mb-1">
             {template.planche}
           </p>
@@ -102,28 +117,17 @@ export function CssPhotoCard({
         </button>
       </div>
 
-      {/* Modal plein écran pour voir la planche en grand */}
-      {showFullPreview && (
-        <div
-          className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4"
-          onClick={() => setShowFullPreview(false)}
-        >
-          <div className="relative max-w-4xl w-full aspect-[4/3]">
-            <CssPlanchePreview
-              template={template}
-              thumbnailUrl={thumbnailUrl}
-              showWatermark={true}
-              className="w-full h-full bg-white rounded-lg"
-            />
-            <button
-              onClick={() => setShowFullPreview(false)}
-              className="absolute top-4 right-4 bg-white text-gray-800 rounded-full w-10 h-10 flex items-center justify-center hover:bg-gray-100 transition-colors"
-            >
-              ✕
-            </button>
-          </div>
-        </div>
-      )}
+      {/* Modal photo pour desktop/mobile */}
+      <CssPhotoModal
+        template={template}
+        thumbnailUrl={thumbnailUrl}
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        studentId={studentId}
+        studentName={studentName}
+        student_id={student_id}
+        classId={classId}
+      />
     </>
   );
 }
