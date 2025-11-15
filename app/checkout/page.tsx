@@ -107,6 +107,7 @@ export default function CheckoutPage() {
         items: items.map((item) => ({
           photoUrl: item.photoUrl,
           format: item.format,
+          plancheName: item.plancheName,
           quantity: item.quantity,
           unitPrice: item.unitPrice,
           subtotal: item.unitPrice * item.quantity,

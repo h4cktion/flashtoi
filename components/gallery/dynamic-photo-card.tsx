@@ -38,6 +38,7 @@ export function DynamicPhotoCard({
     addToCart({
       photoUrl: plancheUrl,
       format: template.planche as PhotoPlanche, // Cast car MongoDB retourne string
+      plancheName: template.planche as PhotoPlanche,
       unitPrice: template.price,
       studentId,
       studentName,

@@ -47,6 +47,7 @@ export function PhotoModal({
     addToCart({
       photoUrl: photo.cloudFrontUrl,
       format: photo.planche,
+      plancheName: photo.planche,
       unitPrice: photo.price,
       studentId,
       studentName,

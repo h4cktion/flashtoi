@@ -41,6 +41,11 @@ const OrderSchema = new Schema<IOrder>(
           enum: PLANCHE_NAMES,
           required: true,
         },
+        plancheName: {
+          type: String,
+          enum: PLANCHE_NAMES,
+          required: true,
+        },
         quantity: {
           type: Number,
           required: true,

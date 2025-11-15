@@ -43,6 +43,7 @@ export function CssPhotoCard({
     addToCart({
       photoUrl,
       format: template.planche as PhotoPlanche,
+      plancheName: template.planche as PhotoPlanche,
       unitPrice: template.price,
       studentId,
       studentName,

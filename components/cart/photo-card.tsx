@@ -37,6 +37,7 @@ export function PhotoCard({
     addToCart({
       photoUrl: photo.cloudFrontUrl,
       format: photo.planche,
+      plancheName: photo.planche,
       unitPrice: photo.price,
       studentId,
       studentName,
