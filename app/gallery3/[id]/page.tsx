@@ -4,11 +4,13 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Image from "next/image";
 import { getStudentById } from "@/lib/actions/student";
+import { getAvailablePacksForStudent } from "@/lib/actions/pack";
 import { getTemplates } from "@/lib/actions/template";
-import { IStudent, ITemplate } from "@/types";
+import { IStudent, ITemplate, Pack } from "@/types";
 import { CssPhotoCard } from "@/components/gallery/css-photo-card";
 import { CartSummary } from "@/components/cart/cart-summary";
 import { MobileCartButton } from "@/components/cart/mobile-cart-button";
+import { PacksSection } from "@/components/cart/packs-section";
 import { AddStudentForm } from "@/components/gallery/add-student-form";
 import { StudentTabs } from "@/components/gallery/student-tabs";
 import { SignOutButton } from "@/components/auth/sign-out-button";
@@ -27,6 +29,7 @@ export default function Gallery3Page() {
 
   const [currentStudent, setCurrentStudent] = useState<IStudent | null>(null);
   const [templates, setTemplates] = useState<ITemplate[]>([]);
+  const [packs, setPacks] = useState<Pack[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -42,9 +45,10 @@ export default function Gallery3Page() {
       setError(null);
 
       try {
-        const [studentResult, templatesResult] = await Promise.all([
+        const [studentResult, templatesResult, packsResult] = await Promise.all([
           getStudentById(id),
           getTemplates(),
+          getAvailablePacksForStudent(id),
         ]);
 
         if (!studentResult.success || !studentResult.data) {
@@ -64,6 +68,11 @@ export default function Gallery3Page() {
           templatesResult.success && templatesResult.data
             ? templatesResult.data
             : []
+        );
+
+        // Charger les packs
+        setPacks(
+          packsResult.success && packsResult.data ? packsResult.data : []
         );
       } catch (err) {
         console.error("Error loading student:", err);
@@ -96,7 +105,10 @@ export default function Gallery3Page() {
       setError(null);
 
       try {
-        const studentResult = await getStudentById(activeStudent.id);
+        const [studentResult, packsResult] = await Promise.all([
+          getStudentById(activeStudent.id),
+          getAvailablePacksForStudent(activeStudent.id),
+        ]);
 
         if (!studentResult.success || !studentResult.data) {
           setError(studentResult.error || "Élève non trouvé");
@@ -104,6 +116,9 @@ export default function Gallery3Page() {
         }
 
         setCurrentStudent(studentResult.data);
+        setPacks(
+          packsResult.success && packsResult.data ? packsResult.data : []
+        );
       } catch (err) {
         console.error("Error loading active student:", err);
         setError("Erreur lors du chargement des données");
@@ -203,10 +218,19 @@ export default function Gallery3Page() {
           </div>
         ) : (
           <>
+            {/* Section des packs */}
+            <PacksSection
+              packs={packs}
+              studentId={currentStudent._id.toString()}
+              studentName={`${currentStudent.firstName} ${currentStudent.lastName}`}
+              student_id={currentStudent.student_id || ""}
+              classId={currentStudent.classId}
+            />
+
             {/* Galerie de planches CSS */}
             <div className="bg-white rounded-lg shadow-sm p-4">
               <h2 className="text-xl font-semibold mb-4">
-                Photos disponibles ({templates.length})
+                Photos individuelles ({templates.length})
               </h2>
 
               {templates.length > 0 &&

@@ -1,6 +1,6 @@
 "use client";
 
-import { ITemplate } from "@/types";
+import { ITemplate, PhotoPlanche } from "@/types";
 import { useCartStore } from "@/lib/stores/cart-store";
 import { useState, useEffect } from "react";
 import { CssPlanchePreview } from "./css-planche-preview";
@@ -51,7 +51,7 @@ export function CssPhotoModal({
 
     addToCart({
       photoUrl,
-      format: template.planche,
+      format: template.planche as PhotoPlanche,
       unitPrice: template.price,
       studentId,
       studentName,
