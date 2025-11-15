@@ -14,6 +14,8 @@ export default function CheckoutPage() {
   const packs = useCartStore((state) => state.packs);
   const totalAmount = useCartStore((state) => state.totalAmount);
   const clearCart = useCartStore((state) => state.clearCart);
+  const removeFromCart = useCartStore((state) => state.removeFromCart);
+  const removePackFromCart = useCartStore((state) => state.removePackFromCart);
 
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | null>(
     null
@@ -216,17 +218,26 @@ export default function CheckoutPage() {
                 {packs.map((pack) => (
                   <div
                     key={pack.packId}
-                    className="flex justify-between text-sm bg-blue-50 p-3 rounded"
+                    className="flex justify-between items-center text-sm bg-blue-50 p-3 rounded"
                   >
-                    <div>
+                    <div className="flex-1">
                       <p className="font-medium">Pack {pack.packName}</p>
                       <p className="text-gray-600 text-xs">
                         {pack.photos.length} photos × {pack.quantity}
                       </p>
                     </div>
-                    <p className="font-semibold">
-                      {(pack.packPrice * pack.quantity).toFixed(2)} €
-                    </p>
+                    <div className="flex items-center gap-3">
+                      <p className="font-semibold">
+                        {(pack.packPrice * pack.quantity).toFixed(2)} €
+                      </p>
+                      <button
+                        onClick={() => removePackFromCart(pack.packId, pack.studentId)}
+                        className="text-red-500 hover:text-red-700 text-2xl font-bold w-8 h-8 flex items-center justify-center rounded hover:bg-red-50 transition-colors"
+                        aria-label="Supprimer ce pack"
+                      >
+                        ×
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -243,17 +254,26 @@ export default function CheckoutPage() {
                 {items.map((item, index) => (
                   <div
                     key={`${item.photoUrl}-${item.format}-${index}`}
-                    className="flex justify-between text-sm bg-gray-50 p-3 rounded"
+                    className="flex justify-between items-center text-sm bg-gray-50 p-3 rounded"
                   >
-                    <div>
+                    <div className="flex-1">
                       <p className="font-medium">{item.format}</p>
                       <p className="text-gray-600 text-xs">
                         {item.unitPrice.toFixed(2)} € × {item.quantity}
                       </p>
                     </div>
-                    <p className="font-semibold">
-                      {(item.unitPrice * item.quantity).toFixed(2)} €
-                    </p>
+                    <div className="flex items-center gap-3">
+                      <p className="font-semibold">
+                        {(item.unitPrice * item.quantity).toFixed(2)} €
+                      </p>
+                      <button
+                        onClick={() => removeFromCart(item.photoUrl, item.format, item.studentId)}
+                        className="text-red-500 hover:text-red-700 text-2xl font-bold w-8 h-8 flex items-center justify-center rounded hover:bg-red-50 transition-colors"
+                        aria-label="Supprimer cette photo"
+                      >
+                        ×
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
