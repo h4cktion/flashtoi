@@ -5,8 +5,9 @@ import { useParams } from "next/navigation";
 import Image from "next/image";
 import { getStudentById } from "@/lib/actions/student";
 import { getAvailablePacksForStudent } from "@/lib/actions/pack";
-import { IStudent, Pack } from "@/types";
-import { PhotoCard } from "@/components/cart/photo-card";
+import { getTemplates } from "@/lib/actions/template";
+import { IStudent, ITemplate, Pack } from "@/types";
+import { CssPhotoCard } from "@/components/gallery/css-photo-card";
 import { CartSummary } from "@/components/cart/cart-summary";
 import { MobileCartButton } from "@/components/cart/mobile-cart-button";
 import { PacksSection } from "@/components/cart/packs-section";
@@ -15,7 +16,7 @@ import { StudentTabs } from "@/components/gallery/student-tabs";
 import { SignOutButton } from "@/components/auth/sign-out-button";
 import { useStudentsStore } from "@/lib/stores/students-store";
 
-export default function GalleryPage() {
+export default function Gallery3Page() {
   const params = useParams();
   const id = params.id as string;
 
@@ -27,6 +28,7 @@ export default function GalleryPage() {
   const addStudent = useStudentsStore((state) => state.addStudent);
 
   const [currentStudent, setCurrentStudent] = useState<IStudent | null>(null);
+  const [templates, setTemplates] = useState<ITemplate[]>([]);
   const [packs, setPacks] = useState<Pack[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -43,22 +45,32 @@ export default function GalleryPage() {
       setError(null);
 
       try {
-        const result = await getStudentById(id);
+        const [studentResult, templatesResult, packsResult] = await Promise.all([
+          getStudentById(id),
+          getTemplates(),
+          getAvailablePacksForStudent(id),
+        ]);
 
-        if (!result.success || !result.data) {
-          setError(result.error || "Élève non trouvé");
+        if (!studentResult.success || !studentResult.data) {
+          setError(studentResult.error || "Élève non trouvé");
           return;
         }
 
         // Ajouter l'élève au store s'il n'est pas déjà ajouté
         if (students.length === 0) {
-          addStudent(result.data);
+          addStudent(studentResult.data);
         }
 
-        setCurrentStudent(result.data);
+        setCurrentStudent(studentResult.data);
+
+        // Charger les templates
+        setTemplates(
+          templatesResult.success && templatesResult.data
+            ? templatesResult.data
+            : []
+        );
 
         // Charger les packs
-        const packsResult = await getAvailablePacksForStudent(id);
         setPacks(
           packsResult.success && packsResult.data ? packsResult.data : []
         );
@@ -215,29 +227,32 @@ export default function GalleryPage() {
               classId={currentStudent.classId}
             />
 
-            {/* Galerie de photos */}
+            {/* Galerie de planches CSS */}
             <div className="bg-white rounded-lg shadow-sm p-4">
               <h2 className="text-xl font-semibold mb-4">
-                Photos individuelles
+                Photos individuelles ({templates.length})
               </h2>
 
-              {currentStudent.photos && currentStudent.photos.length > 0 ? (
+              {templates.length > 0 &&
+              currentStudent.thumbnail?.cloudFrontUrl ? (
                 <div className="flex flex-col gap-3">
-                  {currentStudent.photos.map((photo, index) => (
-                    <PhotoCard
-                      key={index}
-                      photo={photo}
-                      index={index}
+                  {templates.map((template) => (
+                    <CssPhotoCard
+                      key={template._id.toString()}
+                      template={template}
                       studentId={currentStudent._id.toString()}
                       studentName={`${currentStudent.firstName} ${currentStudent.lastName}`}
                       student_id={currentStudent.student_id || ""}
                       classId={currentStudent.classId}
+                      thumbnailUrl={
+                        currentStudent.thumbnail?.cloudFrontUrl || ""
+                      }
                     />
                   ))}
                 </div>
               ) : (
                 <p className="text-gray-500 text-center py-12">
-                  Aucune photo disponible pour le moment
+                  Aucun template disponible pour le moment
                 </p>
               )}
             </div>
