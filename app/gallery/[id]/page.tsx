@@ -225,6 +225,8 @@ export default function Gallery3Page() {
               studentName={`${currentStudent.firstName} ${currentStudent.lastName}`}
               student_id={currentStudent.student_id || ""}
               classId={currentStudent.classId}
+              useCssRendering={true}
+              thumbnailUrl={currentStudent.thumbnail?.cloudFrontUrl || ""}
             />
 
             {/* Galerie de planches CSS */}

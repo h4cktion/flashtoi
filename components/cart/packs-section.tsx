@@ -1,5 +1,6 @@
 import { Pack } from '@/types'
 import { PackCard } from './pack-card'
+import { CssPackCard } from '@/components/gallery/css-pack-card'
 
 interface PacksSectionProps {
   packs: Pack[]
@@ -7,9 +8,19 @@ interface PacksSectionProps {
   studentName?: string
   student_id?: string
   classId?: string
+  useCssRendering?: boolean
+  thumbnailUrl?: string
 }
 
-export function PacksSection({ packs, studentId, studentName, student_id, classId }: PacksSectionProps) {
+export function PacksSection({
+  packs,
+  studentId,
+  studentName,
+  student_id,
+  classId,
+  useCssRendering = false,
+  thumbnailUrl = ''
+}: PacksSectionProps) {
   if (packs.length === 0) {
     return null
   }
@@ -29,14 +40,26 @@ export function PacksSection({ packs, studentId, studentName, student_id, classI
       </div>
 
       <div className="flex flex-col gap-6">
-        {sortedPacks.map((pack) => (
-          <PackCard
-            key={pack.pack._id.toString()}
-            pack={pack}
-            studentId={studentId}
-            studentName={studentName}
-          />
-        ))}
+        {sortedPacks.map((pack) =>
+          useCssRendering ? (
+            <CssPackCard
+              key={pack.pack._id.toString()}
+              pack={pack}
+              studentId={studentId || ''}
+              studentName={studentName || ''}
+              student_id={student_id || ''}
+              classId={classId || ''}
+              thumbnailUrl={thumbnailUrl}
+            />
+          ) : (
+            <PackCard
+              key={pack.pack._id.toString()}
+              pack={pack}
+              studentId={studentId}
+              studentName={studentName}
+            />
+          )
+        )}
       </div>
     </div>
   )
