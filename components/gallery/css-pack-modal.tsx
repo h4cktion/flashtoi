@@ -45,7 +45,7 @@ export function CssPackModal({
         // Filtrer seulement les templates qui correspondent aux planches du pack
         const packPlancheNames = pack.photos.map((p) => p.planche);
         const filteredTemplates = result.data.filter((t) =>
-          packPlancheNames.includes(t.planche)
+          packPlancheNames.includes(t.planche as PhotoPlanche)
         );
         setTemplates(filteredTemplates);
       }
@@ -147,7 +147,7 @@ export function CssPackModal({
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
               {pack.photos.map((photo, index) => {
                 // Cas spécial : photo de classe (pas de template CSS)
-                if (photo.format === "classe" || photo.planche === "classe") {
+                if (photo.planche === "classe") {
                   return (
                     <div
                       key={index}
@@ -168,7 +168,9 @@ export function CssPackModal({
                 }
 
                 // Trouver le template correspondant pour les autres photos
-                const template = templates.find((t) => t.planche === photo.planche);
+                const template = templates.find(
+                  (t) => t.planche === photo.planche
+                );
 
                 if (!template) {
                   return (
@@ -176,7 +178,9 @@ export function CssPackModal({
                       key={index}
                       className="relative aspect-[3/4] bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center"
                     >
-                      <p className="text-gray-500 text-sm">Template non trouvé</p>
+                      <p className="text-gray-500 text-sm">
+                        Template non trouvé
+                      </p>
                     </div>
                   );
                 }
@@ -211,7 +215,7 @@ export function CssPackModal({
                 {pack.pack.price.toFixed(2)} €
               </p>
               <p className="text-sm text-green-600 mt-1">
-                Économie par rapport à l'achat séparé
+                Économie par rapport à l&apos;achat séparé
               </p>
             </div>
 
