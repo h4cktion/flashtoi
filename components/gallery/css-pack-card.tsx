@@ -1,6 +1,6 @@
 "use client";
 
-import { Pack, PhotoPlanche } from "@/types";
+import { Pack } from "@/types";
 import { useCartStore } from "@/lib/stores/cart-store";
 import { useState } from "react";
 import { CssPackModal } from "./css-pack-modal";
@@ -22,7 +22,7 @@ export function CssPackCard({
   classId,
   thumbnailUrl,
 }: CssPackCardProps) {
-  const addToCart = useCartStore((state) => state.addToCart);
+  const addPackToCart = useCartStore((state) => state.addPackToCart);
   const [isAdding, setIsAdding] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -31,19 +31,16 @@ export function CssPackCard({
 
     setIsAdding(true);
 
-    // Ajouter chaque photo du pack au panier
-    pack.photos.forEach((photo) => {
-      const photoUrl = `/api/generate-planche?studentId=${studentId}&planche=${photo.planche}`;
-
-      addToCart({
-        photoUrl,
-        format: photo.planche as PhotoPlanche,
-        unitPrice: photo.price,
-        studentId,
-        studentName,
-        student_id,
-        classId,
-      });
+    // Ajouter le pack au panier avec son prix réduit global
+    addPackToCart({
+      packId: pack.pack._id.toString(),
+      packName: pack.pack.name,
+      packPrice: pack.pack.price,
+      photos: pack.photos,
+      studentId,
+      studentName,
+      student_id,
+      classId,
     });
 
     // Feedback visuel

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Image from "next/image";
 import { getStudentById } from "@/lib/actions/student";
-import { getAvailablePacksForStudent } from "@/lib/actions/pack";
+import { getAvailablePacksForStudentCss } from "@/lib/actions/pack";
 import { getTemplates } from "@/lib/actions/template";
 import { IStudent, ITemplate, Pack } from "@/types";
 import { CssPhotoCard } from "@/components/gallery/css-photo-card";
@@ -48,7 +48,7 @@ export default function Gallery3Page() {
         const [studentResult, templatesResult, packsResult] = await Promise.all([
           getStudentById(id),
           getTemplates(),
-          getAvailablePacksForStudent(id),
+          getAvailablePacksForStudentCss(id),
         ]);
 
         if (!studentResult.success || !studentResult.data) {
@@ -107,7 +107,7 @@ export default function Gallery3Page() {
       try {
         const [studentResult, packsResult] = await Promise.all([
           getStudentById(activeStudent.id),
-          getAvailablePacksForStudent(activeStudent.id),
+          getAvailablePacksForStudentCss(activeStudent.id),
         ]);
 
         if (!studentResult.success || !studentResult.data) {

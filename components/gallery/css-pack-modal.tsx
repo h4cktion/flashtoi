@@ -28,7 +28,7 @@ export function CssPackModal({
   student_id,
   classId,
 }: CssPackModalProps) {
-  const addToCart = useCartStore((state) => state.addToCart);
+  const addPackToCart = useCartStore((state) => state.addPackToCart);
   const [isAdding, setIsAdding] = useState(false);
   const [templates, setTemplates] = useState<ITemplate[]>([]);
   const [loading, setLoading] = useState(true);
@@ -74,19 +74,16 @@ export function CssPackModal({
   const handleAddPackToCart = () => {
     setIsAdding(true);
 
-    // Ajouter chaque photo du pack au panier
-    pack.photos.forEach((photo) => {
-      const photoUrl = `/api/generate-planche?studentId=${studentId}&planche=${photo.planche}`;
-
-      addToCart({
-        photoUrl,
-        format: photo.planche as PhotoPlanche,
-        unitPrice: photo.price,
-        studentId,
-        studentName,
-        student_id,
-        classId,
-      });
+    // Ajouter le pack au panier avec son prix réduit global
+    addPackToCart({
+      packId: pack.pack._id.toString(),
+      packName: pack.pack.name,
+      packPrice: pack.pack.price,
+      photos: pack.photos,
+      studentId,
+      studentName,
+      student_id,
+      classId,
     });
 
     setTimeout(() => {

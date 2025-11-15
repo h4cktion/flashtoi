@@ -3,6 +3,7 @@
 import { connectDB } from "@/lib/db/connect";
 import Pack from "@/lib/db/models/Pack";
 import Student from "@/lib/db/models/Student";
+import Template from "@/lib/db/models/Template";
 import mongoose from "mongoose";
 import { ActionResponse, Pack as PackType, Photo, PhotoFormat, PhotoPlanche } from "@/types";
 
@@ -99,6 +100,112 @@ export async function getAvailablePacksForStudent(
     return {
       success: false,
       error: "Erreur lors de la récupération des packs",
+    };
+  }
+}
+
+/**
+ * Récupère tous les packs disponibles pour un étudiant (version CSS)
+ * Basé sur les templates disponibles au lieu des photos pré-générées
+ */
+export async function getAvailablePacksForStudentCss(
+  studentId: string
+): Promise<ActionResponse<PackType[]>> {
+  try {
+    // Valider que l'ID est un ObjectId MongoDB valide
+    if (!mongoose.Types.ObjectId.isValid(studentId)) {
+      return {
+        success: false,
+        error: "ID étudiant invalide",
+      };
+    }
+
+    await connectDB();
+
+    // Récupérer l'étudiant (pour vérifier qu'il existe et obtenir ses photos de classe)
+    const student = await Student.findById(studentId).select("photos").lean();
+
+    if (!student) {
+      return {
+        success: false,
+        error: "Étudiant non trouvé",
+      };
+    }
+
+    // Récupérer tous les templates disponibles
+    const allTemplates = await Template.find({}).lean();
+    const availableTemplates = new Set(
+      allTemplates.map((t) => t.planche)
+    );
+
+    // Récupérer les photos de classe
+    const classPhotos = student.photos.filter(
+      (photo: StudentPhoto) => photo.planche === "classe"
+    );
+
+    // Récupérer tous les packs, triés par ordre
+    const allPacks = await Pack.find({}).sort({ order: 1 }).lean();
+
+    const availablePacks: PackType[] = [];
+
+    // Pour chaque pack, vérifier si tous les templates requis existent
+    for (const pack of allPacks) {
+      // Vérifier si toutes les planches du pack ont un template disponible
+      const hasAllTemplates = pack.planches.every((planche) =>
+        planche === "classe" || availableTemplates.has(planche)
+      );
+
+      if (hasAllTemplates) {
+        // Créer des "photos virtuelles" pour le pack
+        const packPhotos: Photo[] = pack.planches.map((planche) => {
+          // Cas spécial : photo de classe (utiliser la vraie photo)
+          if (planche === "classe" && classPhotos.length > 0) {
+            const classPhoto = classPhotos[0];
+            return {
+              s3Key: classPhoto.s3Key,
+              cloudFrontUrl: classPhoto.cloudFrontUrl,
+              format: classPhoto.format,
+              price: classPhoto.price,
+              planche: planche,
+            };
+          }
+
+          // Pour les autres planches, créer une photo virtuelle
+          const template = allTemplates.find((t) => t.planche === planche);
+          return {
+            s3Key: "", // Pas nécessaire avec le CSS
+            cloudFrontUrl: `/api/generate-planche?studentId=${studentId}&planche=${planche}`,
+            format: (template?.format || "25x19") as PhotoFormat,
+            price: template?.price || 0,
+            planche: planche,
+          };
+        });
+
+        availablePacks.push({
+          pack: {
+            _id: pack._id.toString(),
+            name: pack.name,
+            price: pack.price,
+            description: pack.description,
+            planches: pack.planches,
+            order: pack.order,
+            createdAt: pack.createdAt,
+            updatedAt: pack.updatedAt,
+          },
+          photos: packPhotos,
+        });
+      }
+    }
+
+    return {
+      success: true,
+      data: availablePacks,
+    };
+  } catch (error) {
+    console.error("Error fetching CSS packs:", error);
+    return {
+      success: false,
+      error: "Erreur lors de la récupération des packs CSS",
     };
   }
 }
