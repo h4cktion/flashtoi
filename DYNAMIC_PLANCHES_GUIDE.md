@@ -27,7 +27,7 @@ Ce système génère les planches photo à la volée depuis les thumbnails des �
 
 ### Flux de génération
 
-1. **Utilisateur visite `/gallery2/[id]`**
+1. **Utilisateur visite la galerie**
    - Charge l'étudiant depuis MongoDB
    - Charge tous les templates disponibles
    - Affiche un `DynamicPhotoCard` par template
@@ -81,7 +81,7 @@ Ce script :
 # Lancer le serveur de développement
 npm run dev
 
-# Accéder à /gallery2/[studentId]
+# Accéder à la galerie avec un studentId
 ```
 
 ## Structure des fichiers
@@ -98,10 +98,8 @@ flashtoi/
 │   └── image/
 │       └── planche-generator.ts     ✓ Générateur avec Sharp
 ├── app/
-│   ├── api/generate-planche/
-│   │   └── route.ts                 ✓ API de génération
-│   └── gallery2/[id]/
-│       └── page.tsx                 ✓ Page galerie v2
+│   └── api/generate-planche/
+│       └── route.ts                 ✓ API de génération
 ├── components/gallery/
 │   └── dynamic-photo-card.tsx       ✓ Carte photo dynamique
 ├── scripts/
@@ -207,24 +205,10 @@ npx tsx scripts/upload-backgrounds-to-s3.ts
 2. Activer CloudFront si pas déjà fait
 3. Vérifier la région AWS (doit être proche)
 
-## Migration progressive
+## Implémentation
 
-### Phase 1 : Test (ACTUEL)
-- `/gallery` : Ancien système
-- `/gallery2` : Nouveau système
-- Tester avec quelques élèves
-
-### Phase 2 : Validation
-- Comparer performance
-- Vérifier qualité des images
-- Tester avec plus d'élèves
-
-### Phase 3 : Bascule
-Option A : Renommer les routes
-- `/gallery` → `/gallery-old`
-- `/gallery2` → `/gallery`
-
-Option B : Modifier `/gallery` pour utiliser le nouveau système
+Le système de génération dynamique est disponible via l'API `/api/generate-planche`.
+Il peut être intégré dans n'importe quelle page de galerie selon vos besoins.
 
 ## Prochaines améliorations
 
