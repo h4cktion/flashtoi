@@ -79,14 +79,82 @@ export async function POST(request: NextRequest) {
       case 'checkout.session.expired': {
         const session = event.data.object as Stripe.Checkout.Session;
         console.log('⏰ Session expirée:', session.id);
-        // Optionnel: marquer la commande comme expirée ou la supprimer
+
+        const orderId = session.metadata?.orderId;
+        if (orderId) {
+          await connectDB();
+
+          // Supprimer la commande expirée (session abandonnée après 24h)
+          const deletedOrder = await Order.findByIdAndDelete(orderId);
+
+          if (deletedOrder) {
+            console.log('🗑️  Commande expirée supprimée:', deletedOrder.orderNumber);
+          }
+        }
         break;
       }
 
       case 'payment_intent.payment_failed': {
         const paymentIntent = event.data.object as Stripe.PaymentIntent;
         console.log('❌ Paiement échoué:', paymentIntent.id);
-        // Optionnel: notifier l'utilisateur ou marquer la commande
+
+        // Récupérer l'orderId depuis les metadata du payment intent
+        const orderId = paymentIntent.metadata?.orderId;
+        if (orderId) {
+          await connectDB();
+
+          await Order.findByIdAndUpdate(orderId, {
+            status: 'pending',
+            notes: `Paiement échoué: ${paymentIntent.last_payment_error?.message || 'Erreur inconnue'}`,
+          });
+
+          console.log('⚠️  Commande marquée comme échec paiement:', orderId);
+        }
+        break;
+      }
+
+      case 'charge.refunded': {
+        const charge = event.data.object as Stripe.Charge;
+        console.log('💸 Remboursement:', charge.id);
+
+        // Récupérer l'orderId depuis les metadata
+        const orderId = charge.metadata?.orderId;
+        if (orderId) {
+          await connectDB();
+
+          const updatedOrder = await Order.findByIdAndUpdate(
+            orderId,
+            {
+              status: 'pending', // Retour en pending après remboursement
+              notes: `Remboursé le ${new Date().toLocaleDateString('fr-FR')}`,
+            },
+            { new: true }
+          );
+
+          if (updatedOrder) {
+            console.log('💰 Commande remboursée:', updatedOrder.orderNumber);
+          }
+        }
+        break;
+      }
+
+      case 'charge.dispute.created': {
+        const dispute = event.data.object as Stripe.Dispute;
+        console.log('⚠️  Litige créé:', dispute.id);
+
+        // Récupérer l'orderId depuis le charge
+        const charge = await stripe.charges.retrieve(dispute.charge as string);
+        const orderId = charge.metadata?.orderId;
+
+        if (orderId) {
+          await connectDB();
+
+          await Order.findByIdAndUpdate(orderId, {
+            notes: `⚠️ LITIGE: ${dispute.reason} - Montant: ${dispute.amount / 100}€`,
+          });
+
+          console.log('🚨 Commande en litige:', orderId);
+        }
         break;
       }
 

@@ -136,6 +136,12 @@ export async function POST(request: NextRequest) {
       customer_email: order.email,
       payment_intent_data: {
         description: description,
+        metadata: {
+          orderId: orderId.toString(),
+          orderNumber: order.orderNumber,
+          studentIds: JSON.stringify(studentIds),
+          schoolId: order.schoolId?.toString() || '',
+        },
       },
     });
 
