@@ -17,11 +17,7 @@ const nextConfig = {
       },
     ],
   },
-  // Configuration webpack pour Sharp sur Vercel
-  webpack: (config: any) => {
-    config.externals = [...config.externals, { sharp: 'commonjs sharp' }];
-    return config;
-  },
+  // Sharp est géré nativement par Next.js 15 (pas de config webpack nécessaire)
 };
 
 module.exports = nextConfig;

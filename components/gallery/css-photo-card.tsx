@@ -36,8 +36,8 @@ export function CssPhotoCard({
 
     setIsAdding(true);
 
-    // Pour l'instant, on utilise une URL factice car on génère en CSS
-    // TODO: Implémenter la capture d'écran ou utiliser l'API Sharp pour les commandes
+    // URL de l'API Sharp qui génère la planche finale pour la commande
+    // (l'aperçu CSS n'est que pour l'affichage, la commande utilise Sharp)
     const photoUrl = `/api/generate-planche?studentId=${studentId}&planche=${template.planche}`;
 
     addToCart({
