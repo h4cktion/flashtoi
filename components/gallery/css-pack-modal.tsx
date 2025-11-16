@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { CssPlanchePreview } from "./css-planche-preview";
 import { getTemplates } from "@/lib/actions/template";
+import { ClassPhotoSelector } from "./class-photo-selector";
 
 interface CssPackModalProps {
   pack: Pack;
@@ -32,6 +33,7 @@ export function CssPackModal({
   const [isAdding, setIsAdding] = useState(false);
   const [templates, setTemplates] = useState<ITemplate[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedClassPhotoId, setSelectedClassPhotoId] = useState<string | null>(null);
 
   // Charger les templates correspondant aux photos du pack
   useEffect(() => {
@@ -71,19 +73,49 @@ export function CssPackModal({
     };
   }, [isOpen, onClose]);
 
+  // Sélectionner automatiquement la première photo de classe par défaut
+  useEffect(() => {
+    if (!isOpen) {
+      setSelectedClassPhotoId(null);
+      return;
+    }
+
+    const classPhotos = pack.photos.filter((p) => p.planche === "classe");
+    if (classPhotos.length > 0 && !selectedClassPhotoId) {
+      setSelectedClassPhotoId(classPhotos[0].s3Key);
+    }
+  }, [isOpen, pack.photos, selectedClassPhotoId]);
+
   const handleAddPackToCart = () => {
     setIsAdding(true);
+
+    // Vérifier si le pack contient une photo de classe
+    const hasClassPhoto = pack.pack.planches.includes("classe");
+
+    // Filtrer les photos du pack pour ne garder que la photo de classe sélectionnée
+    let packPhotos = pack.photos;
+    if (hasClassPhoto && selectedClassPhotoId) {
+      // Exclure toutes les photos de classe
+      const nonClassPhotos = pack.photos.filter((p) => p.planche !== "classe");
+      // Ajouter uniquement la photo de classe sélectionnée
+      const selectedClassPhoto = pack.photos.find((p) => p.s3Key === selectedClassPhotoId);
+
+      if (selectedClassPhoto) {
+        packPhotos = [...nonClassPhotos, selectedClassPhoto];
+      }
+    }
 
     // Ajouter le pack au panier avec son prix réduit global
     addPackToCart({
       packId: pack.pack._id.toString(),
       packName: pack.pack.name,
       packPrice: pack.pack.price,
-      photos: pack.photos,
+      photos: packPhotos,
       studentId,
       studentName,
       student_id,
       classId,
+      selectedClassPhotoId: hasClassPhoto ? selectedClassPhotoId || undefined : undefined,
     });
 
     setTimeout(() => {
@@ -141,7 +173,17 @@ export function CssPackModal({
               <p className="text-gray-600">Chargement des photos...</p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+            <>
+              {/* Class Photo Selector - only shown if pack has class photos */}
+              {pack.pack.planches.includes("classe") && (
+                <ClassPhotoSelector
+                  classPhotos={pack.photos.filter((p) => p.planche === "classe")}
+                  selectedPhotoId={selectedClassPhotoId}
+                  onSelect={setSelectedClassPhotoId}
+                />
+              )}
+
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
               {pack.photos.map((photo, index) => {
                 // Cas spécial : photo de classe (pas de template CSS)
                 if (photo.planche === "classe") {
@@ -199,7 +241,8 @@ export function CssPackModal({
                   </div>
                 );
               })}
-            </div>
+              </div>
+            </>
           )}
 
           {/* Prix et bouton */}

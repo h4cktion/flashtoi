@@ -1,7 +1,6 @@
 "use client";
 
 import { Pack } from "@/types";
-import { useCartStore } from "@/lib/stores/cart-store";
 import { useState } from "react";
 import { CssPackModal } from "./css-pack-modal";
 
@@ -22,34 +21,12 @@ export function CssPackCard({
   classId,
   thumbnailUrl,
 }: CssPackCardProps) {
-  const addPackToCart = useCartStore((state) => state.addPackToCart);
-  const [isAdding, setIsAdding] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const handleAddToCart = (e: React.MouseEvent) => {
-    e.stopPropagation();
-
-    setIsAdding(true);
-
-    // Ajouter le pack au panier avec son prix réduit global
-    addPackToCart({
-      packId: pack.pack._id.toString(),
-      packName: pack.pack.name,
-      packPrice: pack.pack.price,
-      photos: pack.photos,
-      studentId,
-      studentName,
-      student_id,
-      classId,
-    });
-
-    // Feedback visuel
-    setTimeout(() => {
-      setIsAdding(false);
-    }, 1000);
-  };
-
-  const handlePackClick = () => {
+  const handlePackClick = (e?: React.MouseEvent) => {
+    if (e) {
+      e.stopPropagation();
+    }
     setIsModalOpen(true);
   };
 
@@ -89,15 +66,10 @@ export function CssPackCard({
 
           {/* Bouton */}
           <button
-            onClick={handleAddToCart}
-            disabled={isAdding}
-            className={`w-full py-3 rounded-lg font-semibold transition-all duration-300 text-white ${
-              isAdding
-                ? "bg-gradient-to-r from-green-500 to-emerald-600 shadow-md"
-                : "bg-gradient-to-r from-blue-600 to-indigo-700 hover:shadow-lg hover:-translate-y-0.5"
-            }`}
+            onClick={handlePackClick}
+            className="w-full py-3 rounded-lg font-semibold transition-all duration-300 text-white bg-gradient-to-r from-blue-600 to-indigo-700 hover:shadow-lg hover:-translate-y-0.5"
           >
-            {isAdding ? "✓ Ajouté au panier" : "AJOUTER LE PACK"}
+            VOIR LE PACK
           </button>
 
           {/* Info CSS */}

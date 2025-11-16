@@ -123,6 +123,7 @@ export default function CheckoutPage() {
           photosCount: pack.photos.length,
           student_id: pack.student_id,
           classId: pack.classId,
+          selectedClassPhotoId: pack.selectedClassPhotoId,
         })),
         totalAmount,
         paymentMethod: paymentMethod as PaymentMethod,

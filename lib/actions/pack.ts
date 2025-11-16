@@ -157,29 +157,32 @@ export async function getAvailablePacksForStudentCss(
 
       if (hasAllTemplates) {
         // Créer des "photos virtuelles" pour le pack
-        const packPhotos: Photo[] = pack.planches.map((planche) => {
-          // Cas spécial : photo de classe (utiliser la vraie photo)
-          if (planche === "classe" && classPhotos.length > 0) {
-            const classPhoto = classPhotos[0];
-            return {
-              s3Key: classPhoto.s3Key,
-              cloudFrontUrl: classPhoto.cloudFrontUrl,
-              format: classPhoto.format,
-              price: classPhoto.price,
-              planche: planche,
-            };
-          }
+        const packPhotos: Photo[] = [];
 
-          // Pour les autres planches, créer une photo virtuelle
-          const template = allTemplates.find((t) => t.planche === planche);
-          return {
-            s3Key: "", // Pas nécessaire avec le CSS
-            cloudFrontUrl: `/api/generate-planche?studentId=${studentId}&planche=${planche}`,
-            format: (template?.format || "25x19") as PhotoFormat,
-            price: template?.price || 0,
-            planche: planche,
-          };
-        });
+        for (const planche of pack.planches) {
+          // Cas spécial : photo de classe (ajouter TOUTES les photos de classe)
+          if (planche === "classe" && classPhotos.length > 0) {
+            classPhotos.forEach((classPhoto: StudentPhoto) => {
+              packPhotos.push({
+                s3Key: classPhoto.s3Key,
+                cloudFrontUrl: classPhoto.cloudFrontUrl,
+                format: classPhoto.format,
+                price: classPhoto.price,
+                planche: planche,
+              });
+            });
+          } else if (planche !== "classe") {
+            // Pour les autres planches, créer une photo virtuelle
+            const template = allTemplates.find((t) => t.planche === planche);
+            packPhotos.push({
+              s3Key: "", // Pas nécessaire avec le CSS
+              cloudFrontUrl: `/api/generate-planche?studentId=${studentId}&planche=${planche}`,
+              format: (template?.format || "25x19") as PhotoFormat,
+              price: template?.price || 0,
+              planche: planche,
+            });
+          }
+        }
 
         availablePacks.push({
           pack: {

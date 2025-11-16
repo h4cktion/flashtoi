@@ -107,6 +107,7 @@ export interface OrderPackItem {
   photosCount: number;
   student_id: string;
   classId: string;
+  selectedClassPhotoId?: string;
 }
 
 export interface IOrder {
@@ -195,6 +196,7 @@ export interface PackCartItem {
   studentName: string;
   student_id: string;
   classId: string;
+  selectedClassPhotoId?: string;
 }
 
 export interface Cart {

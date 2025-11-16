@@ -110,6 +110,10 @@ const OrderSchema = new Schema<IOrder>(
           type: String,
           required: false,
         },
+        selectedClassPhotoId: {
+          type: String,
+          required: false,
+        },
       },
     ],
     totalAmount: {
