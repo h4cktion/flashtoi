@@ -1,12 +1,24 @@
 'use client'
 
 import { useSearchParams, useRouter } from 'next/navigation'
-import { Suspense } from 'react'
+import { Suspense, useEffect } from 'react'
+import { useCartStore } from '@/lib/stores/cart-store'
 
 function OrderConfirmationContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const orderNumber = searchParams.get('orderNumber')
+  const sessionId = searchParams.get('session_id')
+  const clearCart = useCartStore((state) => state.clearCart)
+
+  // Vider le panier si on revient de Stripe
+  useEffect(() => {
+    if (sessionId) {
+      clearCart()
+    }
+  }, [sessionId, clearCart])
+
+  const isPaidOnline = !!sessionId
 
   if (!orderNumber) {
     return (
@@ -50,11 +62,13 @@ function OrderConfirmationContent() {
           </div>
 
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Commande confirmée !
+            {isPaidOnline ? 'Paiement réussi !' : 'Commande confirmée !'}
           </h1>
 
           <p className="text-gray-600 mb-8">
-            Votre commande a été enregistrée avec succès
+            {isPaidOnline
+              ? 'Votre paiement a été traité avec succès'
+              : 'Votre commande a été enregistrée avec succès'}
           </p>
 
           {/* Numéro de commande */}
@@ -68,33 +82,61 @@ function OrderConfirmationContent() {
             <h2 className="font-semibold text-gray-900 mb-3">
               Prochaines étapes
             </h2>
-            <ul className="space-y-2 text-gray-600">
-              <li className="flex items-start">
-                <span className="text-blue-600 mr-2">1.</span>
-                <span>
-                  Préparez votre paiement (chèque ou espèces) selon le mode
-                  choisi
-                </span>
-              </li>
-              <li className="flex items-start">
-                <span className="text-blue-600 mr-2">2.</span>
-                <span>
-                  Remettez le paiement à l&apos;école avec le numéro de commande
-                </span>
-              </li>
-              <li className="flex items-start">
-                <span className="text-blue-600 mr-2">3.</span>
-                <span>
-                  Votre commande sera traitée après réception du paiement
-                </span>
-              </li>
-              <li className="flex items-start">
-                <span className="text-blue-600 mr-2">4.</span>
-                <span>
-                  Vous recevrez vos photos à l&apos;école dans les délais indiqués
-                </span>
-              </li>
-            </ul>
+            {isPaidOnline ? (
+              <ul className="space-y-2 text-gray-600">
+                <li className="flex items-start">
+                  <span className="text-blue-600 mr-2">1.</span>
+                  <span>
+                    Votre paiement a été traité et votre commande est confirmée
+                  </span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-blue-600 mr-2">2.</span>
+                  <span>
+                    Un email de confirmation vous a été envoyé
+                  </span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-blue-600 mr-2">3.</span>
+                  <span>
+                    Votre commande est en cours de traitement
+                  </span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-blue-600 mr-2">4.</span>
+                  <span>
+                    Vous recevrez vos photos à l&apos;école dans les délais indiqués
+                  </span>
+                </li>
+              </ul>
+            ) : (
+              <ul className="space-y-2 text-gray-600">
+                <li className="flex items-start">
+                  <span className="text-blue-600 mr-2">1.</span>
+                  <span>
+                    Préparez votre paiement (chèque ou espèces) selon le mode choisi
+                  </span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-blue-600 mr-2">2.</span>
+                  <span>
+                    Remettez le paiement à l&apos;école avec le numéro de commande
+                  </span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-blue-600 mr-2">3.</span>
+                  <span>
+                    Votre commande sera traitée après réception du paiement
+                  </span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-blue-600 mr-2">4.</span>
+                  <span>
+                    Vous recevrez vos photos à l&apos;école dans les délais indiqués
+                  </span>
+                </li>
+              </ul>
+            )}
           </div>
 
           {/* Boutons */}

@@ -78,10 +78,8 @@ export default function CheckoutPage() {
       return;
     }
 
-    if (paymentMethod === "online") {
-      setError("Le paiement en ligne sera bientôt disponible");
-      return;
-    }
+    // Le paiement en ligne est maintenant disponible via Stripe
+    const isOnlinePayment = paymentMethod === "online";
 
     setIsLoading(true);
     setError("");
@@ -133,13 +131,41 @@ export default function CheckoutPage() {
       const result = await createOrder(orderData);
 
       if (result.success) {
-        // Vider le panier
-        clearCart();
+        // Si paiement en ligne, rediriger vers Stripe
+        if (isOnlinePayment) {
+          try {
+            const stripeResponse = await fetch('/api/stripe/create-checkout-session', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                orderId: result.data?.orderId,
+              }),
+            });
 
-        // Rediriger vers la page de confirmation
-        router.push(
-          `/order-confirmation?orderNumber=${result.data?.orderNumber}`
-        );
+            const stripeData = await stripeResponse.json();
+
+            if (stripeData.error) {
+              setError(stripeData.error);
+              return;
+            }
+
+            // Rediriger vers Stripe Checkout
+            if (stripeData.url) {
+              window.location.href = stripeData.url;
+            }
+          } catch (err) {
+            console.error('Error redirecting to Stripe:', err);
+            setError('Erreur lors de la redirection vers le paiement');
+          }
+        } else {
+          // Pour les paiements chèque/espèces, vider le panier et rediriger
+          clearCart();
+          router.push(
+            `/order-confirmation?orderNumber=${result.data?.orderNumber}`
+          );
+        }
       } else {
         setError(result.error || "Une erreur est survenue");
       }
@@ -338,18 +364,21 @@ export default function CheckoutPage() {
               </div>
             </label>
 
-            {/* Stripe (désactivé) */}
-            <label className="flex items-start p-4 border rounded-lg opacity-50 cursor-not-allowed bg-gray-50">
+            {/* Stripe */}
+            <label className="flex items-start p-4 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
               <input
                 type="radio"
                 name="paymentMethod"
                 value="online"
-                disabled
+                checked={paymentMethod === "online"}
+                onChange={(e) =>
+                  setPaymentMethod(e.target.value as PaymentMethod)
+                }
                 className="mt-1 mr-3"
               />
               <div className="flex-1">
                 <p className="font-medium text-gray-900">
-                  Paiement en ligne (bientôt disponible)
+                  Paiement en ligne
                 </p>
                 <p className="text-sm text-gray-600 mt-1">
                   Payez en ligne par carte bancaire via Stripe
