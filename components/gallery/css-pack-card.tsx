@@ -50,6 +50,7 @@ export function CssPackCard({
           <h3 className="text-lg font-bold text-gray-900 mb-2">
             Pack {pack.pack.name}
           </h3>
+
           <p className="text-sm text-gray-600 mb-3 line-clamp-2">
             {pack.pack.description}
           </p>
@@ -59,9 +60,7 @@ export function CssPackCard({
             <span className="text-3xl font-bold text-[#192F84]">
               {pack.pack.price.toFixed(2)} €
             </span>
-            <span className="text-sm text-green-600">
-              Pack économique
-            </span>
+            <span className="text-sm text-green-600">Pack économique</span>
           </div>
 
           {/* Bouton */}
