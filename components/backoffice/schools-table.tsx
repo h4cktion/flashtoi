@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { SchoolWithStats } from "@/lib/actions/admin";
 
 interface SchoolsTableProps {
@@ -88,7 +89,7 @@ export function SchoolsTable({ schools }: SchoolsTableProps) {
                     Code de connexion
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Date de création
+                    Ventes
                   </th>
                   <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Étudiants
@@ -106,7 +107,12 @@ export function SchoolsTable({ schools }: SchoolsTableProps) {
                   <tr key={school._id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-gray-900">
-                        {school.name}
+                        <Link
+                          href={`/backoffice/schools/${school._id}`}
+                          className="text-indigo-600 hover:text-indigo-900 hover:underline"
+                        >
+                          {school.name}
+                        </Link>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -115,8 +121,24 @@ export function SchoolsTable({ schools }: SchoolsTableProps) {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-500">
-                        {formatDate(school.createdAt)}
+                      <div className="flex items-center gap-2">
+                        <div className="text-sm font-medium text-gray-900">
+                          {school.studentsWithOrdersCount} / {school.studentsCount}
+                        </div>
+                        <div className="w-16 h-2 bg-gray-100 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-green-500"
+                            style={{
+                              width: `${
+                                school.studentsCount > 0
+                                  ? (school.studentsWithOrdersCount /
+                                      school.studentsCount) *
+                                    100
+                                  : 0
+                              }%`,
+                            }}
+                          />
+                        </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-center">

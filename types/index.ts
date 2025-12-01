@@ -59,6 +59,7 @@ export interface ISchool {
   password: string;
   address: string;
   phone: string;
+  closingDate?: Date;
   createdAt: Date;
   updatedAt: Date;
 }

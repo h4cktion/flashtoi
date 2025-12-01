@@ -22,6 +22,7 @@ export interface SchoolWithStats {
   totalRevenue: number;
   pendingOrders: number;
   paidOrders: number;
+  studentsWithOrdersCount: number;
 }
 
 // Helper types for populated fields
@@ -112,7 +113,7 @@ export async function getAllSchoolsForAdmin(): Promise<
 
         // Get orders
         const orders = await Order.find({ schoolId })
-          .select("totalAmount status")
+          .select("totalAmount status studentIds")
           .lean();
 
         // Calculate order statistics
@@ -121,6 +122,15 @@ export async function getAllSchoolsForAdmin(): Promise<
           (o) => o.status === "pending"
         ).length;
         const paidOrders = orders.filter((o) => o.status === "paid").length;
+
+        // Calculate unique students with orders
+        const studentsWithOrders = new Set();
+        orders.forEach((order) => {
+          if (order.studentIds && Array.isArray(order.studentIds)) {
+            order.studentIds.forEach((id) => studentsWithOrders.add(id.toString()));
+          }
+        });
+        const studentsWithOrdersCount = studentsWithOrders.size;
 
         // Calculate revenue
         const totalRevenue = orders.reduce((sum, order) => {
@@ -144,6 +154,7 @@ export async function getAllSchoolsForAdmin(): Promise<
           totalRevenue,
           pendingOrders,
           paidOrders,
+          studentsWithOrdersCount,
         };
       })
     );
@@ -383,6 +394,211 @@ export async function getAllOrdersForAdmin(): Promise<
     return {
       success: false,
       error: "Erreur lors de la récupération des commandes",
+    };
+  }
+}
+
+/**
+ * Get detailed school information
+ * Admin only
+ */
+export async function getSchoolDetailsForAdmin(schoolId: string): Promise<
+  ActionResponse<{
+    school: SchoolWithStats & {
+      email: string;
+      address: string;
+      phone: string;
+      closingDate?: string;
+    };
+    students: StudentWithDetails[];
+    orders: OrderWithDetails[];
+  }>
+> {
+  try {
+    // 1. Check authentication
+    const session = await auth();
+    if (!session || session.user.role !== "admin") {
+      redirect("/backoffice/login");
+    }
+
+    // 2. Connect to database
+    await connectDB();
+
+    // 3. Fetch school
+    const school = await School.findById(schoolId).lean();
+    if (!school) {
+      return { success: false, error: "École non trouvée" };
+    }
+
+    // 4. Fetch students
+    const students = await Student.find({ schoolId })
+      .populate("schoolId", "name")
+      .sort({ lastName: 1, firstName: 1 })
+      .lean();
+
+    // 5. Fetch orders
+    const orders = await Order.find({ schoolId })
+      .populate("schoolId", "name")
+      .populate("studentIds", "firstName lastName")
+      .sort({ createdAt: -1 })
+      .lean();
+
+    // 6. Calculate stats
+    const studentsCount = students.length;
+    const ordersCount = orders.length;
+    const pendingOrders = orders.filter((o) => o.status === "pending").length;
+    const paidOrders = orders.filter((o) => o.status === "paid").length;
+    const totalRevenue = orders.reduce(
+      (sum, order) => sum + (order.totalAmount ?? 0),
+      0
+    );
+
+    // Calculate unique students with orders
+    const studentsWithOrders = new Set();
+    orders.forEach((order) => {
+      if (order.studentIds && Array.isArray(order.studentIds)) {
+        order.studentIds.forEach((id) => studentsWithOrders.add(id.toString()));
+      }
+    });
+    const studentsWithOrdersCount = studentsWithOrders.size;
+
+    // 7. Format students
+    const studentIds = students.map((s) => s._id);
+    const studentOrders = await Order.find({ studentIds: { $in: studentIds } })
+      .select("studentIds totalAmount status")
+      .lean();
+
+    const studentOrdersMap = new Map();
+    studentOrders.forEach((order) => {
+      order.studentIds.forEach((sid) => {
+        const id = sid.toString();
+        if (!studentOrdersMap.has(id)) {
+          studentOrdersMap.set(id, {
+            hasOrder: true,
+            status: order.status,
+            amount: order.totalAmount ?? 0,
+          });
+        }
+      });
+    });
+
+    const studentsWithDetails: StudentWithDetails[] = students.map((student) => {
+      const id = student._id.toString();
+      const orderInfo = studentOrdersMap.get(id);
+      const firstPhoto = student.photos?.[0];
+
+      return {
+        _id: id,
+        firstName: student.firstName,
+        lastName: student.lastName,
+        loginCode: student.loginCode,
+        classId: student.classId,
+        schoolName: school.name,
+        schoolId: school._id.toString(),
+        photoUrl: firstPhoto?.cloudFrontUrl || null,
+        hasOrder: orderInfo?.hasOrder || false,
+        orderStatus: orderInfo?.status || null,
+        orderAmount: orderInfo?.amount || null,
+        createdAt: student.createdAt
+          ? new Date(student.createdAt).toISOString()
+          : new Date().toISOString(),
+      };
+    });
+
+    // 8. Format orders
+    const ordersWithDetails: OrderWithDetails[] = orders.map((order) => {
+      const studentNames = Array.isArray(order.studentIds)
+        ? (order.studentIds as unknown as PopulatedStudent[])
+            .filter(
+              (student) => student && student.firstName && student.lastName
+            )
+            .map((student) => `${student.firstName} ${student.lastName}`)
+        : [];
+
+      return {
+        _id: order._id.toString(),
+        orderNumber: order.orderNumber,
+        schoolName: school.name,
+        schoolId: school._id.toString(),
+        studentNames: studentNames.length > 0 ? studentNames : ["N/A"],
+        totalAmount: order.totalAmount ?? 0,
+        paymentMethod: order.paymentMethod,
+        status: order.status,
+        itemsCount: order.items?.length || 0,
+        packsCount: order.packs?.length || 0,
+        notes: order.notes || null,
+        createdAt: order.createdAt
+          ? new Date(order.createdAt).toISOString()
+          : new Date().toISOString(),
+        paidAt: order.paidAt ? new Date(order.paidAt).toISOString() : null,
+      };
+    });
+
+    return {
+      success: true,
+      data: {
+        school: {
+          _id: school._id.toString(),
+          name: school.name,
+          loginCode: school.loginCode,
+          email: school.email,
+          address: school.address,
+          phone: school.phone,
+          closingDate: school.closingDate
+            ? new Date(school.closingDate).toISOString()
+            : undefined,
+          createdAt: school.createdAt
+            ? new Date(school.createdAt).toISOString()
+            : new Date().toISOString(),
+          studentsCount,
+          ordersCount,
+          totalRevenue,
+          pendingOrders,
+          paidOrders,
+          studentsWithOrdersCount,
+        },
+        students: studentsWithDetails,
+        orders: ordersWithDetails,
+      },
+    };
+  } catch (error) {
+    console.error("getSchoolDetailsForAdmin error:", error);
+    return {
+      success: false,
+      error: "Erreur lors de la récupération des détails de l'école",
+    };
+  }
+}
+
+/**
+ * Update school closing date
+ * Admin only
+ */
+export async function updateSchoolClosingDate(
+  schoolId: string,
+  closingDate: Date | null
+): Promise<ActionResponse<void>> {
+  try {
+    // 1. Check authentication
+    const session = await auth();
+    if (!session || session.user.role !== "admin") {
+      redirect("/backoffice/login");
+    }
+
+    // 2. Connect to database
+    await connectDB();
+
+    // 3. Update school
+    await School.findByIdAndUpdate(schoolId, {
+      $set: { closingDate },
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error("updateSchoolClosingDate error:", error);
+    return {
+      success: false,
+      error: "Erreur lors de la mise à jour de la date de clôture",
     };
   }
 }

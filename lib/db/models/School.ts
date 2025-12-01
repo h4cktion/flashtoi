@@ -38,6 +38,10 @@ const SchoolSchema = new Schema<ISchool>(
       required: [true, 'Phone number is required'],
       trim: true,
     },
+    closingDate: {
+      type: Date,
+      required: false,
+    },
   },
   {
     timestamps: true,
