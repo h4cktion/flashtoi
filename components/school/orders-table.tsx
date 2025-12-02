@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { markOrderAsPaid } from "@/lib/actions/school";
+import { updateOrderPaymentStatus } from "@/lib/actions/school";
 import { useRouter } from "next/navigation";
 
 interface Order {
@@ -107,15 +107,16 @@ export function OrdersTable({ orders, schoolId }: OrdersTableProps) {
     setCurrentPage(1);
   };
 
-  const handleMarkAsPaid = async (orderId: string) => {
-    if (!confirm("Confirmer que cette commande a été payée ?")) {
+  const handleUpdateStatus = async (orderId: string, newStatus: "paid" | "pending") => {
+    const action = newStatus === "paid" ? "marquer comme payée" : "marquer comme non payée";
+    if (!confirm(`Confirmer vouloir ${action} cette commande ?`)) {
       return;
     }
 
     setProcessingOrderId(orderId);
 
     try {
-      const result = await markOrderAsPaid(orderId, schoolId);
+      const result = await updateOrderPaymentStatus(orderId, schoolId, newStatus);
 
       if (result.success) {
         // Recharger la page pour afficher les données mises à jour
@@ -299,10 +300,13 @@ export function OrdersTable({ orders, schoolId }: OrdersTableProps) {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {currentOrders.map((order) => {
+                  const isCashOrCheck =
+                    order.paymentMethod === "cash" ||
+                    order.paymentMethod === "check";
                   const canMarkAsPaid =
-                    order.status === "pending" &&
-                    (order.paymentMethod === "cash" ||
-                      order.paymentMethod === "check");
+                    order.status === "pending" && isCashOrCheck;
+                  const canMarkAsPending =
+                    order.status === "paid" && isCashOrCheck;
                   const isProcessing = processingOrderId === order._id;
 
                   return (
@@ -344,11 +348,20 @@ export function OrdersTable({ orders, schoolId }: OrdersTableProps) {
                       <td className="px-4 py-4">
                         {canMarkAsPaid && (
                           <button
-                            onClick={() => handleMarkAsPaid(order._id)}
+                            onClick={() => handleUpdateStatus(order._id, "paid")}
                             disabled={isProcessing}
                             className="px-3 py-1 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                           >
-                            {isProcessing ? "En cours..." : "Marquer payé"}
+                            {isProcessing ? "..." : "Marquer payé"}
+                          </button>
+                        )}
+                        {canMarkAsPending && (
+                          <button
+                            onClick={() => handleUpdateStatus(order._id, "pending")}
+                            disabled={isProcessing}
+                            className="px-3 py-1 text-sm font-medium text-white bg-orange-500 hover:bg-orange-600 rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                          >
+                            {isProcessing ? "..." : "Marquer non payé"}
                           </button>
                         )}
                       </td>

@@ -130,7 +130,7 @@ export function SchoolDetailsClient({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div>
               <h3 className="text-lg font-medium text-gray-900 mb-4">
-                Détails de l'école
+                Détails de l&apos;école
               </h3>
               <dl className="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
                 <div className="sm:col-span-1">
@@ -207,7 +207,7 @@ export function SchoolDetailsClient({
               <dl className="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
                 <div className="sm:col-span-1">
                   <dt className="text-sm font-medium text-gray-500">
-                    Chiffre d'affaires
+                    Chiffre d&apos;affaires
                   </dt>
                   <dd className="mt-1 text-2xl font-bold text-gray-900">
                     {formatCurrency(school.totalRevenue)}

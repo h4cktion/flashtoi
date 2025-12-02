@@ -278,3 +278,65 @@ export async function markOrderAsPaid(
     };
   }
 }
+
+/**
+ * Update order payment status (paid <-> pending)
+ * Only for cash/check payments
+ */
+export async function updateOrderPaymentStatus(
+  orderId: string,
+  schoolId: string,
+  newStatus: "paid" | "pending"
+): Promise<ActionResponse<{ success: boolean }>> {
+  try {
+    await connectDB();
+
+    // Vérifier que la commande appartient bien à cette école
+    const order = await Order.findOne({ _id: orderId, schoolId }).lean();
+
+    if (!order) {
+      return {
+        success: false,
+        error: "Commande non trouvée",
+      };
+    }
+
+    // Vérifier que le paiement est en espèces ou chèque
+    if (order.paymentMethod !== "cash" && order.paymentMethod !== "check") {
+      return {
+        success: false,
+        error: "Seules les commandes par chèque ou espèces peuvent être modifiées",
+      };
+    }
+
+    // Vérifier que le statut actuel permet la modification
+    if (order.status !== "pending" && order.status !== "paid") {
+      return {
+        success: false,
+        error: "Le statut de cette commande ne peut plus être modifié",
+      };
+    }
+
+    // Mettre à jour le statut
+    await Order.updateOne(
+      { _id: orderId },
+      {
+        $set: {
+          status: newStatus,
+          paidAt: newStatus === "paid" ? new Date() : null,
+        },
+      }
+    );
+
+    return {
+      success: true,
+      data: { success: true },
+    };
+  } catch (error) {
+    console.error("updateOrderPaymentStatus error:", error);
+    return {
+      success: false,
+      error: "Erreur lors de la mise à jour de la commande",
+    };
+  }
+}
