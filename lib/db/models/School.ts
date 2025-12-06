@@ -38,6 +38,11 @@ const SchoolSchema = new Schema<ISchool>(
       required: [true, 'Phone number is required'],
       trim: true,
     },
+    rib: {
+      type: String,
+      required: false,
+      trim: true,
+    },
     closingDate: {
       type: Date,
       required: false,

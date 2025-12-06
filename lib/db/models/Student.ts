@@ -38,6 +38,10 @@ const StudentSchema = new Schema<IStudent>(
       required: [true, "Password is required"],
       minlength: [4, "Password must be at least 4 characters"],
     },
+    clearPassword: {
+      type: String,
+      required: false,
+    },
     schoolId: {
       type: Schema.Types.ObjectId,
       ref: "School",

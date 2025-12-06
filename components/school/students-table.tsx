@@ -163,14 +163,20 @@ export function StudentsTable({ students }: StudentsTableProps) {
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                     Photos
                   </th>
+                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
+                    Coupon
+                  </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {currentStudents.map((student) => {
-                  // Trouver la planche1 pour afficher la photo individuelle
+                  // Trouver la planche1 pour afficher la photo individuelle (fallback)
                   const planche1 = student.photos?.find(
                     (photo) => photo.planche === "18x24"
                   );
+                  
+                  // Utiliser la miniature si disponible, sinon planche1, sinon première photo
+                  const displayPhotoUrl = student.thumbnail?.cloudFrontUrl || planche1?.cloudFrontUrl || student.photos?.[0]?.cloudFrontUrl;
 
                   return (
                     <tr
@@ -178,10 +184,10 @@ export function StudentsTable({ students }: StudentsTableProps) {
                       className="hover:bg-gray-50"
                     >
                       <td className="px-4 py-4">
-                        {planche1 ? (
+                        {displayPhotoUrl ? (
                           <div className="relative w-16 h-16 rounded-lg overflow-hidden border border-gray-200">
                             <Image
-                              src={planche1.cloudFrontUrl}
+                              src={displayPhotoUrl}
                               alt={`${student.firstName} ${student.lastName}`}
                               fill
                               className="object-cover"
@@ -220,6 +226,40 @@ export function StudentsTable({ students }: StudentsTableProps) {
                       </td>
                       <td className="px-4 py-4 text-sm text-gray-600">
                         {student.photos?.length || 0}
+                      </td>
+                      <td className="px-4 py-4 text-right">
+                        <button
+                          onClick={async () => {
+                            const studentId = student._id.toString();
+                            const schoolId = typeof student.schoolId === 'string' ? student.schoolId : student.schoolId.toString();
+                            
+                            try {
+                              // Simple loading state could be added here if needed, but for now direct call
+                              const { generateStudentCoupon } = await import("@/lib/actions/school");
+                              const result = await generateStudentCoupon(studentId, schoolId);
+                              
+                              if (result.success && result.data?.imageBase64) {
+                                const link = document.createElement("a");
+                                link.href = result.data.imageBase64;
+                                link.download = `coupon-${student.firstName}-${student.lastName}.png`;
+                                document.body.appendChild(link);
+                                link.click();
+                                document.body.removeChild(link);
+                              } else {
+                                alert("Erreur: " + result.error);
+                              }
+                            } catch (error) {
+                              console.error(error);
+                              alert("Une erreur est survenue lors de la génération du coupon");
+                            }
+                          }}
+                          className="text-indigo-600 hover:text-indigo-900"
+                          title="Télécharger le coupon de connexion"
+                        >
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                          </svg>
+                        </button>
                       </td>
                     </tr>
                   );

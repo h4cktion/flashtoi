@@ -6,8 +6,12 @@ import {
   StudentWithDetails,
   OrderWithDetails,
   updateSchoolClosingDate,
+  updateSchoolRibForAdmin,
+  updateSchoolDetails,
 } from "@/lib/actions/admin";
 import { useRouter } from "next/navigation";
+import { IbanInput } from "@/components/ui/iban-input";
+import { useToastStore } from "@/lib/store/toast-store";
 
 interface SchoolDetailsClientProps {
   school: SchoolWithStats & {
@@ -15,6 +19,7 @@ interface SchoolDetailsClientProps {
     address: string;
     phone: string;
     closingDate?: string;
+    rib?: string;
   };
   students: StudentWithDetails[];
   orders: OrderWithDetails[];
@@ -30,10 +35,37 @@ export function SchoolDetailsClient({
     "info"
   );
   const [searchTerm, setSearchTerm] = useState("");
-  const [closingDate, setClosingDate] = useState(
-    school.closingDate ? new Date(school.closingDate).toISOString().split("T")[0] : ""
-  );
-  const [isUpdatingDate, setIsUpdatingDate] = useState(false);
+  
+  // Consolidated form state
+  const [formData, setFormData] = useState({
+    name: school.name,
+    email: school.email,
+    phone: school.phone,
+    address: school.address,
+    closingDate: school.closingDate
+      ? new Date(school.closingDate).toISOString().split("T")[0]
+      : "",
+    rib: school.rib || "",
+  });
+
+  const [isEditingDetails, setIsEditingDetails] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Check if there are changes
+  const hasChanges = () => {
+    const initialClosingDate = school.closingDate
+      ? new Date(school.closingDate).toISOString().split("T")[0]
+      : "";
+    
+    return (
+      formData.name !== school.name ||
+      formData.email !== school.email ||
+      formData.phone !== school.phone ||
+      formData.address !== school.address ||
+      formData.closingDate !== initialClosingDate ||
+      formData.rib !== (school.rib || "")
+    );
+  };
 
   // Filter students
   const filteredStudents = students.filter((student) => {
@@ -47,23 +79,35 @@ export function SchoolDetailsClient({
     );
   });
 
-  // Handle closing date update
-  const handleUpdateClosingDate = async () => {
-    setIsUpdatingDate(true);
+  const { addToast } = useToastStore();
+
+  // Handle global save
+  const handleSave = async () => {
+    setIsSaving(true);
     try {
-      const date = closingDate ? new Date(closingDate) : null;
-      const result = await updateSchoolClosingDate(school._id, date);
+      const closingDate = formData.closingDate ? new Date(formData.closingDate) : null;
+      
+      const result = await updateSchoolDetails(school._id, {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        address: formData.address,
+        closingDate,
+        rib: formData.rib,
+      });
+
       if (result.success) {
         router.refresh();
-        alert("Date de clôture mise à jour avec succès");
+        setIsEditingDetails(false);
+        addToast("Modifications enregistrées avec succès", "success");
       } else {
-        alert("Erreur: " + result.error);
+        addToast("Erreur: " + result.error, "error");
       }
     } catch (error) {
       console.error(error);
-      alert("Une erreur est survenue");
+      addToast("Une erreur est survenue", "error");
     } finally {
-      setIsUpdatingDate(false);
+      setIsSaving(false);
     }
   };
 
@@ -129,13 +173,67 @@ export function SchoolDetailsClient({
         {activeTab === "info" && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div>
-              <h3 className="text-lg font-medium text-gray-900 mb-4">
-                Détails de l&apos;école
-              </h3>
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-medium text-gray-900">
+                  Détails de l&apos;école
+                </h3>
+                <button
+                  onClick={() => {
+                    if (isEditingDetails) {
+                      // Reset form data on cancel (optional, keeping changes for now)
+                    }
+                    setIsEditingDetails(!isEditingDetails);
+                  }}
+                  className="text-indigo-600 hover:text-indigo-900"
+                >
+                  {isEditingDetails ? (
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  ) : (
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                      />
+                    </svg>
+                  )}
+                </button>
+              </div>
               <dl className="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
                 <div className="sm:col-span-1">
                   <dt className="text-sm font-medium text-gray-500">Nom</dt>
-                  <dd className="mt-1 text-sm text-gray-900">{school.name}</dd>
+                  <dd className="mt-1 text-sm text-gray-900">
+                    {isEditingDetails ? (
+                      <input
+                        type="text"
+                        value={formData.name}
+                        onChange={(e) =>
+                          setFormData({ ...formData, name: e.target.value })
+                        }
+                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-gray-900"
+                      />
+                    ) : (
+                      school.name
+                    )}
+                  </dd>
                 </div>
                 <div className="sm:col-span-1">
                   <dt className="text-sm font-medium text-gray-500">
@@ -147,18 +245,55 @@ export function SchoolDetailsClient({
                 </div>
                 <div className="sm:col-span-1">
                   <dt className="text-sm font-medium text-gray-500">Email</dt>
-                  <dd className="mt-1 text-sm text-gray-900">{school.email}</dd>
+                  <dd className="mt-1 text-sm text-gray-900">
+                    {isEditingDetails ? (
+                      <input
+                        type="email"
+                        value={formData.email}
+                        onChange={(e) =>
+                          setFormData({ ...formData, email: e.target.value })
+                        }
+                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-gray-900"
+                      />
+                    ) : (
+                      school.email
+                    )}
+                  </dd>
                 </div>
                 <div className="sm:col-span-1">
                   <dt className="text-sm font-medium text-gray-500">
                     Téléphone
                   </dt>
-                  <dd className="mt-1 text-sm text-gray-900">{school.phone}</dd>
+                  <dd className="mt-1 text-sm text-gray-900">
+                    {isEditingDetails ? (
+                      <input
+                        type="text"
+                        value={formData.phone}
+                        onChange={(e) =>
+                          setFormData({ ...formData, phone: e.target.value })
+                        }
+                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-gray-900"
+                      />
+                    ) : (
+                      school.phone
+                    )}
+                  </dd>
                 </div>
                 <div className="sm:col-span-2">
                   <dt className="text-sm font-medium text-gray-500">Adresse</dt>
                   <dd className="mt-1 text-sm text-gray-900">
-                    {school.address}
+                    {isEditingDetails ? (
+                      <textarea
+                        rows={2}
+                        value={formData.address}
+                        onChange={(e) =>
+                          setFormData({ ...formData, address: e.target.value })
+                        }
+                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-gray-900"
+                      />
+                    ) : (
+                      school.address
+                    )}
                   </dd>
                 </div>
               </dl>
@@ -168,7 +303,7 @@ export function SchoolDetailsClient({
               <h3 className="text-lg font-medium text-gray-900 mb-4">
                 Configuration
               </h3>
-              <div className="space-y-4">
+              <div className="space-y-6">
                 <div>
                   <label
                     htmlFor="closingDate"
@@ -176,29 +311,51 @@ export function SchoolDetailsClient({
                   >
                     Date de clôture des commandes
                   </label>
-                  <div className="mt-1 flex rounded-md shadow-sm">
+                  <div className="mt-1">
                     <input
                       type="date"
                       name="closingDate"
                       id="closingDate"
-                      className="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-l-md border-gray-300 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border"
-                      value={closingDate}
-                      onChange={(e) => setClosingDate(e.target.value)}
+                      className="block w-full px-3 py-2 rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border text-gray-900"
+                      value={formData.closingDate}
+                      onChange={(e) => setFormData({ ...formData, closingDate: e.target.value })}
                     />
-                    <button
-                      type="button"
-                      onClick={handleUpdateClosingDate}
-                      disabled={isUpdatingDate}
-                      className="inline-flex items-center px-4 py-2 border border-l-0 border-gray-300 rounded-r-md shadow-sm text-sm font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 disabled:opacity-50"
-                    >
-                      {isUpdatingDate ? "..." : "Enregistrer"}
-                    </button>
                   </div>
                   <p className="mt-2 text-sm text-gray-500">
                     Après cette date, les parents ne pourront plus passer de
                     commande.
                   </p>
                 </div>
+
+                <div>
+                  <label
+                    htmlFor="rib"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    RIB / IBAN
+                  </label>
+                  <div className="mt-1">
+                    <IbanInput
+                      id="rib"
+                      className="block w-full px-4 py-2 rounded-lg border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-base border text-gray-900"
+                      placeholder="FR76..."
+                      value={formData.rib}
+                      onChange={(value) => setFormData({ ...formData, rib: value })}
+                    />
+                  </div>
+                </div>
+
+                {hasChanges() && (
+                  <div className="pt-4 border-t border-gray-200">
+                    <button
+                      onClick={handleSave}
+                      disabled={isSaving}
+                      className="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+                    >
+                      {isSaving ? "Enregistrement..." : "Enregistrer les modifications"}
+                    </button>
+                  </div>
+                )}
               </div>
 
               <h3 className="text-lg font-medium text-gray-900 mt-8 mb-4">
@@ -244,7 +401,7 @@ export function SchoolDetailsClient({
                 placeholder="Rechercher un élève..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-gray-900"
               />
             </div>
 
@@ -431,3 +588,4 @@ export function SchoolDetailsClient({
     </div>
   );
 }
+

@@ -31,6 +31,7 @@ const studentSchema = new mongoose.Schema(
     qrCode: { type: String, unique: true },
     loginCode: { type: String, unique: true },
     password: String,
+    clearPassword: String,
     schoolId: { type: mongoose.Schema.Types.ObjectId, ref: "School" },
     classId: String,
     photos: [
@@ -129,6 +130,7 @@ async function seed() {
       const student = await Student.create({
         ...studentData,
         password: studentPassword,
+        clearPassword: "1234",
         schoolId: school._id,
         photos: [
           {

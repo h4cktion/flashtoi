@@ -289,6 +289,7 @@ export async function getAllStudentsForAdmin(): Promise<
 
         // Find first available photo for display
         const firstPhoto = student.photos?.[0];
+        const thumbnailUrl = student.thumbnail?.cloudFrontUrl || firstPhoto?.cloudFrontUrl || null;
 
         return {
           _id: studentId,
@@ -303,7 +304,7 @@ export async function getAllStudentsForAdmin(): Promise<
             (
               student.schoolId as unknown as PopulatedSchool | null
             )?._id?.toString() || "",
-          photoUrl: firstPhoto?.cloudFrontUrl || null,
+          photoUrl: thumbnailUrl,
           hasOrder: orderInfo?.hasOrder || false,
           orderStatus: orderInfo?.status || null,
           orderAmount: orderInfo?.amount || null,
@@ -425,7 +426,9 @@ export async function getSchoolDetailsForAdmin(schoolId: string): Promise<
     await connectDB();
 
     // 3. Fetch school
-    const school = await School.findById(schoolId).lean();
+    const school = await School.findById(schoolId)
+      .select("-password")
+      .lean();
     if (!school) {
       return { success: false, error: "École non trouvée" };
     }
@@ -486,6 +489,7 @@ export async function getSchoolDetailsForAdmin(schoolId: string): Promise<
       const id = student._id.toString();
       const orderInfo = studentOrdersMap.get(id);
       const firstPhoto = student.photos?.[0];
+      const thumbnailUrl = student.thumbnail?.cloudFrontUrl || firstPhoto?.cloudFrontUrl || null;
 
       return {
         _id: id,
@@ -495,7 +499,7 @@ export async function getSchoolDetailsForAdmin(schoolId: string): Promise<
         classId: student.classId,
         schoolName: school.name,
         schoolId: school._id.toString(),
-        photoUrl: firstPhoto?.cloudFrontUrl || null,
+        photoUrl: thumbnailUrl,
         hasOrder: orderInfo?.hasOrder || false,
         orderStatus: orderInfo?.status || null,
         orderAmount: orderInfo?.amount || null,
@@ -599,6 +603,92 @@ export async function updateSchoolClosingDate(
     return {
       success: false,
       error: "Erreur lors de la mise à jour de la date de clôture",
+    };
+  }
+}
+
+/**
+ * Update school RIB (Admin)
+ */
+export async function updateSchoolRibForAdmin(
+  schoolId: string,
+  rib: string
+): Promise<ActionResponse<{ success: boolean }>> {
+  try {
+    await connectDB();
+
+    // Vérifier l'authentification admin
+    const session = await auth();
+    if (!session || session.user.role !== "admin") {
+      return {
+        success: false,
+        error: "Non autorisé",
+      };
+    }
+
+    await School.findByIdAndUpdate(schoolId, {
+      $set: { rib },
+    });
+
+    return {
+      success: true,
+      data: { success: true },
+    };
+  } catch (error) {
+    console.error("updateSchoolRibForAdmin error:", error);
+    return {
+      success: false,
+      error: "Erreur lors de la mise à jour du RIB",
+    };
+  }
+}
+
+/**
+ * Update school details (Admin)
+ */
+export async function updateSchoolDetails(
+  schoolId: string,
+  data: {
+    name: string;
+    email: string;
+    phone: string;
+    address: string;
+    closingDate?: Date | null;
+    rib?: string;
+  }
+): Promise<ActionResponse<{ success: boolean }>> {
+  try {
+    await connectDB();
+
+    // Vérifier l'authentification admin
+    const session = await auth();
+    if (!session || session.user.role !== "admin") {
+      return {
+        success: false,
+        error: "Non autorisé",
+      };
+    }
+
+    await School.findByIdAndUpdate(schoolId, {
+      $set: {
+        name: data.name,
+        email: data.email,
+        phone: data.phone,
+        address: data.address,
+        closingDate: data.closingDate,
+        rib: data.rib,
+      },
+    });
+
+    return {
+      success: true,
+      data: { success: true },
+    };
+  } catch (error) {
+    console.error("updateSchoolDetails error:", error);
+    return {
+      success: false,
+      error: "Erreur lors de la mise à jour des informations",
     };
   }
 }

@@ -36,6 +36,7 @@ export interface IStudent {
   qrCode: string;
   loginCode: string;
   password: string;
+  clearPassword?: string;
   schoolId: Types.ObjectId | string;
   classId: string;
   photos: Photo[];
@@ -59,6 +60,7 @@ export interface ISchool {
   password: string;
   address: string;
   phone: string;
+  rib?: string;
   closingDate?: Date;
   createdAt: Date;
   updatedAt: Date;
