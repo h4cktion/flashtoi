@@ -399,7 +399,7 @@ export async function generateStudentCoupon(
     }
 
     // 3. Générer le QR Code
-    const QRCode = require("qrcode");
+    const QRCode = await import("qrcode");
     const qrCodeBuffer = await QRCode.toBuffer(student.qrCode, {
       width: 300,
       margin: 1,
@@ -410,7 +410,7 @@ export async function generateStudentCoupon(
     });
 
     // 4. Créer l'image du coupon avec Sharp
-    const sharp = require("sharp");
+    const sharp = (await import("sharp")).default;
     
     let backgroundBuffer;
     let width = 1200;
