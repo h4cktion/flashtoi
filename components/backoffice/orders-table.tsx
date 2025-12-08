@@ -12,7 +12,16 @@ export function OrdersTable({ orders }: OrdersTableProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [paymentFilter, setPaymentFilter] = useState<string>("all");
+  const [itemTypeFilter, setItemTypeFilter] = useState<string>("all");
+  const [selectedOrder, setSelectedOrder] = useState<OrderWithDetails | null>(
+    null
+  );
   const itemsPerPage = 20;
+
+  // Get unique item types for filter dropdown
+  const allItemTypes = Array.from(
+    new Set(orders.flatMap((order) => order.itemTypes || []))
+  ).sort();
 
   // Filter orders based on search and filters
   const filteredOrders = orders.filter((order) => {
@@ -33,6 +42,14 @@ export function OrdersTable({ orders }: OrdersTableProps) {
     // Payment filter
     if (paymentFilter !== "all" && order.paymentMethod !== paymentFilter)
       return false;
+
+    // Item type filter
+    if (
+      itemTypeFilter !== "all" &&
+      !order.itemTypes?.includes(itemTypeFilter)
+    ) {
+      return false;
+    }
 
     return true;
   });
@@ -56,6 +73,11 @@ export function OrdersTable({ orders }: OrdersTableProps) {
 
   const handlePaymentFilter = (value: string) => {
     setPaymentFilter(value);
+    setCurrentPage(1);
+  };
+
+  const handleItemTypeFilter = (value: string) => {
+    setItemTypeFilter(value);
     setCurrentPage(1);
   };
 
@@ -166,6 +188,19 @@ export function OrdersTable({ orders }: OrdersTableProps) {
             <option value="pending">En attente</option>
           </select>
 
+          <select
+            value={itemTypeFilter}
+            onChange={(e) => handleItemTypeFilter(e.target.value)}
+            className="px-4 py-2 border border-gray-300 rounded-lg text-slate-500 focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+          >
+            <option value="all">Tous les articles</option>
+            {allItemTypes.map((type) => (
+              <option key={type} value={type}>
+                {type}
+              </option>
+            ))}
+          </select>
+
           <div className="text-sm text-gray-600 flex items-center px-3">
             {filteredOrders.length} commande(s)
           </div>
@@ -211,7 +246,11 @@ export function OrdersTable({ orders }: OrdersTableProps) {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {currentOrders.map((order) => (
-                  <tr key={order._id} className="hover:bg-gray-50">
+                  <tr
+                    key={order._id}
+                    className="hover:bg-gray-50 cursor-pointer transition-colors"
+                    onClick={() => setSelectedOrder(order)}
+                  >
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-gray-900 font-mono">
                         {order.orderNumber}
@@ -304,6 +343,219 @@ export function OrdersTable({ orders }: OrdersTableProps) {
           )}
         </>
       )}
+
+      {/* Modal */}
+      {selectedOrder && (
+        <OrderDetailsModal
+          order={selectedOrder}
+          onClose={() => setSelectedOrder(null)}
+        />
+      )}
+    </div>
+  );
+}
+
+function OrderDetailsModal({
+  order,
+  onClose,
+}: {
+  order: OrderWithDetails;
+  onClose: () => void;
+}) {
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat("fr-FR", {
+      style: "currency",
+      currency: "EUR",
+    }).format(amount);
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="p-6">
+          <div className="flex justify-between items-start mb-6">
+            <div>
+              <h3 className="text-xl font-bold text-gray-900">
+                Commande {order.orderNumber}
+              </h3>
+              <p className="text-sm text-gray-500">
+                {new Date(order.createdAt).toLocaleDateString("fr-FR", {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </p>
+            </div>
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-500"
+            >
+              <svg
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          </div>
+
+          <div className="space-y-6">
+            {/* Informations */}
+            <div className="grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg">
+              <div>
+                <p className="text-sm font-medium text-gray-500">École</p>
+                <p className="text-base font-medium text-gray-900">
+                  {order.schoolName}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-500">Étudiant(s)</p>
+                <div className="flex flex-col gap-2 mt-1">
+                  {order.studentNames.map((name, idx) => (
+                    <div key={idx} className="flex items-center gap-2">
+                      {order.studentPhotos?.[idx] ? (
+                        <img
+                          src={order.studentPhotos[idx]!}
+                          alt={name}
+                          className="w-8 h-8 rounded-full object-cover border border-gray-200"
+                        />
+                      ) : (
+                        <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs font-medium text-gray-500">
+                          {name.charAt(0)}
+                        </div>
+                      )}
+                      <span className="text-base font-medium text-gray-900">
+                        {name}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-500">Statut</p>
+                <p className="text-base font-medium text-gray-900 capitalize">
+                  {order.status === "pending"
+                    ? "En attente"
+                    : order.status === "paid"
+                    ? "Payée"
+                    : order.status}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-500">Paiement</p>
+                <p className="text-base font-medium text-gray-900 capitalize">
+                  {order.paymentMethod === "online"
+                    ? "En ligne"
+                    : order.paymentMethod === "check"
+                    ? "Chèque"
+                    : order.paymentMethod === "cash"
+                    ? "Espèces"
+                    : order.paymentMethod}
+                </p>
+              </div>
+            </div>
+
+            {/* Articles */}
+            <div>
+              <h4 className="font-semibold text-gray-900 mb-3">Articles</h4>
+              <div className="border rounded-lg overflow-hidden">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                        Description
+                      </th>
+                      <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">
+                        Qté
+                      </th>
+                      <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">
+                        Prix
+                      </th>
+                      <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">
+                        Total
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {order.items?.map((item: any, idx: number) => (
+                      <tr key={idx}>
+                        <td className="px-4 py-2 text-sm text-gray-900">
+                          {item.plancheName} - {item.format}
+                        </td>
+                        <td className="px-4 py-2 text-sm text-gray-900 text-right">
+                          {item.quantity}
+                        </td>
+                        <td className="px-4 py-2 text-sm text-gray-900 text-right">
+                          {formatCurrency(item.unitPrice)}
+                        </td>
+                        <td className="px-4 py-2 text-sm text-gray-900 text-right font-medium">
+                          {formatCurrency(item.subtotal)}
+                        </td>
+                      </tr>
+                    ))}
+                    {order.packs?.map((pack: any, idx: number) => (
+                      <tr key={`pack-${idx}`}>
+                        <td className="px-4 py-2 text-sm text-gray-900">
+                          Pack {pack.packName} ({pack.photosCount} photos)
+                        </td>
+                        <td className="px-4 py-2 text-sm text-gray-900 text-right">
+                          {pack.quantity}
+                        </td>
+                        <td className="px-4 py-2 text-sm text-gray-900 text-right">
+                          {formatCurrency(pack.packPrice)}
+                        </td>
+                        <td className="px-4 py-2 text-sm text-gray-900 text-right font-medium">
+                          {formatCurrency(pack.subtotal)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                  <tfoot className="bg-gray-50">
+                    <tr>
+                      <td
+                        colSpan={3}
+                        className="px-4 py-3 text-right text-sm font-bold text-gray-900"
+                      >
+                        Total
+                      </td>
+                      <td className="px-4 py-3 text-right text-sm font-bold text-gray-900">
+                        {formatCurrency(order.totalAmount)}
+                      </td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </div>
+
+            {order.notes && (
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-2">Notes</h4>
+                <p className="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
+                  {order.notes}
+                </p>
+              </div>
+            )}
+          </div>
+
+          <div className="mt-8 flex justify-end">
+            <button
+              onClick={onClose}
+              className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium"
+            >
+              Fermer
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

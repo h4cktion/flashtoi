@@ -155,6 +155,9 @@ export function StudentsTable({ students }: StudentsTableProps) {
                     Code de connexion
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Mot de passe
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Commande
                   </th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -214,6 +217,11 @@ export function StudentsTable({ students }: StudentsTableProps) {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900 font-mono">
                         {student.loginCode}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900 font-mono">
+                        {student.clearPassword || "-"}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">

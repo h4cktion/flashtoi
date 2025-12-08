@@ -34,6 +34,12 @@ interface PopulatedSchool {
 interface PopulatedStudent {
   firstName: string;
   lastName: string;
+  thumbnail?: {
+    cloudFrontUrl: string;
+  };
+  photos?: {
+    cloudFrontUrl: string;
+  }[];
 }
 
 export interface GlobalStats {
@@ -52,6 +58,7 @@ export interface StudentWithDetails {
   firstName: string;
   lastName: string;
   loginCode: string;
+  clearPassword?: string;
   classId: string;
   schoolName: string;
   schoolId: string;
@@ -68,6 +75,7 @@ export interface OrderWithDetails {
   schoolName: string;
   schoolId: string;
   studentNames: string[];
+  studentPhotos: (string | null)[];
   totalAmount: number;
   paymentMethod: string;
   status: string;
@@ -76,6 +84,9 @@ export interface OrderWithDetails {
   notes: string | null;
   createdAt: string;
   paidAt: string | null;
+  itemTypes: string[];
+  items: any[];
+  packs: any[];
 }
 
 // ============================================
@@ -296,6 +307,7 @@ export async function getAllStudentsForAdmin(): Promise<
           firstName: student.firstName,
           lastName: student.lastName,
           loginCode: student.loginCode,
+          clearPassword: student.clearPassword,
           classId: student.classId,
           schoolName:
             (student.schoolId as unknown as PopulatedSchool | null)?.name ||
@@ -348,7 +360,7 @@ export async function getAllOrdersForAdmin(): Promise<
     // 3. Fetch all orders with school and student info
     const orders = await Order.find({})
       .populate("schoolId", "name")
-      .populate("studentIds", "firstName lastName")
+      .populate("studentIds", "firstName lastName thumbnail photos")
       .sort({ createdAt: -1 })
       .lean();
 
@@ -363,6 +375,20 @@ export async function getAllOrdersForAdmin(): Promise<
             .map((student) => `${student.firstName} ${student.lastName}`)
         : [];
 
+      // Get student photos
+      const studentPhotos = Array.isArray(order.studentIds)
+        ? (order.studentIds as unknown as PopulatedStudent[])
+            .filter(
+              (student) => student && student.firstName && student.lastName
+            )
+            .map(
+              (student) =>
+                student.thumbnail?.cloudFrontUrl ||
+                student.photos?.[0]?.cloudFrontUrl ||
+                null
+            )
+        : [];
+
       return {
         _id: order._id.toString(),
         orderNumber: order.orderNumber,
@@ -373,6 +399,7 @@ export async function getAllOrdersForAdmin(): Promise<
             order.schoolId as unknown as PopulatedSchool | null
           )?._id?.toString() || "",
         studentNames: studentNames.length > 0 ? studentNames : ["N/A"],
+        studentPhotos,
         totalAmount: order.totalAmount ?? 0,
         paymentMethod: order.paymentMethod,
         status: order.status,
@@ -383,6 +410,21 @@ export async function getAllOrdersForAdmin(): Promise<
           ? new Date(order.createdAt).toISOString()
           : new Date().toISOString(),
         paidAt: order.paidAt ? new Date(order.paidAt).toISOString() : null,
+        itemTypes: [
+          ...new Set([
+            ...(order.items?.map((i: any) => i.plancheName) || []),
+            ...(order.items?.map((i: any) => i.format) || []),
+            ...(order.packs?.length ? ["pack"] : []),
+          ]),
+        ],
+        items: (order.items || []).map((item: any) => ({
+          ...item,
+          _id: item._id ? item._id.toString() : undefined,
+        })),
+        packs: (order.packs || []).map((pack: any) => ({
+          ...pack,
+          _id: pack._id ? pack._id.toString() : undefined,
+        })),
       };
     });
 
@@ -442,7 +484,7 @@ export async function getSchoolDetailsForAdmin(schoolId: string): Promise<
     // 5. Fetch orders
     const orders = await Order.find({ schoolId })
       .populate("schoolId", "name")
-      .populate("studentIds", "firstName lastName")
+      .populate("studentIds", "firstName lastName thumbnail photos")
       .sort({ createdAt: -1 })
       .lean();
 
@@ -496,6 +538,7 @@ export async function getSchoolDetailsForAdmin(schoolId: string): Promise<
         firstName: student.firstName,
         lastName: student.lastName,
         loginCode: student.loginCode,
+        clearPassword: student.clearPassword,
         classId: student.classId,
         schoolName: school.name,
         schoolId: school._id.toString(),
@@ -525,6 +568,7 @@ export async function getSchoolDetailsForAdmin(schoolId: string): Promise<
         schoolName: school.name,
         schoolId: school._id.toString(),
         studentNames: studentNames.length > 0 ? studentNames : ["N/A"],
+        studentPhotos,
         totalAmount: order.totalAmount ?? 0,
         paymentMethod: order.paymentMethod,
         status: order.status,
@@ -535,6 +579,21 @@ export async function getSchoolDetailsForAdmin(schoolId: string): Promise<
           ? new Date(order.createdAt).toISOString()
           : new Date().toISOString(),
         paidAt: order.paidAt ? new Date(order.paidAt).toISOString() : null,
+        itemTypes: [
+          ...new Set([
+            ...(order.items?.map((i: any) => i.plancheName) || []),
+            ...(order.items?.map((i: any) => i.format) || []),
+            ...(order.packs?.length ? ["pack"] : []),
+          ]),
+        ],
+        items: (order.items || []).map((item: any) => ({
+          ...item,
+          _id: item._id ? item._id.toString() : undefined,
+        })),
+        packs: (order.packs || []).map((pack: any) => ({
+          ...pack,
+          _id: pack._id ? pack._id.toString() : undefined,
+        })),
       };
     });
 

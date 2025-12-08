@@ -419,6 +419,9 @@ export function SchoolDetailsClient({
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Codes
                     </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Mot de passe
+                    </th>
                     <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Commande
                     </th>
@@ -463,6 +466,11 @@ export function SchoolDetailsClient({
                           Login: <span className="font-mono">{student.loginCode}</span>
                         </div>
                       </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-xs text-gray-500 font-mono">
+                          {student.clearPassword || "-"}
+                        </div>
+                      </td>
                       <td className="px-6 py-4 whitespace-nowrap text-center">
                         {student.hasOrder ? (
                           <span
@@ -488,7 +496,7 @@ export function SchoolDetailsClient({
                   {filteredStudents.length === 0 && (
                     <tr>
                       <td
-                        colSpan={5}
+                        colSpan={6}
                         className="px-6 py-4 text-center text-gray-500"
                       >
                         Aucun élève trouvé
