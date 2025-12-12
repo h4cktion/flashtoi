@@ -23,11 +23,16 @@ function ParentLoginContent() {
     const autologin = searchParams.get("autologin");
 
     // Check for QR code auto-login
+    // Check for QR code auto-login
     const code = searchParams.get("code");
-    if (autologin === "true" && code) {
+    // We allow auto-login if "code" is present, even without "autologin=true", 
+    // to support direct QR code links and account switching
+    if (code) {
       setIsAutoLogging(true);
 
       startTransition(async () => {
+        // If we are already logged in, this action should set a NEW session cookie
+        // overwriting the old one.
         const result = await authenticateWithQRCodeAutoLogin(code);
 
         if (result.success && result.data) {

@@ -58,7 +58,10 @@ export default auth((req) => {
   }
 
   // Redirect logged-in users away from login pages
-  if (isLoggedIn && isPublicRoute) {
+  // EXCEPTION: If trying to access /login with a "code" param (QR login/Magic link), allow it to proceed so the page can handle the account switch
+  const isLoginWithCode = nextUrl.pathname === "/login" && nextUrl.searchParams.has("code");
+  
+  if (isLoggedIn && isPublicRoute && !isLoginWithCode) {
     if (userRole === "admin") {
       return NextResponse.redirect(new URL("/backoffice/dashboard", nextUrl));
     }
