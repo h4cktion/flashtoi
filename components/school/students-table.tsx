@@ -222,38 +222,18 @@ export function StudentsTable({ students }: StudentsTableProps) {
                         {student.photos?.length || 0}
                       </td>
                       <td className="px-4 py-4 text-right">
-                        <button
-                          onClick={async () => {
-                            const studentId = student._id.toString();
-                            const schoolId = typeof student.schoolId === 'string' ? student.schoolId : student.schoolId.toString();
-                            
-                            try {
-                              // Simple loading state could be added here if needed, but for now direct call
-                              const { generateStudentCoupon } = await import("@/lib/actions/school");
-                              const result = await generateStudentCoupon(studentId, schoolId);
-                              
-                              if (result.success && result.data?.imageBase64) {
-                                const link = document.createElement("a");
-                                link.href = result.data.imageBase64;
-                                link.download = `coupon-${student.firstName}-${student.lastName}.png`;
-                                document.body.appendChild(link);
-                                link.click();
-                                document.body.removeChild(link);
-                              } else {
-                                alert("Erreur: " + result.error);
-                              }
-                            } catch (error) {
-                              console.error(error);
-                              alert("Une erreur est survenue lors de la génération du coupon");
-                            }
-                          }}
-                          className="text-indigo-600 hover:text-indigo-900"
-                          title="Télécharger le coupon de connexion"
+                        <a
+                          href={`/school/coupon/${student._id.toString()}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-indigo-600 hover:text-indigo-900 flex items-center justify-end gap-1"
+                          title="Imprimer le coupon de connexion"
                         >
+                          <span className="hidden sm:inline">Imprimer</span>
                           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
                           </svg>
-                        </button>
+                        </a>
                       </td>
                     </tr>
                   );
