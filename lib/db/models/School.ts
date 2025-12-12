@@ -28,6 +28,10 @@ const SchoolSchema = new Schema<ISchool>(
       required: [true, 'Password is required'],
       minlength: [6, 'Password must be at least 6 characters'],
     },
+    clearPassword: {
+      type: String,
+      required: false,
+    },
     address: {
       type: String,
       required: [true, 'Address is required'],

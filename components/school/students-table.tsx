@@ -149,10 +149,7 @@ export function StudentsTable({ students }: StudentsTableProps) {
                     Photo
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Nom
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Prénom
+                    Mot de passe
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                     Classe
@@ -212,11 +209,8 @@ export function StudentsTable({ students }: StudentsTableProps) {
                           </div>
                         )}
                       </td>
-                      <td className="px-4 py-4 text-sm text-gray-900">
-                        {student.lastName}
-                      </td>
-                      <td className="px-4 py-4 text-sm text-gray-900">
-                        {student.firstName}
+                      <td className="px-4 py-4 text-sm text-gray-900 font-mono">
+                        {student.clearPassword || "-"}
                       </td>
                       <td className="px-4 py-4 text-sm text-gray-600">
                         {student.classId}

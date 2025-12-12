@@ -46,7 +46,7 @@ export async function getSchoolDashboard(
 
     // 2. Récupérer tous les étudiants de cette école
     const students = await Student.find({ schoolId })
-      .select("firstName lastName classId qrCode loginCode photos thumbnail schoolId")
+      .select("firstName lastName classId qrCode loginCode clearPassword photos thumbnail schoolId")
       .lean();
 
     // 3. Récupérer les commandes de cette école
@@ -108,7 +108,7 @@ export async function getStudentsByClass(
     await connectDB();
 
     const students = await Student.find({ schoolId, classId })
-      .select("firstName lastName qrCode loginCode photos thumbnail schoolId")
+      .select("firstName lastName qrCode loginCode clearPassword photos thumbnail schoolId")
       .lean();
 
     // Convertir en plain objects pour éviter les problèmes de sérialisation

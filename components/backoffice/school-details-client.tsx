@@ -20,6 +20,8 @@ interface SchoolDetailsClientProps {
     phone: string;
     closingDate?: string;
     rib?: string;
+    password?: string;
+    clearPassword?: string;
   };
   students: StudentWithDetails[];
   orders: OrderWithDetails[];
@@ -235,12 +237,20 @@ export function SchoolDetailsClient({
                     )}
                   </dd>
                 </div>
-                <div className="sm:col-span-1">
+                  <div className="sm:col-span-1">
                   <dt className="text-sm font-medium text-gray-500">
                     Code de connexion
                   </dt>
                   <dd className="mt-1 text-sm font-mono text-gray-900">
                     {school.loginCode}
+                  </dd>
+                </div>
+                <div className="sm:col-span-1">
+                  <dt className="text-sm font-medium text-gray-500">
+                    Mot de passe
+                  </dt>
+                  <dd className="mt-1 text-sm font-mono text-gray-900">
+                    {school.clearPassword || "-"}
                   </dd>
                 </div>
                 <div className="sm:col-span-1">

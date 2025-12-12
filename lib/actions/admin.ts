@@ -6,7 +6,8 @@ import Student from "@/lib/db/models/Student";
 import Order from "@/lib/db/models/Order";
 import { auth } from "@/lib/auth/auth";
 import { redirect } from "next/navigation";
-import { ActionResponse } from "@/types";
+import { ActionResponse, OrderItem, OrderPackItem } from "@/types";
+import { Types } from "mongoose";
 
 // ============================================
 // TYPES
@@ -85,8 +86,33 @@ export interface OrderWithDetails {
   createdAt: string;
   paidAt: string | null;
   itemTypes: string[];
-  items: any[];
-  packs: any[];
+  items: OrderItemDetails[];
+  packs: OrderPackDetails[];
+}
+
+export interface OrderItemDetails {
+  _id?: string;
+  photoUrl: string;
+  format: string;
+  plancheName: string;
+  quantity: number;
+  unitPrice: number;
+  subtotal: number;
+  student_id: string;
+  classId: string;
+}
+
+export interface OrderPackDetails {
+  _id?: string;
+  packId: string;
+  packName: string;
+  packPrice: number;
+  quantity: number;
+  subtotal: number;
+  photosCount: number;
+  student_id: string;
+  classId: string;
+  selectedClassPhotoId?: string;
 }
 
 // ============================================
@@ -412,19 +438,19 @@ export async function getAllOrdersForAdmin(): Promise<
         paidAt: order.paidAt ? new Date(order.paidAt).toISOString() : null,
         itemTypes: [
           ...new Set([
-            ...(order.items?.map((i: any) => i.plancheName) || []),
-            ...(order.items?.map((i: any) => i.format) || []),
+            ...(order.items?.map((i: OrderItem) => i.plancheName) || []),
+            ...(order.items?.map((i: OrderItem) => i.format) || []),
             ...(order.packs?.length ? ["pack"] : []),
           ]),
         ],
-        items: (order.items || []).map((item: any) => ({
+        items: (order.items || []).map((item: OrderItem & { _id?: Types.ObjectId }) => ({
           ...item,
           _id: item._id ? item._id.toString() : undefined,
-        })),
-        packs: (order.packs || []).map((pack: any) => ({
+        })) as OrderItemDetails[],
+        packs: (order.packs || []).map((pack: OrderPackItem & { _id?: Types.ObjectId }) => ({
           ...pack,
           _id: pack._id ? pack._id.toString() : undefined,
-        })),
+        })) as OrderPackDetails[],
       };
     });
 
@@ -452,6 +478,8 @@ export async function getSchoolDetailsForAdmin(schoolId: string): Promise<
       address: string;
       phone: string;
       closingDate?: string;
+      password?: string;
+      clearPassword?: string;
     };
     students: StudentWithDetails[];
     orders: OrderWithDetails[];
@@ -468,9 +496,8 @@ export async function getSchoolDetailsForAdmin(schoolId: string): Promise<
     await connectDB();
 
     // 3. Fetch school
-    const school = await School.findById(schoolId)
-      .select("-password")
-      .lean();
+    // 3. Fetch school
+    const school = await School.findById(schoolId).lean();
     if (!school) {
       return { success: false, error: "École non trouvée" };
     }
@@ -562,6 +589,20 @@ export async function getSchoolDetailsForAdmin(schoolId: string): Promise<
             .map((student) => `${student.firstName} ${student.lastName}`)
         : [];
 
+      // Get student photos
+      const studentPhotos = Array.isArray(order.studentIds)
+        ? (order.studentIds as unknown as PopulatedStudent[])
+            .filter(
+              (student) => student && student.firstName && student.lastName
+            )
+            .map(
+              (student) =>
+                student.thumbnail?.cloudFrontUrl ||
+                student.photos?.[0]?.cloudFrontUrl ||
+                null
+            )
+        : [];
+
       return {
         _id: order._id.toString(),
         orderNumber: order.orderNumber,
@@ -581,19 +622,19 @@ export async function getSchoolDetailsForAdmin(schoolId: string): Promise<
         paidAt: order.paidAt ? new Date(order.paidAt).toISOString() : null,
         itemTypes: [
           ...new Set([
-            ...(order.items?.map((i: any) => i.plancheName) || []),
-            ...(order.items?.map((i: any) => i.format) || []),
+            ...(order.items?.map((i: OrderItem) => i.plancheName) || []),
+            ...(order.items?.map((i: OrderItem) => i.format) || []),
             ...(order.packs?.length ? ["pack"] : []),
           ]),
         ],
-        items: (order.items || []).map((item: any) => ({
+        items: (order.items || []).map((item: OrderItem & { _id?: Types.ObjectId }) => ({
           ...item,
           _id: item._id ? item._id.toString() : undefined,
-        })),
-        packs: (order.packs || []).map((pack: any) => ({
+        })) as OrderItemDetails[],
+        packs: (order.packs || []).map((pack: OrderPackItem & { _id?: Types.ObjectId }) => ({
           ...pack,
           _id: pack._id ? pack._id.toString() : undefined,
-        })),
+        })) as OrderPackDetails[],
       };
     });
 
@@ -607,6 +648,8 @@ export async function getSchoolDetailsForAdmin(schoolId: string): Promise<
           email: school.email,
           address: school.address,
           phone: school.phone,
+          password: school.password,
+          clearPassword: school.clearPassword,
           closingDate: school.closingDate
             ? new Date(school.closingDate).toISOString()
             : undefined,

@@ -58,6 +58,7 @@ export interface ISchool {
   email: string;
   loginCode: string;
   password: string;
+  clearPassword?: string;
   address: string;
   phone: string;
   rib?: string;

@@ -486,7 +486,7 @@ function OrderDetailsModal({
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">
-                    {order.items?.map((item: any, idx: number) => (
+                    {order.items?.map((item, idx: number) => (
                       <tr key={idx}>
                         <td className="px-4 py-2 text-sm text-gray-900">
                           {item.plancheName} - {item.format}
@@ -502,7 +502,7 @@ function OrderDetailsModal({
                         </td>
                       </tr>
                     ))}
-                    {order.packs?.map((pack: any, idx: number) => (
+                    {order.packs?.map((pack, idx: number) => (
                       <tr key={`pack-${idx}`}>
                         <td className="px-4 py-2 text-sm text-gray-900">
                           Pack {pack.packName} ({pack.photosCount} photos)
