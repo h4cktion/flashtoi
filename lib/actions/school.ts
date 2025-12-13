@@ -5,6 +5,8 @@ import School from "@/lib/db/models/School";
 import Student from "@/lib/db/models/Student";
 import Order from "@/lib/db/models/Order";
 import { ActionResponse, ISchool, IStudent } from "@/types";
+import { revalidatePath } from "next/cache";
+import { auth } from "@/lib/auth/auth";
 
 // ============================================
 // TYPES
@@ -519,6 +521,47 @@ export async function generateStudentCoupon(
     return {
       success: false,
       error: "Erreur lors de la génération du coupon",
+    };
+  }
+}
+
+/**
+ * Met à jour les informations de l'établissement
+ */
+export async function updateSchoolDetails(
+  schoolId: string,
+  data: {
+    address: string;
+    phone: string;
+    email: string;
+  }
+): Promise<ActionResponse<void>> {
+  try {
+    const session = await auth();
+    if (!session || session.user.role !== "school" || session.user.schoolId !== schoolId) {
+      return {
+        success: false,
+        error: "Non autorisé",
+      };
+    }
+
+    await connectDB();
+
+    await School.findByIdAndUpdate(schoolId, {
+      $set: {
+        address: data.address,
+        phone: data.phone,
+        email: data.email,
+      },
+    });
+
+    revalidatePath("/school/dashboard");
+    return { success: true };
+  } catch (error) {
+    console.error("Error updating school details:", error);
+    return {
+      success: false,
+      error: "Erreur lors de la mise à jour des informations",
     };
   }
 }
