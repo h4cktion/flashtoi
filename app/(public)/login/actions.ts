@@ -235,3 +235,25 @@ export async function authenticateWithQRCodeAutoLogin(
     };
   }
 }
+
+/**
+ * Get student ID from QR code
+ * Used to check if we are switching accounts
+ */
+export async function getStudentIdFromCode(
+  qrCode: string
+): Promise<ActionResponse<{ studentId: string }>> {
+  try {
+    await connectDB();
+    const student = await Student.findOne({ qrCode }).select("_id");
+    
+    if (!student) {
+      return { success: false, error: "Étudiant non trouvé" };
+    }
+
+    return { success: true, data: { studentId: student._id.toString() } };
+  } catch (error) {
+    console.error("getStudentIdFromCode error:", error);
+    return { success: false, error: "Erreur serveur" };
+  }
+}

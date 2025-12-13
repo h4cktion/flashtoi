@@ -1,15 +1,22 @@
+
 "use client";
 
 import { useState, useTransition, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { signOut, useSession } from "next-auth/react";
+import { useCartStore } from "@/lib/stores/cart-store";
 import {
   authenticateWithCredentials,
   authenticateWithQRCodeAutoLogin,
+  getStudentIdFromCode,
 } from "./actions";
 
 function ParentLoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { data: session } = useSession();
+  const clearCart = useCartStore((state) => state.clearCart);
+  
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string>("");
   const [isAutoLogging, setIsAutoLogging] = useState(false);
@@ -23,7 +30,6 @@ function ParentLoginContent() {
     const autologin = searchParams.get("autologin");
 
     // Check for QR code auto-login
-    // Check for QR code auto-login
     const code = searchParams.get("code");
     // We allow auto-login if "code" is present, even without "autologin=true", 
     // to support direct QR code links and account switching
@@ -31,13 +37,33 @@ function ParentLoginContent() {
       setIsAutoLogging(true);
 
       startTransition(async () => {
-        // If we are already logged in, this action should set a NEW session cookie
-        // overwriting the old one.
+        // 1. Check if we need to switch accounts
+        const { data: studentData } = await getStudentIdFromCode(code);
+        
+        if (studentData) {
+          // If we are already logged in...
+          if (session?.user?.studentId) {
+             // ...as the SAME student: Do nothing (just redirect)
+             if (session.user.studentId === studentData.studentId) {
+                console.log("Already logged in as same student, redirecting...");
+                router.push(`/gallery/${session.user.studentId}`);
+                router.refresh();
+                return;
+             }
+             
+             // ...as a DIFFERENT student: Logout and Clear Cart
+             console.log("Switching accounts: Clearing cart and signing out...");
+             clearCart();
+             await signOut({ redirect: false });
+          }
+        }
+
+        // 2. Proceed with Auto Login
         const result = await authenticateWithQRCodeAutoLogin(code);
 
         if (result.success && result.data) {
-          router.push(result.data.redirectUrl);
-          router.refresh();
+          // Force hard refresh to ensure session cookies are picked up
+          window.location.href = result.data.redirectUrl;
         } else {
           setIsAutoLogging(false);
           setError(result.error || "Échec de la connexion automatique");
