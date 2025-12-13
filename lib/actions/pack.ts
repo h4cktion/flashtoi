@@ -5,7 +5,7 @@ import Pack from "@/lib/db/models/Pack";
 import Student from "@/lib/db/models/Student";
 import Template from "@/lib/db/models/Template";
 import mongoose from "mongoose";
-import { ActionResponse, Pack as PackType, Photo, PhotoFormat, PhotoPlanche } from "@/types";
+import { ActionResponse, Pack as PackType, Photo, PhotoFormat, PhotoPlanche, IStudent } from "@/types";
 import { addClassPhotosToStudent } from "./student";
 
 // Type for photo structure in the database
@@ -36,7 +36,7 @@ export async function getAvailablePacksForStudent(
     await connectDB();
 
     // Récupérer l'étudiant et ses photos
-    let student = await Student.findById(studentId).lean();
+    let student = (await Student.findById(studentId).lean()) as IStudent | null;
 
     if (!student) {
       return {
@@ -56,10 +56,8 @@ export async function getAvailablePacksForStudent(
     // Pour chaque pack, vérifier si l'étudiant possède toutes les planches requises
     for (const pack of allPacks) {
       // Obtenir les planches disponibles pour cet étudiant
-      // @ts-ignore
       const studentPlanches = new Set(
-        // @ts-ignore
-        student.photos.map((photo: StudentPhoto) => photo.planche)
+        student.photos?.map((photo: StudentPhoto) => photo.planche) || []
       );
 
       // Vérifier si toutes les planches du pack sont disponibles
@@ -69,8 +67,8 @@ export async function getAvailablePacksForStudent(
 
       if (hasAllPlanches) {
         // Récupérer les photos correspondant aux planches du pack
-        // @ts-ignore
-        const packPhotos: Photo[] = student.photos
+        // Récupérer les photos correspondant aux planches du pack
+        const packPhotos: Photo[] = (student.photos || [])
           .filter((photo: StudentPhoto) =>
             pack.planches.includes(photo.planche)
           )
@@ -130,7 +128,7 @@ export async function getAvailablePacksForStudentCss(
     await connectDB();
 
     // Récupérer l'étudiant
-    let student = await Student.findById(studentId).lean();
+    let student = (await Student.findById(studentId).lean()) as IStudent | null;
 
     if (!student) {
       return {
@@ -140,9 +138,7 @@ export async function getAvailablePacksForStudentCss(
     }
     
     // Add class photos
-    if (student) {
-      student = await addClassPhotosToStudent(student);
-    }
+    student = await addClassPhotosToStudent(student);
 
     // Récupérer tous les templates disponibles
     const allTemplates = await Template.find({}).lean();
@@ -151,11 +147,7 @@ export async function getAvailablePacksForStudentCss(
     );
 
     // Récupérer les photos de classe
-    // @ts-ignore
-    const classPhotos = student.photos.filter(
-      // @ts-ignore
-      (photo: StudentPhoto) => photo.planche === "classe"
-    );
+    // Récupérer les photos de classe (logic moved to inside loop)
 
     // Récupérer tous les packs, triés par ordre
     const allPacks = await Pack.find({}).sort({ order: 1 }).lean();
@@ -178,7 +170,7 @@ export async function getAvailablePacksForStudentCss(
         for (const planche of pack.planches) {
           // Cas spécial : photo de classe ou de groupe (ajouter TOUTES les photos correspondantes)
           if ((planche === "classe" || planche === "groupe")) {
-            const staticPhotos = student.photos.filter(
+            const staticPhotos = (student?.photos || []).filter(
               (p: StudentPhoto) => p.planche === planche
             );
 

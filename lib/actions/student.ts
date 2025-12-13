@@ -9,7 +9,7 @@ import { verifyPassword } from "@/lib/auth/password";
 /**
  * Helper to add class photos to student object
  */
-export async function addClassPhotosToStudent(student: any) {
+export async function addClassPhotosToStudent(student: IStudent) {
   try {
     if (!student.classId || !student.schoolId) return student;
 
