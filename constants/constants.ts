@@ -15,6 +15,7 @@ export type PhotoFormat = (typeof PHOTO_FORMATS)[number];
 
 // Noms des planches disponibles
 export const PLANCHE_NAMES = [
+  "groupe",
   "classe",
   "bonne-fetes",
   "multiformat-carre",

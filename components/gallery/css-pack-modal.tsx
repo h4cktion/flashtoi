@@ -80,7 +80,7 @@ export function CssPackModal({
       return;
     }
 
-    const classPhotos = pack.photos.filter((p) => p.planche === "classe");
+    const classPhotos = pack.photos.filter((p) => p.planche === "classe" || p.planche === "groupe");
     if (classPhotos.length > 0 && !selectedClassPhotoId) {
       setSelectedClassPhotoId(classPhotos[0].s3Key);
     }
@@ -89,14 +89,14 @@ export function CssPackModal({
   const handleAddPackToCart = () => {
     setIsAdding(true);
 
-    // Vérifier si le pack contient une photo de classe
-    const hasClassPhoto = pack.pack.planches.includes("classe");
+    // Vérifier si le pack contient une photo de classe ou de groupe
+    const hasClassPhoto = pack.pack.planches.some(p => p === "classe" || p === "groupe");
 
     // Filtrer les photos du pack pour ne garder que la photo de classe sélectionnée
     let packPhotos = pack.photos;
     if (hasClassPhoto && selectedClassPhotoId) {
-      // Exclure toutes les photos de classe
-      const nonClassPhotos = pack.photos.filter((p) => p.planche !== "classe");
+      // Exclure toutes les photos de classe/groupe pour ne pas les avoir en double
+      const nonClassPhotos = pack.photos.filter((p) => p.planche !== "classe" && p.planche !== "groupe");
       // Ajouter uniquement la photo de classe sélectionnée
       const selectedClassPhoto = pack.photos.find((p) => p.s3Key === selectedClassPhotoId);
 
@@ -185,8 +185,8 @@ export function CssPackModal({
 
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
               {pack.photos.map((photo, index) => {
-                // Cas spécial : photo de classe (pas de template CSS)
-                if (photo.planche === "classe") {
+                // Cas spécial : photo de classe ou de groupe (pas de template CSS)
+                if (photo.planche === "classe" || photo.planche === "groupe") {
                   return (
                     <div
                       key={index}
@@ -200,7 +200,7 @@ export function CssPackModal({
                         sizes="(max-width: 768px) 50vw, 33vw"
                       />
                       <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white p-2 text-xs">
-                        Photo de classe
+                        Photo de {photo.planche === "classe" ? "classe" : "groupe"}
                       </div>
                     </div>
                   );

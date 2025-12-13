@@ -44,6 +44,7 @@ export interface IStudent {
     s3Key: string;
     cloudFrontUrl: string;
   };
+  hasLoggedIn?: boolean;
   siblings: Sibling[];
   createdAt: Date;
   updatedAt: Date;

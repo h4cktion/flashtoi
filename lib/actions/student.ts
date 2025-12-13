@@ -2,8 +2,54 @@
 
 import { connectDB } from "@/lib/db/connect";
 import Student from "@/lib/db/models/Student";
-import { ActionResponse, IStudent } from "@/types";
+import Class from "@/lib/db/models/Class";
+import { ActionResponse, IStudent, Photo, PhotoFormat } from "@/types";
 import { verifyPassword } from "@/lib/auth/password";
+
+/**
+ * Helper to add class photos to student object
+ */
+export async function addClassPhotosToStudent(student: any) {
+  try {
+    if (!student.classId || !student.schoolId) return student;
+
+    // Find class document
+    const classDoc = await Class.findOne({
+      schoolId: student.schoolId,
+      class_name: student.classId, // matching student.classId (string) to Class.class_name
+    }).lean();
+
+    if (classDoc && classDoc.photos && classDoc.photos.length > 0) {
+      // Map class photos to Student Photo format
+      // We create TWO entries for each photo:
+      // 1. "groupe": for the new gallery display and logic
+      // 2. "classe": for backward compatibility with existing packs that look for "classe"
+      const classPhotos: Photo[] = classDoc.photos.flatMap((p) => [
+        {
+          s3Key: p.s3Key,
+          cloudFrontUrl: p.cloudFrontUrl,
+          format: "25x19" as PhotoFormat,
+          price: 0,
+          planche: "groupe",
+        },
+        {
+          s3Key: p.s3Key,
+          cloudFrontUrl: p.cloudFrontUrl,
+          format: "25x19" as PhotoFormat,
+          price: 0,
+          planche: "classe",
+        }
+      ]);
+
+      // Merge with existing photos
+      student.photos = [...(student.photos || []), ...classPhotos];
+    }
+  } catch (error) {
+    console.error("Error fetching class photos:", error);
+    // Don't fail the whole request if class photos fail
+  }
+  return student;
+}
 
 /**
  * Récupère les données d'un étudiant par son ID
@@ -26,7 +72,10 @@ export async function getStudentById(
     }
 
     // Convertir en plain object pour éviter les problèmes de sérialisation
-    const plainStudent = JSON.parse(JSON.stringify(student));
+    let plainStudent = JSON.parse(JSON.stringify(student));
+    
+    // Add class photos
+    plainStudent = await addClassPhotosToStudent(plainStudent);
 
     return {
       success: true,
@@ -62,7 +111,10 @@ export async function getStudentByQrCode(
     }
 
     // Convertir en plain object pour éviter les problèmes de sérialisation
-    const plainStudent = JSON.parse(JSON.stringify(student));
+    let plainStudent = JSON.parse(JSON.stringify(student));
+
+    // Add class photos
+    plainStudent = await addClassPhotosToStudent(plainStudent);
 
     return {
       success: true,
@@ -108,8 +160,11 @@ export async function getStudentByLogin(
     }
 
     // Convertir en plain object et retirer le password
-    const plainStudent = JSON.parse(JSON.stringify(student));
+    let plainStudent = JSON.parse(JSON.stringify(student));
     delete plainStudent.password;
+
+    // Add class photos
+    plainStudent = await addClassPhotosToStudent(plainStudent);
 
     return {
       success: true,

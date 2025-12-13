@@ -6,6 +6,7 @@ import Student from "@/lib/db/models/Student";
 import Template from "@/lib/db/models/Template";
 import mongoose from "mongoose";
 import { ActionResponse, Pack as PackType, Photo, PhotoFormat, PhotoPlanche } from "@/types";
+import { addClassPhotosToStudent } from "./student";
 
 // Type for photo structure in the database
 interface StudentPhoto {
@@ -35,7 +36,7 @@ export async function getAvailablePacksForStudent(
     await connectDB();
 
     // Récupérer l'étudiant et ses photos
-    const student = await Student.findById(studentId).select("photos").lean();
+    let student = await Student.findById(studentId).lean();
 
     if (!student) {
       return {
@@ -43,6 +44,9 @@ export async function getAvailablePacksForStudent(
         error: "Étudiant non trouvé",
       };
     }
+
+    // Add class photos
+    student = await addClassPhotosToStudent(student);
 
     // Récupérer tous les packs, triés par ordre
     const allPacks = await Pack.find({}).sort({ order: 1 }).lean();
@@ -52,7 +56,9 @@ export async function getAvailablePacksForStudent(
     // Pour chaque pack, vérifier si l'étudiant possède toutes les planches requises
     for (const pack of allPacks) {
       // Obtenir les planches disponibles pour cet étudiant
+      // @ts-ignore
       const studentPlanches = new Set(
+        // @ts-ignore
         student.photos.map((photo: StudentPhoto) => photo.planche)
       );
 
@@ -63,6 +69,7 @@ export async function getAvailablePacksForStudent(
 
       if (hasAllPlanches) {
         // Récupérer les photos correspondant aux planches du pack
+        // @ts-ignore
         const packPhotos: Photo[] = student.photos
           .filter((photo: StudentPhoto) =>
             pack.planches.includes(photo.planche)
@@ -122,14 +129,19 @@ export async function getAvailablePacksForStudentCss(
 
     await connectDB();
 
-    // Récupérer l'étudiant (pour vérifier qu'il existe et obtenir ses photos de classe)
-    const student = await Student.findById(studentId).select("photos").lean();
+    // Récupérer l'étudiant
+    let student = await Student.findById(studentId).lean();
 
     if (!student) {
       return {
         success: false,
         error: "Étudiant non trouvé",
       };
+    }
+    
+    // Add class photos
+    if (student) {
+      student = await addClassPhotosToStudent(student);
     }
 
     // Récupérer tous les templates disponibles
@@ -139,7 +151,9 @@ export async function getAvailablePacksForStudentCss(
     );
 
     // Récupérer les photos de classe
+    // @ts-ignore
     const classPhotos = student.photos.filter(
+      // @ts-ignore
       (photo: StudentPhoto) => photo.planche === "classe"
     );
 
@@ -150,28 +164,36 @@ export async function getAvailablePacksForStudentCss(
 
     // Pour chaque pack, vérifier si tous les templates requis existent
     for (const pack of allPacks) {
-      // Vérifier si toutes les planches du pack ont un template disponible
-      const hasAllTemplates = pack.planches.every((planche) =>
-        planche === "classe" || availableTemplates.has(planche)
-      );
+      // Vérifier si toutes les planches du pack ont un template disponible ou sont des photos statiques
+      const hasAllTemplates = pack.planches.every((planche) => {
+        if (planche === "classe") return true; // Classe est toujours considérée (vérifiée dans la boucle)
+        if (planche === "groupe") return true; // Groupe est toujours considéré
+        return availableTemplates.has(planche);
+      });
 
       if (hasAllTemplates) {
         // Créer des "photos virtuelles" pour le pack
         const packPhotos: Photo[] = [];
 
         for (const planche of pack.planches) {
-          // Cas spécial : photo de classe (ajouter TOUTES les photos de classe)
-          if (planche === "classe" && classPhotos.length > 0) {
-            classPhotos.forEach((classPhoto: StudentPhoto) => {
-              packPhotos.push({
-                s3Key: classPhoto.s3Key,
-                cloudFrontUrl: classPhoto.cloudFrontUrl,
-                format: classPhoto.format,
-                price: classPhoto.price,
-                planche: planche,
+          // Cas spécial : photo de classe ou de groupe (ajouter TOUTES les photos correspondantes)
+          if ((planche === "classe" || planche === "groupe")) {
+            const staticPhotos = student.photos.filter(
+              (p: StudentPhoto) => p.planche === planche
+            );
+
+            if (staticPhotos.length > 0) {
+              staticPhotos.forEach((photo: StudentPhoto) => {
+                packPhotos.push({
+                  s3Key: photo.s3Key,
+                  cloudFrontUrl: photo.cloudFrontUrl,
+                  format: photo.format,
+                  price: photo.price,
+                  planche: planche,
+                });
               });
-            });
-          } else if (planche !== "classe") {
+            }
+          } else {
             // Pour les autres planches, créer une photo virtuelle
             const template = allTemplates.find((t) => t.planche === planche);
             packPhotos.push({

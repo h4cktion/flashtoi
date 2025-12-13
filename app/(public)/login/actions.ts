@@ -59,6 +59,13 @@ export async function authenticateWithQRCode(
       qrCode: validated.qrCode,
     }).select("_id");
 
+    if (student) {
+      await Student.updateOne(
+        { _id: student._id },
+        { $set: { hasLoggedIn: true } }
+      );
+    }
+
     if (!student) {
       return {
         success: false,
@@ -123,6 +130,13 @@ export async function authenticateWithCredentials(
     const student = await Student.findOne({
       loginCode: validated.loginCode,
     }).select("_id");
+
+    if (student) {
+      await Student.updateOne(
+        { _id: student._id },
+        { $set: { hasLoggedIn: true } }
+      );
+    }
 
     if (!student) {
       return {
@@ -197,6 +211,13 @@ export async function authenticateWithQRCodeAutoLogin(
     const student = await Student.findOne({
       qrCode: validated.qrCode,
     }).select("_id");
+
+    if (student) {
+      await Student.updateOne(
+        { _id: student._id },
+        { $set: { hasLoggedIn: true } }
+      );
+    }
 
     if (!student) {
       console.error("[QR AutoLogin] Student not found");

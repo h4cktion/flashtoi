@@ -60,6 +60,7 @@ export interface StudentWithDetails {
   lastName: string;
   loginCode: string;
   clearPassword?: string;
+  hasLoggedIn?: boolean;
   classId: string;
   schoolName: string;
   schoolId: string;
@@ -334,6 +335,7 @@ export async function getAllStudentsForAdmin(): Promise<
           lastName: student.lastName,
           loginCode: student.loginCode,
           clearPassword: student.clearPassword,
+          hasLoggedIn: student.hasLoggedIn,
           classId: student.classId,
           schoolName:
             (student.schoolId as unknown as PopulatedSchool | null)?.name ||
@@ -566,6 +568,7 @@ export async function getSchoolDetailsForAdmin(schoolId: string): Promise<
         lastName: student.lastName,
         loginCode: student.loginCode,
         clearPassword: student.clearPassword,
+        hasLoggedIn: student.hasLoggedIn,
         classId: student.classId,
         schoolName: school.name,
         schoolId: school._id.toString(),

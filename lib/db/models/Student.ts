@@ -80,6 +80,10 @@ const StudentSchema = new Schema<IStudent>(
         },
       },
     ],
+     hasLoggedIn: {
+      type: Boolean,
+      default: false,
+    },
     thumbnail: {
       s3Key: {
         type: String,
