@@ -12,6 +12,7 @@ import {
 import { useRouter } from "next/navigation";
 import { IbanInput } from "@/components/ui/iban-input";
 import { useToastStore } from "@/lib/store/toast-store";
+import { ExportPDFButton } from "./export-pdf-button";
 
 interface SchoolDetailsClientProps {
   school: SchoolWithStats & {
@@ -378,6 +379,17 @@ export function SchoolDetailsClient({
                   </dt>
                   <dd className="mt-1 text-2xl font-bold text-gray-900">
                     {formatCurrency(school.totalRevenue)}
+                  </dd>
+                </div>
+                <div className="sm:col-span-1">
+                  <dt className="text-sm font-medium text-gray-500">
+                    Montant à payer à l&apos;école (30%)
+                  </dt>
+                  <dd className="mt-1 text-2xl font-bold text-green-600">
+                    {formatCurrency(school.schoolPayment)}
+                  </dd>
+                  <dd className="mt-1 text-xs text-gray-500">
+                    Sur {formatCurrency(school.paidRevenue)} de commandes payées
                   </dd>
                 </div>
                 <div className="sm:col-span-1">

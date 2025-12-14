@@ -91,36 +91,40 @@ export async function createOrder(
       notes: data.notes,
     })
 
-    // Envoyer l'email de confirmation
-    console.log('📧 [Order] Envoi email de confirmation à:', data.email)
-    const emailResult = await sendOrderConfirmationEmail({
-      to: data.email,
-      orderNumber: order.orderNumber,
-      studentName: `${student.firstName} ${student.lastName}`,
-      items: itemsWithSubtotal.map((item) => ({
-        format: item.format,
-        quantity: item.quantity,
-        unitPrice: item.unitPrice,
-        subtotal: item.subtotal,
-      })),
-      packs: (packsWithSubtotal || []).map((pack) => ({
-        packName: pack.packName,
-        quantity: pack.quantity,
-        packPrice: pack.packPrice,
-        subtotal: pack.subtotal,
-        photosCount: pack.photosCount,
-      })),
-      totalAmount: data.totalAmount,
-      paymentMethod: data.paymentMethod,
-      notes: data.notes,
-    })
 
-    if (!emailResult.success) {
-      console.error('❌ [Order] Erreur envoi email:', emailResult.error)
-      // On ne fait pas échouer la commande si l'email ne part pas
-      // La commande est créée avec succès même si l'email échoue
+    // Envoyer l'email de confirmation (si pas paiement en ligne)
+    if (data.paymentMethod !== 'online') {
+      console.log('📧 [Order] Envoi email de confirmation à:', data.email)
+      const emailResult = await sendOrderConfirmationEmail({
+        to: data.email,
+        orderNumber: order.orderNumber,
+        studentName: `${student.firstName} ${student.lastName}`,
+        items: itemsWithSubtotal.map((item) => ({
+          format: item.format,
+          quantity: item.quantity,
+          unitPrice: item.unitPrice,
+          subtotal: item.subtotal,
+        })),
+        packs: (packsWithSubtotal || []).map((pack) => ({
+          packName: pack.packName,
+          quantity: pack.quantity,
+          packPrice: pack.packPrice,
+          subtotal: pack.subtotal,
+          photosCount: pack.photosCount,
+        })),
+        totalAmount: data.totalAmount,
+        paymentMethod: data.paymentMethod,
+        notes: data.notes,
+      })
+
+      if (!emailResult.success) {
+        console.error('❌ [Order] Erreur envoi email:', emailResult.error)
+        // On ne fait pas échouer la commande si l'email ne part pas
+      } else {
+        console.log('✅ [Order] Email envoyé avec succès')
+      }
     } else {
-      console.log('✅ [Order] Email envoyé avec succès')
+      console.log('⏳ [Order] Paiement en ligne : email différé après validation Stripe')
     }
 
     return {

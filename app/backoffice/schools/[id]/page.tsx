@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { getSchoolDetailsForAdmin } from "@/lib/actions/admin";
 import Link from "next/link";
 import { SchoolDetailsClient } from "@/components/backoffice/school-details-client";
+import { ExportPDFButton } from "@/components/backoffice/export-pdf-button";
 
 export default async function SchoolDetailsPage({
   params,
@@ -59,12 +60,24 @@ export default async function SchoolDetailsPage({
               </div>
               <h1 className="text-3xl font-bold text-gray-900">{school.name}</h1>
             </div>
-            <Link
-              href="/backoffice/schools"
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
-            >
-              Retour
-            </Link>
+            <div className="flex gap-3">
+              <ExportPDFButton
+                schoolName={school.name}
+                schoolId={school._id}
+                orders={orders}
+                totalRevenue={school.totalRevenue}
+                paidRevenue={school.paidRevenue}
+                schoolPayment={school.schoolPayment}
+                paidOrders={school.paidOrders}
+                pendingOrders={school.pendingOrders}
+              />
+              <Link
+                href="/backoffice/schools"
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+              >
+                Retour
+              </Link>
+            </div>
           </div>
         </div>
       </header>

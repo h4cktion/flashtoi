@@ -21,6 +21,8 @@ export interface SchoolWithStats {
   studentsCount: number;
   ordersCount: number;
   totalRevenue: number;
+  paidRevenue: number;
+  schoolPayment: number;
   pendingOrders: number;
   paidOrders: number;
   studentsWithOrdersCount: number;
@@ -180,6 +182,11 @@ export async function getAllSchoolsForAdmin(): Promise<
           return sum + amount;
         }, 0);
 
+        const paidRevenue = orders
+          .filter((o) => o.status === "paid")
+          .reduce((sum, order) => sum + (order.totalAmount ?? 0), 0);
+        const schoolPayment = paidRevenue * 0.3;
+
         return {
           _id: schoolId.toString(),
           name: school.name,
@@ -190,6 +197,8 @@ export async function getAllSchoolsForAdmin(): Promise<
           studentsCount,
           ordersCount,
           totalRevenue,
+          paidRevenue,
+          schoolPayment,
           pendingOrders,
           paidOrders,
           studentsWithOrdersCount,
@@ -526,6 +535,10 @@ export async function getSchoolDetailsForAdmin(schoolId: string): Promise<
       (sum, order) => sum + (order.totalAmount ?? 0),
       0
     );
+    const paidRevenue = orders
+      .filter((o) => o.status === "paid")
+      .reduce((sum, order) => sum + (order.totalAmount ?? 0), 0);
+    const schoolPayment = paidRevenue * 0.3;
 
     // Calculate unique students with orders
     const studentsWithOrders = new Set();
@@ -662,6 +675,8 @@ export async function getSchoolDetailsForAdmin(schoolId: string): Promise<
           studentsCount,
           ordersCount,
           totalRevenue,
+          paidRevenue,
+          schoolPayment,
           pendingOrders,
           paidOrders,
           studentsWithOrdersCount,

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe/stripe';
 import { connectDB } from '@/lib/db/connect';
 import Order from '@/lib/db/models/Order';
+import Student from '@/lib/db/models/Student';
+import { sendOrderConfirmationEmail } from '@/lib/email/send-order-confirmation';
 import Stripe from 'stripe';
 
 // Désactiver le body parser de Next.js pour recevoir le raw body
@@ -69,6 +71,53 @@ export async function POST(request: NextRequest) {
 
         if (updatedOrder) {
           console.log('✅ Commande mise à jour:', updatedOrder.orderNumber);
+
+          // Récupérer les infos de l'étudiant pour l'email
+          console.log('📧 Préparation envoi email confirmation...');
+          try {
+            const studentId = updatedOrder.studentIds && updatedOrder.studentIds.length > 0
+              ? updatedOrder.studentIds[0]
+              : null;
+
+            let studentName = 'Client';
+            if (studentId) {
+              const student = await Student.findById(studentId).lean();
+              if (student) {
+                studentName = `${student.firstName} ${student.lastName}`;
+              }
+            }
+
+            // Envoyer l'email
+            const emailResult = await sendOrderConfirmationEmail({
+              to: updatedOrder.email,
+              orderNumber: updatedOrder.orderNumber,
+              studentName: studentName,
+              items: (updatedOrder.items || []).map((item) => ({
+                format: item.format,
+                quantity: item.quantity,
+                unitPrice: item.unitPrice,
+                subtotal: item.subtotal,
+              })),
+              packs: (updatedOrder.packs || []).map((pack) => ({
+                packName: pack.packName,
+                quantity: pack.quantity,
+                packPrice: pack.packPrice,
+                subtotal: pack.subtotal,
+                photosCount: pack.photosCount,
+              })),
+              totalAmount: updatedOrder.totalAmount,
+              paymentMethod: 'online',
+              notes: updatedOrder.notes,
+            });
+
+            if (emailResult.success) {
+              console.log('✅ Email de confirmation envoyé');
+            } else {
+              console.error('❌ Erreur envoi email:', emailResult.error);
+            }
+          } catch (emailErr) {
+            console.error('❌ Exception envoi email dans webhook:', emailErr);
+          }
         } else {
           console.error('❌ Commande non trouvée:', orderId);
         }
