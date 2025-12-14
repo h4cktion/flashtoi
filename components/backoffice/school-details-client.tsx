@@ -5,7 +5,7 @@ import {
   SchoolWithStats,
   StudentWithDetails,
   OrderWithDetails,
-  updateSchoolClosingDate,
+  updateSchoolClosureDate,
   updateSchoolRibForAdmin,
   updateSchoolDetails,
 } from "@/lib/actions/admin";
@@ -20,7 +20,7 @@ interface SchoolDetailsClientProps {
     email: string;
     address: string;
     phone: string;
-    closingDate?: string;
+    closureDate?: string;
     rib?: string;
     password?: string;
     clearPassword?: string;
@@ -46,8 +46,8 @@ export function SchoolDetailsClient({
     email: school.email,
     phone: school.phone,
     address: school.address,
-    closingDate: school.closingDate
-      ? new Date(school.closingDate).toISOString().split("T")[0]
+    closureDate: school.closureDate
+      ? new Date(school.closureDate).toISOString().split("T")[0]
       : "",
     rib: school.rib || "",
   });
@@ -57,8 +57,8 @@ export function SchoolDetailsClient({
 
   // Check if there are changes
   const hasChanges = () => {
-    const initialClosingDate = school.closingDate
-      ? new Date(school.closingDate).toISOString().split("T")[0]
+    const initialClosingDate = school.closureDate
+      ? new Date(school.closureDate).toISOString().split("T")[0]
       : "";
     
     return (
@@ -66,7 +66,7 @@ export function SchoolDetailsClient({
       formData.email !== school.email ||
       formData.phone !== school.phone ||
       formData.address !== school.address ||
-      formData.closingDate !== initialClosingDate ||
+      formData.closureDate !== initialClosingDate ||
       formData.rib !== (school.rib || "")
     );
   };
@@ -89,14 +89,14 @@ export function SchoolDetailsClient({
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      const closingDate = formData.closingDate ? new Date(formData.closingDate) : null;
+      const closureDate = formData.closureDate ? new Date(formData.closureDate) : null;
       
       const result = await updateSchoolDetails(school._id, {
         name: formData.name,
         email: formData.email,
         phone: formData.phone,
         address: formData.address,
-        closingDate,
+        closureDate,
         rib: formData.rib,
       });
 
@@ -318,7 +318,7 @@ export function SchoolDetailsClient({
               <div className="space-y-6">
                 <div>
                   <label
-                    htmlFor="closingDate"
+                    htmlFor="closureDate"
                     className="block text-sm font-medium text-gray-700"
                   >
                     Date de clôture des commandes
@@ -326,11 +326,11 @@ export function SchoolDetailsClient({
                   <div className="mt-1">
                     <input
                       type="date"
-                      name="closingDate"
-                      id="closingDate"
+                      name="closureDate"
+                      id="closureDate"
                       className="block w-full px-3 py-2 rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border text-gray-900"
-                      value={formData.closingDate}
-                      onChange={(e) => setFormData({ ...formData, closingDate: e.target.value })}
+                      value={formData.closureDate}
+                      onChange={(e) => setFormData({ ...formData, closureDate: e.target.value })}
                     />
                   </div>
                   <p className="mt-2 text-sm text-gray-500">

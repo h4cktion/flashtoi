@@ -47,7 +47,7 @@ const SchoolSchema = new Schema<ISchool>(
       required: false,
       trim: true,
     },
-    closingDate: {
+    closureDate: {
       type: Date,
       required: false,
     },

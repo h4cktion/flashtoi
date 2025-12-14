@@ -534,6 +534,7 @@ export async function updateSchoolDetails(
     address: string;
     phone: string;
     email: string;
+    closureDate?: Date;
   }
 ): Promise<ActionResponse<void>> {
   try {
@@ -552,6 +553,7 @@ export async function updateSchoolDetails(
         address: data.address,
         phone: data.phone,
         email: data.email,
+        closureDate: data.closureDate,
       },
     });
 

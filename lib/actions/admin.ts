@@ -523,7 +523,7 @@ export async function getSchoolDetailsForAdmin(schoolId: string): Promise<
       email: string;
       address: string;
       phone: string;
-      closingDate?: string;
+      closureDate?: string;
       password?: string;
       clearPassword?: string;
     };
@@ -701,8 +701,8 @@ export async function getSchoolDetailsForAdmin(schoolId: string): Promise<
           phone: school.phone,
           password: school.password,
           clearPassword: school.clearPassword,
-          closingDate: school.closingDate
-            ? new Date(school.closingDate).toISOString()
+          closureDate: school.closureDate
+            ? new Date(school.closureDate).toISOString()
             : undefined,
           createdAt: school.createdAt
             ? new Date(school.createdAt).toISOString()
@@ -733,9 +733,9 @@ export async function getSchoolDetailsForAdmin(schoolId: string): Promise<
  * Update school closing date
  * Admin only
  */
-export async function updateSchoolClosingDate(
+export async function updateSchoolClosureDate(
   schoolId: string,
-  closingDate: Date | null
+  closureDate: Date | null
 ): Promise<ActionResponse<void>> {
   try {
     // 1. Check authentication
@@ -749,7 +749,7 @@ export async function updateSchoolClosingDate(
 
     // 3. Update school
     await School.findByIdAndUpdate(schoolId, {
-      $set: { closingDate },
+      $set: { closureDate },
     });
 
     return { success: true };
@@ -808,7 +808,7 @@ export async function updateSchoolDetails(
     email: string;
     phone: string;
     address: string;
-    closingDate?: Date | null;
+    closureDate?: Date | null;
     rib?: string;
   }
 ): Promise<ActionResponse<{ success: boolean }>> {
@@ -830,7 +830,7 @@ export async function updateSchoolDetails(
         email: data.email,
         phone: data.phone,
         address: data.address,
-        closingDate: data.closingDate,
+        closureDate: data.closureDate,
         rib: data.rib,
       },
     });

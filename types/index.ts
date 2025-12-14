@@ -63,7 +63,7 @@ export interface ISchool {
   address: string;
   phone: string;
   rib?: string;
-  closingDate?: Date;
+  closureDate?: Date;
   createdAt: Date;
   updatedAt: Date;
 }

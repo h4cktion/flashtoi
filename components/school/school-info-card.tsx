@@ -17,6 +17,7 @@ export function SchoolInfoCard({ school }: SchoolInfoCardProps) {
     address: school.address,
     phone: school.phone,
     email: school.email,
+    closureDate: school.closureDate ? new Date(school.closureDate).toISOString().split('T')[0] : '',
   });
 
   const handleSave = async () => {
@@ -25,7 +26,10 @@ export function SchoolInfoCard({ school }: SchoolInfoCardProps) {
 
     const result = await updateSchoolDetails(
       typeof school._id === 'string' ? school._id : school._id.toString(),
-      formData
+      {
+        ...formData,
+        closureDate: formData.closureDate ? new Date(formData.closureDate) : undefined
+      }
     );
 
     if (result.success) {
@@ -43,6 +47,7 @@ export function SchoolInfoCard({ school }: SchoolInfoCardProps) {
       address: school.address,
       phone: school.phone,
       email: school.email,
+      closureDate: school.closureDate ? new Date(school.closureDate).toISOString().split('T')[0] : '',
     });
   };
 
@@ -130,6 +135,19 @@ export function SchoolInfoCard({ school }: SchoolInfoCardProps) {
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 text-gray-900"
             />
           </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Date de clôture
+            </label>
+            <input
+              type="date"
+              value={formData.closureDate}
+              onChange={(e) =>
+                setFormData({ ...formData, closureDate: e.target.value })
+              }
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 text-gray-900"
+            />
+          </div>
           
           <div className="md:col-span-2 flex justify-end gap-3 mt-4">
             <button
@@ -165,6 +183,14 @@ export function SchoolInfoCard({ school }: SchoolInfoCardProps) {
           <div>
             <p className="text-sm font-medium text-gray-600">Email</p>
             <p className="text-gray-900">{school.email}</p>
+          </div>
+          <div>
+            <p className="text-sm font-medium text-gray-600">Date de clôture</p>
+            <p className="text-gray-900">
+              {school.closureDate
+                ? new Date(school.closureDate).toLocaleDateString()
+                : 'Non définie'}
+            </p>
           </div>
         </div>
       )}
