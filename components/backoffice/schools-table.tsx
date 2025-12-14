@@ -1,39 +1,47 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { SchoolWithStats } from "@/lib/actions/admin";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useDebounce } from "use-debounce";
 
 interface SchoolsTableProps {
   schools: SchoolWithStats[];
+  pagination: {
+    currentPage: number;
+    totalPages: number;
+    totalSchools: number;
+  };
 }
 
-export function SchoolsTable({ schools }: SchoolsTableProps) {
-  const [currentPage, setCurrentPage] = useState(1);
-  const [searchTerm, setSearchTerm] = useState("");
-  const itemsPerPage = 10;
+export function SchoolsTable({ schools, pagination }: SchoolsTableProps) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
-  // Filter schools based on search
-  const filteredSchools = schools.filter((school) => {
-    if (!searchTerm) return true;
+  // Search state
+  const [searchTerm, setSearchTerm] = useState(searchParams.get("search") || "");
+  const [debouncedSearch] = useDebounce(searchTerm, 300);
 
-    const search = searchTerm.toLowerCase();
-    return (
-      school.name.toLowerCase().includes(search) ||
-      school.loginCode.toLowerCase().includes(search)
-    );
-  });
+  // Update URL when search changes
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams);
+    if (debouncedSearch) {
+      params.set("search", debouncedSearch);
+    } else {
+      params.delete("search");
+    }
+    // Reset to page 1 on search
+    params.set("page", "1");
+    router.push(`?${params.toString()}`);
+  }, [debouncedSearch, router]);
+  // Note: searchParams dependency is omitted intentionally to avoid loops, 
+  // relying on debouncedSearch changes directly.
 
-  // Calculate pagination
-  const totalPages = Math.ceil(filteredSchools.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const currentSchools = filteredSchools.slice(startIndex, endIndex);
-
-  // Reset to page 1 when search changes
-  const handleSearch = (value: string) => {
-    setSearchTerm(value);
-    setCurrentPage(1);
+  const handlePageChange = (page: number) => {
+    const params = new URLSearchParams(searchParams);
+    params.set("page", page.toString());
+    router.push(`?${params.toString()}`);
   };
 
   // Format currency
@@ -42,15 +50,6 @@ export function SchoolsTable({ schools }: SchoolsTableProps) {
       style: "currency",
       currency: "EUR",
     }).format(amount);
-  };
-
-  // Format date
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("fr-FR", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    });
   };
 
   return (
@@ -62,17 +61,17 @@ export function SchoolsTable({ schools }: SchoolsTableProps) {
             type="text"
             placeholder="Rechercher par nom d'école ou code de connexion..."
             value={searchTerm}
-            onChange={(e) => handleSearch(e.target.value)}
+            onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full px-4 py-2 border border-gray-300  text-slate-500 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent"
           />
         </div>
         <div className="text-sm text-gray-600">
-          {filteredSchools.length} école(s)
+          {pagination.totalSchools} école(s)
         </div>
       </div>
 
       {/* Table */}
-      {currentSchools.length === 0 ? (
+      {schools.length === 0 ? (
         <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
           <p className="text-gray-500">Aucune école trouvée</p>
         </div>
@@ -103,7 +102,7 @@ export function SchoolsTable({ schools }: SchoolsTableProps) {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {currentSchools.map((school) => (
+                {schools.map((school) => (
                   <tr key={school._id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-gray-900">
@@ -173,24 +172,22 @@ export function SchoolsTable({ schools }: SchoolsTableProps) {
           </div>
 
           {/* Pagination */}
-          {totalPages > 1 && (
+          {pagination.totalPages > 1 && (
             <div className="flex items-center justify-between">
               <div className="text-sm text-gray-600">
-                Page {currentPage} sur {totalPages}
+                Page {pagination.currentPage} sur {pagination.totalPages}
               </div>
               <div className="flex gap-2">
                 <button
-                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                  disabled={currentPage === 1}
+                  onClick={() => handlePageChange(pagination.currentPage - 1)}
+                  disabled={pagination.currentPage === 1}
                   className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Précédent
                 </button>
                 <button
-                  onClick={() =>
-                    setCurrentPage((p) => Math.min(totalPages, p + 1))
-                  }
-                  disabled={currentPage === totalPages}
+                  onClick={() => handlePageChange(pagination.currentPage + 1)}
+                  disabled={pagination.currentPage === pagination.totalPages}
                   className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Suivant

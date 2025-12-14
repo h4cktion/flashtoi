@@ -13,6 +13,7 @@ import { useRouter } from "next/navigation";
 import { IbanInput } from "@/components/ui/iban-input";
 import { useToastStore } from "@/lib/store/toast-store";
 import { ExportPDFButton } from "./export-pdf-button";
+import { OrdersTable } from "./orders-table";
 
 interface SchoolDetailsClientProps {
   school: SchoolWithStats & {
@@ -415,7 +416,66 @@ export function SchoolDetailsClient({
         )}
 
         {activeTab === "students" && (
-          <div className="space-y-4">
+          <div className="space-y-6">
+            {/* Stats Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
+                <div className="text-sm font-medium text-gray-600">
+                  Total élèves
+                </div>
+                <div className="text-2xl font-bold text-gray-900 mt-2">
+                  {students.length}
+                </div>
+              </div>
+
+              <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
+                <div className="text-sm font-medium text-gray-600">
+                  Avec commande
+                </div>
+                <div className="text-2xl font-bold text-green-600 mt-2">
+                  {students.filter((s) => s.hasOrder).length}
+                </div>
+                <div className="text-xs text-gray-500 mt-1">
+                  {students.length > 0
+                    ? `${Math.round(
+                        (students.filter((s) => s.hasOrder).length /
+                          students.length) *
+                          100
+                      )}%`
+                    : "0%"}
+                </div>
+              </div>
+
+              <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
+                <div className="text-sm font-medium text-gray-600">
+                  Sans commande
+                </div>
+                <div className="text-2xl font-bold text-yellow-600 mt-2">
+                  {students.filter((s) => !s.hasOrder).length}
+                </div>
+                <div className="text-xs text-gray-500 mt-1">
+                  {students.length > 0
+                    ? `${Math.round(
+                        (students.filter((s) => !s.hasOrder).length /
+                          students.length) *
+                          100
+                      )}%`
+                    : "0%"}
+                </div>
+              </div>
+
+              <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
+                <div className="text-sm font-medium text-gray-600">
+                  Chiffre d&apos;affaires élèves
+                </div>
+                <div className="text-2xl font-bold text-gray-900 mt-2">
+                  {formatCurrency(
+                    students.reduce((sum, s) => sum + (s.orderAmount ?? 0), 0)
+                  )}
+                </div>
+              </div>
+            </div>
+
             {/* Search */}
             <div className="max-w-md">
               <input
@@ -532,86 +592,108 @@ export function SchoolDetailsClient({
         )}
 
         {activeTab === "orders" && (
-          <div className="overflow-x-auto border border-gray-200 rounded-lg">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Commande
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Date
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Élèves
-                  </th>
-                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Statut
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Montant
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {orders.map((order) => (
-                  <tr key={order._id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">
-                        {order.orderNumber}
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        {order.paymentMethod === "online"
-                          ? "Carte bancaire"
-                          : order.paymentMethod === "check"
-                          ? "Chèque"
-                          : "Espèces"}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
-                        {formatDate(order.createdAt)}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm text-gray-900">
-                        {order.studentNames.join(", ")}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center">
-                      <span
-                        className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                          order.status === "paid"
-                            ? "bg-green-100 text-green-800"
-                            : order.status === "pending"
-                            ? "bg-yellow-100 text-yellow-800"
-                            : "bg-gray-100 text-gray-800"
-                        }`}
-                      >
-                        {order.status === "paid"
-                          ? "Payée"
-                          : order.status === "pending"
-                          ? "En attente"
-                          : order.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium text-gray-900">
-                      {formatCurrency(order.totalAmount)}
-                    </td>
-                  </tr>
-                ))}
-                {orders.length === 0 && (
-                  <tr>
-                    <td
-                      colSpan={5}
-                      className="px-6 py-4 text-center text-gray-500"
-                    >
-                      Aucune commande trouvée
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+          <div className="space-y-6">
+            {/* Stats Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+              <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
+                <div className="text-sm font-medium text-gray-600">
+                  Total commandes
+                </div>
+                <div className="text-2xl font-bold text-gray-900 mt-2">
+                  {orders.length}
+                </div>
+              </div>
+
+              <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
+                <div className="text-sm font-medium text-gray-600">
+                  Chiffre d&apos;affaires
+                </div>
+                <div className="text-2xl font-bold text-gray-900 mt-2">
+                  {formatCurrency(
+                    orders.reduce((sum, o) => sum + (o.totalAmount ?? 0), 0)
+                  )}
+                </div>
+              </div>
+
+              <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
+                <div className="text-sm font-medium text-gray-600">
+                  Panier moyen
+                </div>
+                <div className="text-2xl font-bold text-gray-900 mt-2">
+                  {formatCurrency(
+                    orders.length > 0
+                      ? orders.reduce(
+                          (sum, o) => sum + (o.totalAmount ?? 0),
+                          0
+                        ) / orders.length
+                      : 0
+                  )}
+                </div>
+              </div>
+
+              <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
+                <div className="text-sm font-medium text-gray-600">
+                  Commandes terminées
+                </div>
+                <div className="text-2xl font-bold text-green-600 mt-2">
+                  {orders.filter((o) => o.status === "completed").length}
+                </div>
+                <div className="text-xs text-gray-500 mt-1">
+                  {orders.length > 0
+                    ? `${Math.round(
+                        (orders.filter((o) => o.status === "completed").length /
+                          orders.length) *
+                          100
+                      )}%`
+                    : "0%"}
+                </div>
+              </div>
+
+              {/* Status Stats */}
+              <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="text-sm font-medium text-gray-600">
+                    En attente
+                  </div>
+                  <span className="px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800">
+                    Pending
+                  </span>
+                </div>
+                <div className="text-2xl font-bold text-gray-900">
+                  {orders.filter((o) => o.status === "pending").length}
+                </div>
+              </div>
+
+              <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="text-sm font-medium text-gray-600">
+                    Payées
+                  </div>
+                  <span className="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">
+                    Paid
+                  </span>
+                </div>
+                <div className="text-2xl font-bold text-gray-900">
+                  {orders.filter((o) => o.status === "paid").length}
+                </div>
+              </div>
+
+              <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="text-sm font-medium text-gray-600">
+                    En ligne
+                  </div>
+                  <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
+                    Online
+                  </span>
+                </div>
+                <div className="text-2xl font-bold text-gray-900">
+                  {orders.filter((o) => o.paymentMethod === "online").length}
+                </div>
+              </div>
+            </div>
+
+            <OrdersTable orders={orders} />
           </div>
         )}
       </div>

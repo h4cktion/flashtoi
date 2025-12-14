@@ -7,7 +7,7 @@ import Order from "@/lib/db/models/Order";
 import { auth } from "@/lib/auth/auth";
 import { redirect } from "next/navigation";
 import { ActionResponse, OrderItem, OrderPackItem } from "@/types";
-import { Types } from "mongoose";
+import { Types, FilterQuery } from "mongoose";
 
 // ============================================
 // TYPES
@@ -126,8 +126,23 @@ export interface OrderPackDetails {
  * Get all schools with their statistics
  * Admin only
  */
-export async function getAllSchoolsForAdmin(): Promise<
-  ActionResponse<{ schools: SchoolWithStats[] }>
+/**
+ * Get all schools with their statistics
+ * Admin only
+ */
+export async function getAllSchoolsForAdmin(
+  page: number = 1,
+  limit: number = 10,
+  search: string = ""
+): Promise<
+  ActionResponse<{
+    schools: SchoolWithStats[];
+    pagination: {
+      currentPage: number;
+      totalPages: number;
+      totalSchools: number;
+    };
+  }>
 > {
   try {
     // 1. Check authentication
@@ -139,10 +154,27 @@ export async function getAllSchoolsForAdmin(): Promise<
     // 2. Connect to database
     await connectDB();
 
-    // 3. Fetch all schools
-    const schools = await School.find({}).sort({ createdAt: -1 }).lean();
+    // 3. Build query
+    const query: FilterQuery<typeof School> = {};
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: "i" } },
+        { loginCode: { $regex: search, $options: "i" } },
+      ];
+    }
 
-    // 4. Get statistics for each school
+    // 4. Execute query with pagination
+    const totalSchools = await School.countDocuments(query);
+    const totalPages = Math.ceil(totalSchools / limit);
+    const skip = (page - 1) * limit;
+
+    const schools = await School.find(query)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean();
+
+    // 5. Get statistics for each school
     const schoolsWithStats: SchoolWithStats[] = await Promise.all(
       schools.map(async (school) => {
         // Use ObjectId for queries
@@ -175,10 +207,6 @@ export async function getAllSchoolsForAdmin(): Promise<
         // Calculate revenue
         const totalRevenue = orders.reduce((sum, order) => {
           const amount = order.totalAmount ?? 0;
-          // Debug log for missing totalAmount
-          if (!order.totalAmount && order.totalAmount !== 0) {
-            console.log(`Order without totalAmount:`, order);
-          }
           return sum + amount;
         }, 0);
 
@@ -208,7 +236,14 @@ export async function getAllSchoolsForAdmin(): Promise<
 
     return {
       success: true,
-      data: { schools: schoolsWithStats },
+      data: {
+        schools: schoolsWithStats,
+        pagination: {
+          currentPage: page,
+          totalPages,
+          totalSchools,
+        },
+      },
     };
   } catch (error) {
     console.error("getAllSchoolsForAdmin error:", error);

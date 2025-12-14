@@ -93,7 +93,7 @@ export function ExportPDFButton({
           0: { fontStyle: "bold", cellWidth: 80 },
           1: { halign: "right" },
         },
-        didParseCell: (data: any) => {
+        didParseCell: (data) => {
           // Highlight the school payment row
           if (data.row.index === 5) {
             data.cell.styles.fillColor = [220, 252, 231]; // Light green
@@ -108,7 +108,7 @@ export function ExportPDFButton({
       });
 
       // Liste des commandes payées
-      yPos = (doc as any).lastAutoTable.finalY + 15;
+      yPos = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 15;
       
       doc.setFontSize(14);
       doc.setFont("helvetica", "bold");

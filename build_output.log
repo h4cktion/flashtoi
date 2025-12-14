@@ -1,0 +1,96 @@
+
+> photo-scolaire@0.1.0 build
+> next build
+
+   ▲ Next.js 15.5.7
+   - Environments: .env.local, .env
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 6.1s
+   Linting and checking validity of types ...
+
+./app/(public)/login/page.tsx
+95:6  Warning: React Hook useEffect has missing dependencies: 'clearCart' and 'session.user.studentId'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+
+./app/backoffice/dashboard/page.tsx
+5:8  Warning: 'Link' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/school/coupon/[studentId]/page.tsx
+129:17  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/CookieConsent.tsx
+4:8  Warning: 'Link' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./components/backoffice/orders-table.tsx
+426:25  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/backoffice/school-details-client.tsx
+8:3  Warning: 'updateSchoolClosingDate' is defined but never used.  @typescript-eslint/no-unused-vars
+9:3  Warning: 'updateSchoolRibForAdmin' is defined but never used.  @typescript-eslint/no-unused-vars
+15:10  Warning: 'ExportPDFButton' is defined but never used.  @typescript-eslint/no-unused-vars
+127:9  Warning: 'formatDate' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+522:31  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/backoffice/schools-table.tsx
+37:6  Warning: React Hook useEffect has a missing dependency: 'searchParams'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./components/gallery/css-photo-card.tsx
+27:9  Warning: 'router' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+29:9  Warning: 'urlStudentId' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./components/ui/iban-input.tsx
+3:10  Warning: 'useState' is defined but never used.  @typescript-eslint/no-unused-vars
+3:20  Warning: 'useEffect' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./lib/email/templates/order-confirmation.tsx
+46:7  Warning: Do not use `<head>` element. Use `<Head />` from `next/head` instead. See: https://nextjs.org/docs/messages/no-head-element  @next/next/no-head-element
+
+./lib/utils/s3-uploader.ts
+105:14  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/app/api-reference/config/eslint#disabling-rules
+   Collecting page data ...
+   Generating static pages (0/20) ...
+🔄 [Checkout] Affichage loader (store non hydraté)
+   Generating static pages (5/20) 
+   Generating static pages (10/20) 
+   Generating static pages (15/20) 
+ ✓ Generating static pages (20/20)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                 Size  First Load JS
+┌ ○ /                                      489 B         107 kB
+├ ○ /_not-found                            996 B         103 kB
+├ ƒ /api/auth/[...nextauth]                141 B         102 kB
+├ ƒ /api/generate-planche                  141 B         102 kB
+├ ƒ /api/stripe/create-checkout-session    141 B         102 kB
+├ ƒ /api/stripe/webhook                    141 B         102 kB
+├ ƒ /backoffice/dashboard                2.91 kB         113 kB
+├ ○ /backoffice/login                    1.56 kB         103 kB
+├ ƒ /backoffice/orders                     176 B         108 kB
+├ ƒ /backoffice/schools/[id]              143 kB         251 kB
+├ ƒ /backoffice/students                 2.35 kB         113 kB
+├ ○ /checkout                            3.27 kB         110 kB
+├ ƒ /gallery/[id]                        3.48 kB         126 kB
+├ ƒ /galleryOld                            141 B         102 kB
+├ ƒ /galleryOld/[id]                     2.79 kB         125 kB
+├ ƒ /galleryOld/[id]/pack/[packId]         856 B         113 kB
+├ ƒ /galleryOld/[id]/photo/[photoIndex]    869 B         113 kB
+├ ○ /login                               2.29 kB         109 kB
+├ ○ /order-confirmation                  1.73 kB         105 kB
+├ ƒ /school/coupon/[studentId]             899 B         108 kB
+├ ƒ /school/dashboard                    3.57 kB         113 kB
+├ ○ /school/login                        1.75 kB         104 kB
+├ ○ /school/orders                         141 B         102 kB
+├ ƒ /school/settings                      3.1 kB         113 kB
+└ ƒ /school/students                     3.09 kB         118 kB
++ First Load JS shared by all             102 kB
+  ├ chunks/255-ac576b8c1dfdf619.js       45.5 kB
+  ├ chunks/4bd1b696-409494caf8c83275.js  54.2 kB
+  └ other shared chunks (total)          2.07 kB
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

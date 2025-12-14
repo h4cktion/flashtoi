@@ -1,10 +1,21 @@
 import { auth } from '@/lib/auth/auth'
 import { redirect } from 'next/navigation'
 import { SignOutButton } from '@/components/auth/sign-out-button'
-import { getGlobalStats } from '@/lib/actions/admin'
+import { getGlobalStats, getAllSchoolsForAdmin } from '@/lib/actions/admin'
 import Link from 'next/link'
+import { SchoolsTable } from '@/components/backoffice/schools-table'
 
-export default async function BackofficeDashboardPage() {
+export default async function BackofficeDashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
+  // Await searchParams before using
+  const resolvedSearchParams = await searchParams;
+  const page = typeof resolvedSearchParams.page === 'string' ? parseInt(resolvedSearchParams.page) : 1;
+  const search = typeof resolvedSearchParams.search === 'string' ? resolvedSearchParams.search : '';
+
+  // Vérifier l'authentification
   // Vérifier l'authentification
   const session = await auth()
 
@@ -12,8 +23,11 @@ export default async function BackofficeDashboardPage() {
     redirect('/backoffice/login')
   }
 
-  // Récupérer les statistiques globales
-  const result = await getGlobalStats()
+  // Récupérer les statistiques globales et les écoles
+  const [statsResult, schoolsResult] = await Promise.all([
+    getGlobalStats(),
+    getAllSchoolsForAdmin(page, 10, search),
+  ])
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -35,10 +49,10 @@ export default async function BackofficeDashboardPage() {
       {/* Main content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Error handling */}
-        {!result.success || !result.data ? (
+        {!statsResult.success || !statsResult.data ? (
           <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-8">
             <p className="text-red-700">
-              Erreur lors du chargement des statistiques: {result.error}
+              Erreur lors du chargement des statistiques: {statsResult.error}
             </p>
           </div>
         ) : (
@@ -54,7 +68,7 @@ export default async function BackofficeDashboardPage() {
                     <div>
                       <div className="text-sm font-medium text-gray-600">Écoles</div>
                       <div className="text-3xl font-bold text-gray-900 mt-2">
-                        {result.data.stats.totalSchools}
+                        {statsResult.data.stats.totalSchools}
                       </div>
                     </div>
                     <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -80,7 +94,7 @@ export default async function BackofficeDashboardPage() {
                     <div>
                       <div className="text-sm font-medium text-gray-600">Étudiants</div>
                       <div className="text-3xl font-bold text-gray-900 mt-2">
-                        {result.data.stats.totalStudents}
+                        {statsResult.data.stats.totalStudents}
                       </div>
                     </div>
                     <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
@@ -106,14 +120,14 @@ export default async function BackofficeDashboardPage() {
                     <div>
                       <div className="text-sm font-medium text-gray-600">Commandes</div>
                       <div className="text-3xl font-bold text-gray-900 mt-2">
-                        {result.data.stats.totalOrders}
+                        {statsResult.data.stats.totalOrders}
                       </div>
                       <div className="flex gap-2 mt-2 text-xs">
                         <span className="text-yellow-600">
-                          {result.data.stats.pendingOrders} en attente
+                          {statsResult.data.stats.pendingOrders} en attente
                         </span>
                         <span className="text-green-600">
-                          {result.data.stats.paidOrders} payées
+                          {statsResult.data.stats.paidOrders} payées
                         </span>
                       </div>
                     </div>
@@ -145,21 +159,21 @@ export default async function BackofficeDashboardPage() {
                         {new Intl.NumberFormat('fr-FR', {
                           style: 'currency',
                           currency: 'EUR',
-                        }).format(result.data.stats.totalRevenue)}
+                        }).format(statsResult.data.stats.totalRevenue)}
                       </div>
                       <div className="flex flex-col gap-1 mt-2 text-xs">
                         <span className="text-yellow-600">
                           {new Intl.NumberFormat('fr-FR', {
                             style: 'currency',
                             currency: 'EUR',
-                          }).format(result.data.stats.pendingRevenue)}{' '}
+                          }).format(statsResult.data.stats.pendingRevenue)}{' '}
                           en attente
                         </span>
                         <span className="text-green-600">
                           {new Intl.NumberFormat('fr-FR', {
                             style: 'currency',
                             currency: 'EUR',
-                          }).format(result.data.stats.paidRevenue)}{' '}
+                          }).format(statsResult.data.stats.paidRevenue)}{' '}
                           payé
                         </span>
                       </div>
@@ -184,103 +198,23 @@ export default async function BackofficeDashboardPage() {
               </div>
             </div>
 
-            {/* Quick actions */}
+            {/* Schools Table */}
             <div className="mb-8">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">Accès rapide</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Link
-                  href="/backoffice/schools"
-                  className="bg-white rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow"
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                      <svg
-                        className="w-6 h-6 text-blue-600"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-                        />
-                      </svg>
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900">
-                        Gestion des écoles
-                      </h3>
-                      <p className="text-sm text-gray-600">
-                        Voir toutes les écoles et leurs statistiques
-                      </p>
-                    </div>
-                  </div>
-                </Link>
-
-                <Link
-                  href="/backoffice/orders"
-                  className="bg-white rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow"
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                      <svg
-                        className="w-6 h-6 text-purple-600"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
-                        />
-                      </svg>
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900">
-                        Gestion des commandes
-                      </h3>
-                      <p className="text-sm text-gray-600">
-                        Voir toutes les commandes et paiements
-                      </p>
-                    </div>
-                  </div>
-                </Link>
-
-                <Link
-                  href="/backoffice/students"
-                  className="bg-white rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow"
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                      <svg
-                        className="w-6 h-6 text-green-600"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
-                        />
-                      </svg>
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900">
-                        Gestion des étudiants
-                      </h3>
-                      <p className="text-sm text-gray-600">
-                        Voir tous les étudiants et leurs commandes
-                      </p>
-                    </div>
-                  </div>
-                </Link>
-              </div>
+              <h2 className="text-xl font-bold text-gray-900 mb-4">Gestion des écoles</h2>
+              {schoolsResult.success && schoolsResult.data ? (
+                <div className="bg-white rounded-lg shadow-sm p-6">
+                  <SchoolsTable 
+                    schools={schoolsResult.data.schools} 
+                    pagination={schoolsResult.data.pagination}
+                  />
+                </div>
+              ) : (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                  <p className="text-red-700">
+                    Erreur lors du chargement des écoles: {schoolsResult.error}
+                  </p>
+                </div>
+              )}
             </div>
           </>
         )}
