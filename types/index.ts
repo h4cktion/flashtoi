@@ -218,6 +218,7 @@ export interface ITemplatePhoto {
   x: number;
   y: number;
   width: number;
+  height?: number;
   rotation: number;
   cropTop: number;
   cropBottom: number;

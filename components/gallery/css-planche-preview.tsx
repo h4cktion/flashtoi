@@ -160,8 +160,10 @@ export function CssPlanchePreview({
             }}
           >
             <div
-              className="relative w-full h-full"
+              className="relative w-full"
               style={{
+                height: photo.height ? `${photo.height}%` : "100%",
+                width: "100%",
                 // Appliquer le crop top et bottom
                 clipPath:
                   cropTop > 0 || cropBottom > 0
