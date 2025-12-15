@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { updateOrderPaymentStatus } from "@/lib/actions/school";
+import { OrderItem, OrderPackItem } from "@/types/index";
 
 // Define a unified Order type that covers both backoffice and school needs
 export interface UnifiedOrder {
@@ -25,8 +27,8 @@ export interface UnifiedOrder {
   // School specific fields (optional)
     // Add any if needed, currently covered by base fields
     // items and packs details are needed for the modal
-  items?: any[];
-  packs?: any[];
+  items?: OrderItem[];
+  packs?: OrderPackItem[];
   studentPhotos?: (string | null)[];
 }
 
@@ -504,7 +506,14 @@ function OrderDetailsModal({
                     <div key={idx} className="flex items-center gap-2">
                        {/* Try to display photo if available */}
                        {order.studentPhotos && order.studentPhotos[idx] ? (
-                           <img src={order.studentPhotos[idx]!} alt={name} className="w-8 h-8 rounded-full object-cover border border-gray-200" />
+                           <Image 
+                             src={order.studentPhotos[idx]!} 
+                             alt={name} 
+                             width={32}
+                             height={32}
+                             className="rounded-full object-cover border border-gray-200"
+                             unoptimized
+                           />
                        ) : (
                            <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs font-medium text-gray-500">
                              {name.charAt(0)}
@@ -546,7 +555,7 @@ function OrderDetailsModal({
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
-                         {order.items?.map((item: any, idx: number) => (
+                         {order.items?.map((item, idx) => (
                         <tr key={idx}>
                             <td className="px-4 py-2 text-sm text-gray-900">{item.plancheName} - {item.format}</td>
                             <td className="px-4 py-2 text-sm text-gray-900 text-right">{item.quantity}</td>
@@ -554,7 +563,7 @@ function OrderDetailsModal({
                             <td className="px-4 py-2 text-sm text-gray-900 text-right font-medium">{formatCurrency(item.subtotal)}</td>
                         </tr>
                         ))}
-                        {order.packs?.map((pack: any, idx: number) => (
+                        {order.packs?.map((pack, idx) => (
                         <tr key={`pack-${idx}`}>
                             <td className="px-4 py-2 text-sm text-gray-900">Pack {pack.packName} ({pack.photosCount} photos)</td>
                             <td className="px-4 py-2 text-sm text-gray-900 text-right">{pack.quantity}</td>
