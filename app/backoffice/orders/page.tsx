@@ -37,7 +37,7 @@ export default async function BackofficeOrdersPage() {
 
   // Par statut
   const pendingOrders = orders.filter((o) => o.status === "pending");
-  const paidOrders = orders.filter((o) => o.status === "paid");
+  const paidOrders = orders.filter((o) => o.status !== "pending");
   const completedOrders = orders.filter((o) => o.status === "completed");
 
   const pendingRevenue = pendingOrders.reduce(
@@ -205,7 +205,7 @@ export default async function BackofficeOrdersPage() {
               <div className="text-2xl font-bold text-gray-900">
                 {totalOrders > 0
                   ? `${Math.round(
-                      ((paidOrders.length + completedOrders.length) /
+                      (paidOrders.length /
                         totalOrders) *
                         100
                     )}%`

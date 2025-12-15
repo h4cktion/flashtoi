@@ -108,6 +108,7 @@ export function OrdersTable({ orders }: OrdersTableProps) {
       validated: { label: "Validée", color: "bg-blue-100 text-blue-800" },
       processing: { label: "En cours", color: "bg-purple-100 text-purple-800" },
       shipped: { label: "Expédiée", color: "bg-indigo-100 text-indigo-800" },
+      print: { label: "Impression", color: "bg-pink-100 text-pink-800" },
       completed: { label: "Terminée", color: "bg-gray-100 text-gray-800" },
     };
 
@@ -172,6 +173,7 @@ export function OrdersTable({ orders }: OrdersTableProps) {
             <option value="paid">Payées</option>
             <option value="validated">Validées</option>
             <option value="processing">En cours</option>
+            <option value="print">Impression</option>
             <option value="shipped">Expédiées</option>
             <option value="completed">Terminées</option>
           </select>

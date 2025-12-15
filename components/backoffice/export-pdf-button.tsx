@@ -72,12 +72,13 @@ export function ExportPDFButton({
       doc.setFont("helvetica", "normal");
       
       const stats = [
-        ["Chiffre d'affaires total", formatCurrency(totalRevenue)],
+        ["Chiffre d'affaires total (Payé + En attente)", formatCurrency(totalRevenue)],
         ["Commandes payées", `${paidOrders}`],
         ["Commandes en attente", `${pendingOrders}`],
         ["", ""],
-        ["Revenu des commandes payées", formatCurrency(paidRevenue)],
-        ["Montant à payer à l'école (30%)", formatCurrency(schoolPayment)],
+        ["Chiffre d'affaires encaissé (Base de calcul)", formatCurrency(paidRevenue)],
+        ["Part Photographe (70%)", formatCurrency(paidRevenue * 0.7)],
+        ["Part École (30%)", formatCurrency(schoolPayment)],
       ];
 
       autoTable(doc, {
@@ -95,7 +96,7 @@ export function ExportPDFButton({
         },
         didParseCell: (data) => {
           // Highlight the school payment row
-          if (data.row.index === 5) {
+          if (data.row.index === 6) {
             data.cell.styles.fillColor = [220, 252, 231]; // Light green
             data.cell.styles.fontStyle = "bold";
             data.cell.styles.fontSize = 12;
@@ -116,7 +117,7 @@ export function ExportPDFButton({
       
       yPos += 5;
 
-      const paidOrdersList = orders.filter((o) => o.status === "paid");
+      const paidOrdersList = orders.filter((o) => o.status !== "pending");
       
       if (paidOrdersList.length > 0) {
         const orderData = paidOrdersList.map((order) => [

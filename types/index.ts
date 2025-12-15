@@ -88,6 +88,7 @@ export type OrderStatus =
   | "pending"
   | "paid"
   | "validated"
+  | "print"
   | "processing"
   | "shipped"
   | "completed";
@@ -219,6 +220,7 @@ export interface ITemplatePhoto {
   y: number;
   width: number;
   height?: number;
+  divHeight?: number;
   rotation: number;
   cropTop: number;
   cropBottom: number;

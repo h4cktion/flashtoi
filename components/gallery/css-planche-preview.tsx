@@ -139,6 +139,9 @@ export function CssPlanchePreview({
         if (photo.css?.height !== undefined) {
           // Utiliser la hauteur CSS spécifiée
           heightPercent = photo.css.height;
+        } else if (photo.divHeight !== undefined) {
+          // Utiliser la hauteur spécifiée dans DB
+          heightPercent = photo.divHeight;
         } else {
           // Calculer selon le ratio portrait (1:1.33) ajusté pour les crops
           const desiredHeight = photoWidth * 1.33;

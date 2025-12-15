@@ -193,7 +193,9 @@ export async function getAllSchoolsForAdmin(
         const pendingOrders = orders.filter(
           (o) => o.status === "pending"
         ).length;
-        const paidOrders = orders.filter((o) => o.status === "paid").length;
+        const paidOrders = orders.filter(
+          (o) => o.status !== "pending"
+        ).length;
 
         // Calculate unique students with orders
         const studentsWithOrders = new Set();
@@ -211,7 +213,7 @@ export async function getAllSchoolsForAdmin(
         }, 0);
 
         const paidRevenue = orders
-          .filter((o) => o.status === "paid")
+          .filter((o) => o.status !== "pending")
           .reduce((sum, order) => sum + (order.totalAmount ?? 0), 0);
         const schoolPayment = paidRevenue * 0.3;
 
@@ -280,7 +282,7 @@ export async function getGlobalStats(): Promise<
     const allOrders = await Order.find({}).select("totalAmount status").lean();
 
     const pendingOrders = allOrders.filter((o) => o.status === "pending");
-    const paidOrders = allOrders.filter((o) => o.status === "paid");
+    const paidOrders = allOrders.filter((o) => o.status !== "pending");
 
     const totalRevenue = allOrders.reduce(
       (sum, order) => sum + (order.totalAmount ?? 0),
@@ -565,13 +567,13 @@ export async function getSchoolDetailsForAdmin(schoolId: string): Promise<
     const studentsCount = students.length;
     const ordersCount = orders.length;
     const pendingOrders = orders.filter((o) => o.status === "pending").length;
-    const paidOrders = orders.filter((o) => o.status === "paid").length;
+    const paidOrders = orders.filter((o) => o.status !== "pending").length;
     const totalRevenue = orders.reduce(
       (sum, order) => sum + (order.totalAmount ?? 0),
       0
     );
     const paidRevenue = orders
-      .filter((o) => o.status === "paid")
+      .filter((o) => o.status !== "pending")
       .reduce((sum, order) => sum + (order.totalAmount ?? 0), 0);
     const schoolPayment = paidRevenue * 0.3;
 
