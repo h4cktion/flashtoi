@@ -42,9 +42,12 @@ export default async function SchoolSettingsPage() {
             <div className="flex items-center gap-4">
               <Link
                 href="/school/dashboard"
-                className="px-4 py-2 text-gray-700 hover:text-gray-900 transition-colors"
+                className="flex items-center gap-2 text-gray-500 hover:text-gray-900 transition-colors"
               >
-                ← Dashboard
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                <span className="font-medium">Retour</span>
               </Link>
               <SignOutButton />
             </div>

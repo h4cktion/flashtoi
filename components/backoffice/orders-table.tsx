@@ -159,45 +159,48 @@ export function OrdersTable({ orders }: OrdersTableProps) {
             placeholder="Rechercher par numéro, école ou nom d'étudiant..."
             value={searchTerm}
             onChange={(e) => handleSearch(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 text-slate-500 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+            className="w-full px-4 py-2 border border-gray-300 text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent"
           />
         </div>
         <div className="flex gap-2 flex-wrap">
           <select
             value={statusFilter}
             onChange={(e) => handleStatusFilter(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg  text-slate-500 focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+            style={{ color: '#111827' }}
+            className="px-4 py-2 border text-gray-900 border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent"
           >
-            <option value="all">Tous les statuts</option>
-            <option value="pending">En attente</option>
-            <option value="paid">Payées</option>
-            <option value="validated">Validées</option>
-            <option value="processing">En cours</option>
-            <option value="print">Impression</option>
-            <option value="shipped">Expédiées</option>
-            <option value="completed">Terminées</option>
+            <option style={{ color: 'black' }} value="all">Tous les statuts</option>
+            <option style={{ color: 'black' }} value="pending">En attente</option>
+            <option style={{ color: 'black' }} value="paid">Payées</option>
+            <option style={{ color: 'black' }} value="validated">Validées</option>
+            <option style={{ color: 'black' }} value="processing">En cours</option>
+            <option style={{ color: 'black' }} value="print">Impression</option>
+            <option style={{ color: 'black' }} value="shipped">Expédiées</option>
+            <option style={{ color: 'black' }} value="completed">Terminées</option>
           </select>
 
           <select
             value={paymentFilter}
             onChange={(e) => handlePaymentFilter(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg  text-slate-500 focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+            style={{ color: '#111827' }}
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent"
           >
-            <option value="all">Tous les paiements</option>
-            <option value="online">En ligne</option>
-            <option value="cash">Espèces</option>
-            <option value="check">Chèque</option>
-            <option value="pending">En attente</option>
+            <option style={{ color: 'black' }} value="all">Tous les paiements</option>
+            <option style={{ color: 'black' }} value="online">En ligne</option>
+            <option style={{ color: 'black' }} value="cash">Espèces</option>
+            <option style={{ color: 'black' }} value="check">Chèque</option>
+            <option style={{ color: 'black' }} value="pending">En attente</option>
           </select>
 
           <select
             value={itemTypeFilter}
             onChange={(e) => handleItemTypeFilter(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg text-slate-500 focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+            style={{ color: '#111827' }}
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent"
           >
-            <option value="all">Tous les articles</option>
+            <option style={{ color: 'black' }} value="all">Tous les articles</option>
             {allItemTypes.map((type) => (
-              <option key={type} value={type}>
+              <option key={type} value={type} style={{ color: 'black' }}>
                 {type}
               </option>
             ))}

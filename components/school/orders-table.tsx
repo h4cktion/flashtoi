@@ -166,7 +166,7 @@ export function OrdersTable({ orders, schoolId }: OrdersTableProps) {
             value={searchTerm}
             onChange={(e) => handleSearch(e.target.value)}
             placeholder="Rechercher par n° ou étudiant..."
-            className="w-full px-4 py-2 pl-10 border border-gray-300  text-slate-500 rounded-lg text-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-4 py-2 pl-10 border border-gray-300 text-gray-900 rounded-lg rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
           <svg
             className="absolute left-3 top-2.5 h-5 w-5 text-gray-400"
@@ -208,15 +208,16 @@ export function OrdersTable({ orders, schoolId }: OrdersTableProps) {
           <select
             value={statusFilter}
             onChange={(e) => handleStatusFilter(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            style={{ color: '#111827' }}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           >
-            <option value="all">Tous les statuts</option>
-            <option value="pending">En attente</option>
-            <option value="paid">Payé</option>
-            <option value="validated">Validé</option>
-            <option value="processing">En traitement</option>
-            <option value="shipped">Expédié</option>
-            <option value="completed">Terminé</option>
+            <option style={{ color: 'black' }} value="all">Tous les statuts</option>
+            <option style={{ color: 'black' }} value="pending">En attente</option>
+            <option style={{ color: 'black' }} value="paid">Payé</option>
+            <option style={{ color: 'black' }} value="validated">Validé</option>
+            <option style={{ color: 'black' }} value="processing">En traitement</option>
+            <option style={{ color: 'black' }} value="shipped">Expédié</option>
+            <option style={{ color: 'black' }} value="completed">Terminé</option>
           </select>
         </div>
 
@@ -225,13 +226,14 @@ export function OrdersTable({ orders, schoolId }: OrdersTableProps) {
           <select
             value={paymentFilter}
             onChange={(e) => handlePaymentFilter(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            style={{ color: '#111827' }}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           >
-            <option value="all">Tous les modes de paiement</option>
-            <option value="check">Chèque</option>
-            <option value="cash">Espèces</option>
-            <option value="online">En ligne</option>
-            <option value="pending">En attente</option>
+            <option style={{ color: 'black' }} value="all">Tous les modes de paiement</option>
+            <option style={{ color: 'black' }} value="check">Chèque</option>
+            <option style={{ color: 'black' }} value="cash">Espèces</option>
+            <option style={{ color: 'black' }} value="online">En ligne</option>
+            <option style={{ color: 'black' }} value="pending">En attente</option>
           </select>
         </div>
       </div>

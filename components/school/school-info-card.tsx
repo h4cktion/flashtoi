@@ -17,7 +17,6 @@ export function SchoolInfoCard({ school }: SchoolInfoCardProps) {
     address: school.address,
     phone: school.phone,
     email: school.email,
-    closureDate: school.closureDate ? new Date(school.closureDate).toISOString().split('T')[0] : '',
   });
 
   const handleSave = async () => {
@@ -27,8 +26,9 @@ export function SchoolInfoCard({ school }: SchoolInfoCardProps) {
     const result = await updateSchoolDetails(
       typeof school._id === 'string' ? school._id : school._id.toString(),
       {
-        ...formData,
-        closureDate: formData.closureDate ? new Date(formData.closureDate) : undefined
+        address: formData.address,
+        phone: formData.phone,
+        email: formData.email,
       }
     );
 
@@ -47,7 +47,6 @@ export function SchoolInfoCard({ school }: SchoolInfoCardProps) {
       address: school.address,
       phone: school.phone,
       email: school.email,
-      closureDate: school.closureDate ? new Date(school.closureDate).toISOString().split('T')[0] : '',
     });
   };
 
@@ -137,16 +136,13 @@ export function SchoolInfoCard({ school }: SchoolInfoCardProps) {
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Date de clôture
+              Date de clôture (Non modifiable)
             </label>
-            <input
-              type="date"
-              value={formData.closureDate}
-              onChange={(e) =>
-                setFormData({ ...formData, closureDate: e.target.value })
-              }
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 text-gray-900"
-            />
+            <p className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-md text-gray-500">
+              {school.closureDate
+                ? new Date(school.closureDate).toLocaleDateString()
+                : 'Non définie'}
+            </p>
           </div>
           
           <div className="md:col-span-2 flex justify-end gap-3 mt-4">
