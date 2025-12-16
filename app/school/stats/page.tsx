@@ -23,7 +23,7 @@ export default async function SchoolStatsPage() {
     )
   }
 
-  const { stats, school } = result.data
+  const { stats } = result.data
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -33,7 +33,7 @@ export default async function SchoolStatsPage() {
             <div className="flex items-center gap-4">
                 <h1 className="text-3xl font-bold text-gray-900">Statistiques</h1>
                 <p className="text-gray-600 mt-1">
-                  Vue d'ensemble des ventes
+                  Vue d&apos;ensemble des ventes
                 </p>
             </div>
             <div className="flex items-center gap-4">
@@ -55,7 +55,7 @@ export default async function SchoolStatsPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <div className="bg-white p-6 rounded-lg shadow-sm">
-            <h3 className="text-sm font-medium text-gray-500">Chiffre d'affaire (30%)</h3>
+            <h3 className="text-sm font-medium text-gray-500">Chiffre d&apos;affaire (30%)</h3>
             <p className="text-3xl font-bold text-gray-900 mt-2">{(stats.totalRevenue * 0.3).toFixed(2)} €</p>
             <p className="text-sm text-gray-500 mt-1">sur {stats.totalRevenue.toFixed(2)} € total</p>
           </div>
