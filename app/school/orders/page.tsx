@@ -91,7 +91,7 @@ export default async function SchoolOrdersPage() {
 
           <div className="bg-white p-6 rounded-lg shadow-sm">
             <h3 className="text-sm font-medium text-gray-600 mb-2">
-              Chiffre d'affaire (30%)
+              Chiffre d&apos;affaire (30%)
             </h3>
             <p className="text-3xl font-bold text-green-600">
               {schoolShare.toFixed(2)} €

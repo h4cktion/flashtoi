@@ -53,7 +53,7 @@ export default async function SchoolDashboardPage() {
               </div>
               <div className="ml-3">
                 <p className="text-sm text-orange-700">
-                  Votre RIB n'est pas renseigné. Veuillez l'ajouter dans les <Link href="/school/settings" className="font-bold underline">paramètres</Link> pour recevoir vos versements.
+                  Votre RIB n&apos;est pas renseigné. Veuillez l&apos;ajouter dans les <Link href="/school/settings" className="font-bold underline">paramètres</Link> pour recevoir vos versements.
                 </p>
               </div>
             </div>
@@ -96,7 +96,7 @@ export default async function SchoolDashboardPage() {
                 </svg>
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">Statistiques</h3>
-              <p className="text-gray-500">Suivre le chiffre d'affaires, le panier moyen et les performances.</p>
+              <p className="text-gray-500">Suivre le chiffre d&apos;affaires, le panier moyen et les performances.</p>
             </div>
           </Link>
         </div>
