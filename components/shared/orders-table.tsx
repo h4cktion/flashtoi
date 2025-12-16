@@ -222,18 +222,39 @@ export function SharedOrdersTable({
         </div>
 
         {/* Filters */}
-        <div className="flex gap-2 flex-wrap">
-          <select
-            value={statusFilter}
-            onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); }}
-            style={{ color: '#374151' }} 
-            className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          >
-            <option style={{ color: '#374151' }} value="all">Tous les statuts</option>
-            {Object.entries(STATUS_CONFIG).map(([key, config]) => (
-                <option key={key} style={{ color: '#374151' }} value={key}>{config.label}</option>
-            ))}
-          </select>
+        <div className="flex gap-2 flex-wrap items-center">
+          <div className="relative">
+             <select
+              value={statusFilter}
+              onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); }}
+              style={{ color: '#374151' }} 
+              className={`px-4 py-2 border rounded-lg text-gray-700 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all ${
+                 orders.some(o => o.status === 'pending') && statusFilter !== 'pending'
+                 ? 'border-orange-300 ring-2 ring-orange-100 ring-offset-1' 
+                 : 'border-gray-300'
+              }`}
+            >
+              <option style={{ color: '#374151' }} value="all">Tous les statuts</option>
+              {Object.entries(STATUS_CONFIG).map(([key, config]) => (
+                  <option key={key} style={{ color: '#374151' }} value={key}>{config.label}</option>
+              ))}
+            </select>
+            
+            {/* Pending Orders Prompt */}
+            {orders.some(o => o.status === 'pending') && statusFilter !== 'pending' && (
+              <div 
+                onClick={() => { setStatusFilter('pending'); setCurrentPage(1); }}
+                className="absolute -top-10 left-0 bg-orange-100 text-orange-700 text-xs px-3 py-1.5 rounded-lg shadow-md border border-orange-200 cursor-pointer hover:bg-orange-200 transition-colors animate-bounce whitespace-nowrap z-10 flex items-center gap-1 group"
+              >
+                <span>Filtrer les {orders.filter(o => o.status === 'pending').length} en attente</span>
+                <svg className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+                 {/* Little arrow pointing down */}
+                <div className="absolute -bottom-1 left-4 w-2 h-2 bg-orange-100 border-b border-r border-orange-200 transform rotate-45"></div>
+              </div>
+            )}
+          </div>
 
           <select
             value={paymentFilter}

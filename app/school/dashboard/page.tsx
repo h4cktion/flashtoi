@@ -63,7 +63,17 @@ export default async function SchoolDashboardPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Action 1: Valider les commandes */}
           <Link href="/school/orders" className="block group">
-            <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow p-8 h-full flex flex-col items-center text-center border border-gray-100 hover:border-indigo-100">
+            <div className={`bg-white rounded-xl shadow-sm hover:shadow-md transition-all p-8 h-full flex flex-col items-center text-center border relative ${
+              result.data?.stats.pendingOrders && result.data.stats.pendingOrders > 0 
+                ? 'border-orange-200 ring-2 ring-orange-100 ring-offset-2 animate-pulse-slow' 
+                : 'border-gray-100 hover:border-indigo-100'
+            }`}>
+              {result.data?.stats.pendingOrders ? (
+                <div className="absolute top-4 right-4 bg-red-100 text-red-600 px-3 py-1 rounded-full text-xs font-bold animate-bounce shadow-sm border border-red-200">
+                  {result.data.stats.pendingOrders} à valider
+                </div>
+              ) : null}
+              
               <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mb-6 group-hover:bg-blue-100 transition-colors">
                 <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
