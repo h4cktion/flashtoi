@@ -47,6 +47,11 @@ const SchoolSchema = new Schema<ISchool>(
       required: false,
       trim: true,
     },
+    pochette: {
+      type: String,
+      required: false,
+      trim: true, // Stores the planche name of the selected template
+    },
     closureDate: {
       type: Date,
       required: false,

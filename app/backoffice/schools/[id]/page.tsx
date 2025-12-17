@@ -44,6 +44,12 @@ export default async function SchoolDetailsPage({
 
   const { school, students, orders } = result.data;
 
+
+  // Récupérer les templates disponibles pour les pochettes
+  const { getTemplates } = await import("@/lib/actions/template");
+  const templatesResult = await getTemplates();
+  const templates = templatesResult.success && templatesResult.data ? templatesResult.data : [];
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -88,6 +94,7 @@ export default async function SchoolDetailsPage({
           school={school}
           students={students}
           orders={orders}
+          templates={templates}
         />
       </main>
     </div>

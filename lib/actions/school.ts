@@ -4,7 +4,7 @@ import { connectDB } from "@/lib/db/connect";
 import School from "@/lib/db/models/School";
 import Student from "@/lib/db/models/Student";
 import Order from "@/lib/db/models/Order";
-import { ActionResponse, ISchool, IStudent } from "@/types";
+import { ActionResponse, ISchool, IStudent, OrderItem, OrderPackItem } from "@/types";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth/auth";
 
@@ -48,12 +48,12 @@ export async function getSchoolDashboard(
 
     // 2. Récupérer tous les étudiants de cette école
     const students = await Student.find({ schoolId })
-      .select("firstName lastName classId qrCode loginCode clearPassword photos thumbnail schoolId")
+      .select("firstName lastName classId qrCode loginCode clearPassword photos thumbnail schoolId hasLoggedIn")
       .lean();
 
     // 3. Récupérer les commandes de cette école
     const orders = await Order.find({ schoolId })
-      .select("totalAmount status createdAt")
+      .select("totalAmount status createdAt studentIds")
       .lean();
 
     // 4. Calculer les statistiques
@@ -67,14 +67,31 @@ export async function getSchoolDashboard(
       (order) => order.status === "pending"
     ).length;
 
+    // Identifier les étudiants qui ont commandé et compter les commandes
+    const studentOrdersCount = new Map<string, number>();
+    
+    orders.forEach((order) => {
+      order.studentIds.forEach((id) => {
+        const idStr = id.toString();
+        studentOrdersCount.set(idStr, (studentOrdersCount.get(idStr) || 0) + 1);
+      });
+    });
+
     // Extraire la liste unique des classes
     const classesList = [
       ...new Set(students.map((student) => student.classId)),
     ].sort();
 
-    // Convertir en plain objects pour éviter les problèmes de sérialisation
+    // Convertir en plain objects et enrichir avec hasOrdered et ordersCount
     const plainSchool = JSON.parse(JSON.stringify(school));
-    const plainStudents = JSON.parse(JSON.stringify(students));
+    const plainStudents = JSON.parse(JSON.stringify(students)).map((student: IStudent) => {
+      const count = studentOrdersCount.get(student._id.toString()) || 0;
+      return {
+        ...student,
+        hasOrdered: count > 0,
+        ordersCount: count
+      };
+    });
 
     return {
       success: true,
@@ -143,6 +160,10 @@ export async function getSchoolOrders(schoolId: string): Promise<
       paymentMethod: string;
       status: string;
       notes?: string;
+      items?: OrderItem[];
+      packs?: OrderPackItem[];
+      itemsCount?: number;
+      packsCount?: number;
     }>
   >
 > {
@@ -152,7 +173,7 @@ export async function getSchoolOrders(schoolId: string): Promise<
     // Récupérer toutes les commandes de l'école avec les IDs des étudiants
     const orders = await Order.find({ schoolId })
       .select(
-        "orderNumber studentIds totalAmount paymentMethod status notes createdAt"
+        "orderNumber studentIds totalAmount paymentMethod status notes createdAt items packs"
       )
       .sort({ createdAt: -1 })
       .lean();
@@ -183,6 +204,8 @@ export async function getSchoolOrders(schoolId: string): Promise<
       paymentMethod: string;
       status: string;
       notes?: string;
+      items?: OrderItem[];
+      packs?: OrderPackItem[];
     }
 
     // Créer un map des étudiants pour un accès rapide
@@ -205,6 +228,16 @@ export async function getSchoolOrders(schoolId: string): Promise<
       paymentMethod: order.paymentMethod,
       status: order.status,
       notes: order.notes,
+      items: order.items?.map((item: OrderItem & { _id?: any }) => ({ // eslint-disable-line @typescript-eslint/no-explicit-any
+        ...item,
+        _id: item._id ? item._id.toString() : undefined,
+      })),
+      packs: order.packs?.map((pack: OrderPackItem & { _id?: any }) => ({ // eslint-disable-line @typescript-eslint/no-explicit-any
+        ...pack,
+        _id: pack._id ? pack._id.toString() : undefined,
+      })),
+      itemsCount: order.items?.reduce((acc, item) => acc + item.quantity, 0) || 0,
+      packsCount: order.packs?.reduce((acc, pack) => acc + pack.quantity, 0) || 0,
     }));
 
     return {
@@ -560,10 +593,63 @@ export async function updateSchoolDetails(
     revalidatePath("/school/dashboard");
     return { success: true };
   } catch (error) {
-    console.error("Error updating school details:", error);
     return {
       success: false,
       error: "Erreur lors de la mise à jour des informations",
+    };
+  }
+}
+
+/**
+ * Get all orders for a specific student
+ */
+export async function getStudentOrders(
+  studentId: string
+): Promise<ActionResponse<any[]>> { // eslint-disable-line @typescript-eslint/no-explicit-any
+  try {
+    await connectDB();
+
+    const orders = await Order.find({ studentIds: studentId })
+      .select(
+        "orderNumber studentIds totalAmount paymentMethod status notes createdAt items packs"
+      )
+      .sort({ createdAt: -1 })
+      .lean();
+
+    // Récupérer le nom de l'étudiant (on suppose que c'est le même pour toutes les commandes si on cherche par ID)
+    const student = await Student.findById(studentId).select("firstName lastName").lean();
+    const studentName = student ? `${student.firstName} ${student.lastName}` : "Inconnu";
+
+    const formattedOrders = orders.map((order) => ({
+      _id: order._id.toString(),
+      orderNumber: order.orderNumber,
+      createdAt: order.createdAt.toISOString(),
+      studentNames: [studentName], // Pour l'affichage dans le modal
+      totalAmount: order.totalAmount,
+      paymentMethod: order.paymentMethod,
+      status: order.status,
+      notes: order.notes,
+      items: order.items?.map((item: OrderItem & { _id?: any }) => ({ // eslint-disable-line @typescript-eslint/no-explicit-any
+        ...item,
+        _id: item._id ? item._id.toString() : undefined,
+      })),
+      packs: order.packs?.map((pack: OrderPackItem & { _id?: any }) => ({ // eslint-disable-line @typescript-eslint/no-explicit-any
+        ...pack,
+        _id: pack._id ? pack._id.toString() : undefined,
+      })),
+      itemsCount: order.items?.reduce((acc: number, item: OrderItem) => acc + item.quantity, 0) || 0,
+      packsCount: order.packs?.reduce((acc: number, pack: OrderPackItem) => acc + pack.quantity, 0) || 0,
+    }));
+
+    return {
+      success: true,
+      data: formattedOrders,
+    };
+  } catch (error) {
+    console.error("getStudentOrders error:", error);
+    return {
+      success: false,
+      error: "Erreur lors de la récupération des commandes de l'étudiant",
     };
   }
 }

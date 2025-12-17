@@ -15,6 +15,8 @@ import { useToastStore } from "@/lib/store/toast-store";
 import { ExportPDFButton } from "./export-pdf-button";
 import { OrdersTable } from "./orders-table";
 
+import { ITemplate } from "@/types";
+
 interface SchoolDetailsClientProps {
   school: SchoolWithStats & {
     email: string;
@@ -22,17 +24,20 @@ interface SchoolDetailsClientProps {
     phone: string;
     closureDate?: string;
     rib?: string;
+    pochette?: string;
     password?: string;
     clearPassword?: string;
   };
   students: StudentWithDetails[];
   orders: OrderWithDetails[];
+  templates: ITemplate[];
 }
 
 export function SchoolDetailsClient({
   school,
   students,
   orders,
+  templates,
 }: SchoolDetailsClientProps) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<"info" | "students" | "orders">(
@@ -50,6 +55,7 @@ export function SchoolDetailsClient({
       ? new Date(school.closureDate).toISOString().split("T")[0]
       : "",
     rib: school.rib || "",
+    pochette: school.pochette || "",
   });
 
   const [isEditingDetails, setIsEditingDetails] = useState(false);
@@ -67,7 +73,8 @@ export function SchoolDetailsClient({
       formData.phone !== school.phone ||
       formData.address !== school.address ||
       formData.closureDate !== initialClosingDate ||
-      formData.rib !== (school.rib || "")
+      formData.rib !== (school.rib || "") ||
+      formData.pochette !== (school.pochette || "")
     );
   };
 
@@ -98,6 +105,7 @@ export function SchoolDetailsClient({
         address: formData.address,
         closureDate,
         rib: formData.rib,
+        pochette: formData.pochette,
       });
 
       if (result.success) {
@@ -305,6 +313,31 @@ export function SchoolDetailsClient({
                       />
                     ) : (
                       school.address
+                    )}
+                  </dd>
+                </div>
+                <div className="sm:col-span-1">
+                  <dt className="text-sm font-medium text-gray-500">Pochette</dt>
+                  <dd className="mt-1 text-sm text-gray-900">
+                    {isEditingDetails ? (
+                       <select
+                        value={formData.pochette}
+                        onChange={(e) =>
+                          setFormData({ ...formData, pochette: e.target.value })
+                        }
+                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-gray-900"
+                      >
+                        <option value="">Aucune</option>
+                        {templates
+                          .filter((t) => t.format === "pochette")
+                          .map((template) => (
+                            <option key={template._id.toString()} value={template.planche}>
+                              {template.planche} ({template.format})
+                            </option>
+                          ))}
+                      </select>
+                    ) : (
+                      school.pochette || "Non définie"
                     )}
                   </dd>
                 </div>

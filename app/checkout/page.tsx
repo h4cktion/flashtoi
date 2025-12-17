@@ -21,6 +21,8 @@ export default function CheckoutPage() {
     null
   );
   const [email, setEmail] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [notes, setNotes] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -73,6 +75,11 @@ export default function CheckoutPage() {
       return;
     }
 
+    if (!firstName.trim() || !lastName.trim()) {
+      setError("Veuillez entrer le nom et le prénom de l'élève");
+      return;
+    }
+
     if (!paymentMethod || paymentMethod === null) {
       setError("Veuillez sélectionner un mode de paiement");
       return;
@@ -102,6 +109,8 @@ export default function CheckoutPage() {
       const orderData = {
         studentId: studentId,
         email: email.trim(),
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
         items: items.map((item) => ({
           photoUrl: item.photoUrl,
           format: item.format,
@@ -218,20 +227,54 @@ export default function CheckoutPage() {
           </p>
         </div>
 
-        {/* Email */}
+        {/* Paiement Informations */}
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <h2 className="text-xl font-semibold mb-4">Email</h2>
-          <p className="text-sm text-gray-600 mb-3">
-            Votre adresse email pour recevoir la confirmation de commande
-          </p>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="votre@email.com"
-            required
-            className="w-full border rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
-          />
+          <h2 className="text-xl font-semibold mb-4">Informations personnelles</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+             <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Nom de l&apos;élève *
+              </label>
+              <input
+                type="text"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                placeholder="Nom"
+                required
+                className="w-full border rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Prénom de l&apos;élève *
+              </label>
+              <input
+                type="text"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                placeholder="Prénom"
+                required
+                className="w-full border rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+              />
+            </div>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Email *
+            </label>
+            <p className="text-xs text-gray-500 mb-2">
+              Pour recevoir la confirmation de commande
+            </p>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="votre@email.com"
+              required
+              className="w-full border rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+            />
+          </div>
         </div>
 
         {/* Récapitulatif de la commande */}

@@ -528,6 +528,8 @@ export async function getSchoolDetailsForAdmin(schoolId: string): Promise<
       closureDate?: string;
       password?: string;
       clearPassword?: string;
+      rib?: string;
+      pochette?: string;
     };
     students: StudentWithDetails[];
     orders: OrderWithDetails[];
@@ -703,6 +705,8 @@ export async function getSchoolDetailsForAdmin(schoolId: string): Promise<
           phone: school.phone,
           password: school.password,
           clearPassword: school.clearPassword,
+          rib: school.rib,
+          pochette: school.pochette,
           closureDate: school.closureDate
             ? new Date(school.closureDate).toISOString()
             : undefined,
@@ -812,6 +816,7 @@ export async function updateSchoolDetails(
     address: string;
     closureDate?: Date | null;
     rib?: string;
+    pochette?: string;
   }
 ): Promise<ActionResponse<{ success: boolean }>> {
   try {
@@ -834,6 +839,7 @@ export async function updateSchoolDetails(
         address: data.address,
         closureDate: data.closureDate,
         rib: data.rib,
+        pochette: data.pochette,
       },
     });
 

@@ -9,6 +9,8 @@ import { sendOrderConfirmationEmail } from '@/lib/email/send-order-confirmation'
 interface CreateOrderData {
   studentId: string
   email: string
+  firstName: string
+  lastName: string
   items: OrderItem[]
   packs?: OrderPackItem[]
   totalAmount: number
@@ -62,6 +64,19 @@ export async function createOrder(
       }
     }
 
+    // Mettre à jour le nom et prénom de l'étudiant
+    if (data.firstName && data.lastName) {
+      await Student.findByIdAndUpdate(data.studentId, {
+        $set: {
+          firstName: data.firstName,
+          lastName: data.lastName,
+        },
+      });
+      // Mettre à jour l'objet local 'student' pour l'email
+      student.firstName = data.firstName;
+      student.lastName = data.lastName;
+    }
+
     // Générer un numéro de commande unique
     const orderNumber = await generateOrderNumber()
 
@@ -83,6 +98,8 @@ export async function createOrder(
       studentIds: [data.studentId],
       schoolId: student.schoolId,
       email: data.email,
+      firstName: data.firstName,
+      lastName: data.lastName,
       items: itemsWithSubtotal,
       packs: packsWithSubtotal || [],
       totalAmount: data.totalAmount,

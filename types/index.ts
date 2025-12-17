@@ -45,6 +45,8 @@ export interface IStudent {
     cloudFrontUrl: string;
   };
   hasLoggedIn?: boolean;
+  hasOrdered?: boolean;
+  ordersCount?: number;
   siblings: Sibling[];
   createdAt: Date;
   updatedAt: Date;
@@ -63,6 +65,7 @@ export interface ISchool {
   address: string;
   phone: string;
   rib?: string;
+  pochette?: string;
   closureDate?: Date;
   createdAt: Date;
   updatedAt: Date;
@@ -122,6 +125,8 @@ export interface IOrder {
   studentIds: (Types.ObjectId | string)[];
   schoolId: Types.ObjectId | string;
   email: string;
+  firstName: string;
+  lastName: string;
   items: OrderItem[];
   packs?: OrderPackItem[];
   totalAmount: number;

@@ -3,6 +3,8 @@
 import { IStudent } from "@/types";
 import Image from "next/image";
 import { useState } from "react";
+import { getStudentOrders } from "@/lib/actions/school";
+import { SharedOrdersTable, UnifiedOrder } from "../shared/orders-table";
 
 interface StudentsTableProps {
   students: IStudent[];
@@ -13,6 +15,12 @@ const STUDENTS_PER_PAGE = 10;
 export function StudentsTable({ students }: StudentsTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
+  
+  // State for orders modal
+  const [isOrdersModalOpen, setIsOrdersModalOpen] = useState(false);
+  const [selectedStudentOrders, setSelectedStudentOrders] = useState<UnifiedOrder[]>([]);
+  const [selectedStudentName, setSelectedStudentName] = useState("");
+  const [loadingOrders, setLoadingOrders] = useState(false);
 
   // Filtrer les étudiants selon le terme de recherche
   const filteredStudents = students.filter((student) => {
@@ -42,6 +50,29 @@ export function StudentsTable({ students }: StudentsTableProps) {
   const handleSearch = (value: string) => {
     setSearchTerm(value);
     setCurrentPage(1);
+  };
+
+  // Gérer le clic sur le badge de commande
+  const handleViewOrders = async (student: IStudent) => {
+    if (!student.ordersCount || student.ordersCount === 0) return;
+
+    setLoadingOrders(true);
+    setSelectedStudentName(`${student.firstName} ${student.lastName}`);
+    
+    try {
+      const result = await getStudentOrders(student._id.toString());
+      if (result.success && result.data) {
+        setSelectedStudentOrders(result.data);
+        setIsOrdersModalOpen(true);
+      } else {
+        alert("Erreur lors de la récupération des commandes");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Une erreur est survenue");
+    } finally {
+      setLoadingOrders(false);
+    }
   };
 
   return (
@@ -149,16 +180,16 @@ export function StudentsTable({ students }: StudentsTableProps) {
                     Photo
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Mot de passe
+                    Nom
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    Prénom
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                     Classe
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Code Login
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Photos
+                    Statut
                   </th>
                   <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
                     Coupon
@@ -209,17 +240,37 @@ export function StudentsTable({ students }: StudentsTableProps) {
                           </div>
                         )}
                       </td>
-                      <td className="px-4 py-4 text-sm text-gray-900 font-mono">
-                        {student.clearPassword || "-"}
+                      <td className="px-4 py-4 text-sm font-medium text-gray-900">
+                        {student.lastName.toUpperCase()}
+                      </td>
+                      <td className="px-4 py-4 text-sm text-gray-900">
+                        {student.firstName}
                       </td>
                       <td className="px-4 py-4 text-sm text-gray-600">
                         {student.classId}
                       </td>
-                      <td className="px-4 py-4 text-sm font-mono text-gray-600">
-                        {student.loginCode}
-                      </td>
-                      <td className="px-4 py-4 text-sm text-gray-600">
-                        {student.photos?.length || 0}
+                      <td className="px-4 py-4">
+                        {student.ordersCount && student.ordersCount > 0 ? (
+                          <button 
+                            onClick={() => handleViewOrders(student)}
+                            disabled={loadingOrders}
+                            className="inline-block px-2 py-1 bg-green-100 text-green-800 text-xs font-bold rounded-full border border-green-200 hover:bg-green-200 cursor-pointer transition-colors disabled:opacity-50"
+                            title="Voir les commandes"
+                          >
+                            {loadingOrders ? "..." : `${student.ordersCount} commande${student.ordersCount > 1 ? 's' : ''}`}
+                          </button>
+                        ) : student.hasLoggedIn ? (
+                          <span className="inline-block px-2 py-1 bg-orange-100 text-orange-800 text-xs font-bold rounded-full border border-orange-200">
+                            Connecté
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center px-2 py-1 bg-red-100 text-red-800 text-xs font-bold rounded-full border border-red-200 gap-1">
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                            Non connecté
+                          </span>
+                        )}
                       </td>
                       <td className="px-4 py-4 text-right">
                         <a
@@ -315,6 +366,44 @@ export function StudentsTable({ students }: StudentsTableProps) {
             </div>
           )}
         </>
+      )}
+
+      {/* Modal pour les commandes de l'étudiant */}
+      {isOrdersModalOpen && (
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-md flex items-center justify-center z-50 p-4" onClick={() => setIsOrdersModalOpen(false)}>
+          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xl font-bold text-gray-900">
+                  Commandes de {selectedStudentName}
+                </h3>
+                <button 
+                  onClick={() => setIsOrdersModalOpen(false)}
+                  className="text-gray-400 hover:text-gray-500"
+                >
+                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              
+              <SharedOrdersTable 
+                orders={selectedStudentOrders} 
+                showActions={false} 
+                showSchoolColumn={false}
+              />
+              
+              <div className="mt-6 flex justify-end">
+                 <button
+                  onClick={() => setIsOrdersModalOpen(false)}
+                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium"
+                >
+                  Fermer
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
