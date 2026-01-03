@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { OrderWithDetails } from "@/lib/actions/admin";
+import { OrderWithDetails, refundOrder } from "@/lib/actions/admin";
+import { useRouter } from "next/navigation";
 
 interface OrdersTableProps {
   orders: OrderWithDetails[];
@@ -360,13 +361,20 @@ export function OrdersTable({ orders }: OrdersTableProps) {
   );
 }
 
-function OrderDetailsModal({
+
+// ... (imports)
+
+
+export function OrderDetailsModal({
   order,
   onClose,
 }: {
   order: OrderWithDetails;
   onClose: () => void;
 }) {
+  const [isRefunding, setIsRefunding] = useState(false);
+  const router = useRouter(); // Need to access router for refresh
+
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("fr-FR", {
       style: "currency",
@@ -374,11 +382,35 @@ function OrderDetailsModal({
     }).format(amount);
   };
 
+  const handleRefund = async () => {
+    if (!confirm("Êtes-vous sûr de vouloir rembourser cette commande ? Cette action est irréversible.")) {
+      return;
+    }
+
+    setIsRefunding(true);
+    try {
+      const result = await refundOrder(order._id);
+      if (result.success) {
+        alert("Commande remboursée avec succès");
+        router.refresh(); // Refresh data
+        onClose();
+      } else {
+        alert(result.error || "Erreur lors du remboursement");
+      }
+    } catch (error) {
+      console.error("Refund error:", error);
+      alert("Une erreur est survenue lors du remboursement");
+    } finally {
+      setIsRefunding(false);
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div className="p-6">
           <div className="flex justify-between items-start mb-6">
+            {/* ... title ... */}
             <div>
               <h3 className="text-xl font-bold text-gray-900">
                 Commande {order.orderNumber}
@@ -416,6 +448,7 @@ function OrderDetailsModal({
           <div className="space-y-6">
             {/* Informations */}
             <div className="grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg">
+              {/* ... existing fields ... */}
               <div>
                 <p className="text-sm font-medium text-gray-500">École</p>
                 <p className="text-base font-medium text-gray-900">
@@ -452,6 +485,8 @@ function OrderDetailsModal({
                     ? "En attente"
                     : order.status === "paid"
                     ? "Payée"
+                    : order.status === "refunded"
+                    ? "Remboursée"
                     : order.status}
                 </p>
               </div>
@@ -472,6 +507,7 @@ function OrderDetailsModal({
             {/* Articles */}
             <div>
               <h4 className="font-semibold text-gray-900 mb-3">Articles</h4>
+              {/* ... existing table ... */}
               <div className="border rounded-lg overflow-hidden">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
@@ -548,6 +584,52 @@ function OrderDetailsModal({
                   {order.notes}
                 </p>
               </div>
+            )}
+            
+            {/* Stripe Refund Section */}
+            {order.paymentMethod === "online" && order.status !== "refunded" && (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="text-sm font-medium text-blue-900">Remboursement Stripe</h4>
+                      <p className="text-sm text-blue-700 mt-1">
+                        Cette commande a été payée en ligne via Stripe.
+                        {!order.stripePaymentIntentId && (
+                           <span className="block mt-1 text-orange-700 font-medium">
+                             ⚠️ Remboursement indisponible : Identifiant Stripe manquant (commande ancienne).
+                           </span>
+                        )}
+                        {order.stripePaymentIntentId && (
+                           <span> Vous pouvez effectuer un remboursement.</span>
+                        )}
+                      </p>
+                    </div>
+                     {order.stripePaymentIntentId ? (
+                        <button
+                          onClick={handleRefund}
+                          disabled={isRefunding}
+                          className="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-md hover:bg-red-700 disabled:opacity-50 transition-colors"
+                        >
+                          {isRefunding ? "Remboursement..." : "Rembourser la commande"}
+                        </button>
+                     ) : (
+                        <button
+                          disabled
+                          className="px-4 py-2 bg-gray-300 text-gray-500 text-sm font-medium rounded-md cursor-not-allowed"
+                        >
+                          Indisponible
+                        </button>
+                     )}
+                  </div>
+                </div>
+            )}
+            
+            {order.status === "refunded" && (
+                 <div className="bg-gray-100 border border-gray-200 rounded-lg p-4">
+                    <p className="text-sm text-gray-600 font-medium text-center">
+                        Cette commande a été remboursée.
+                    </p>
+                 </div>
             )}
           </div>
 

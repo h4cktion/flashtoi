@@ -173,7 +173,7 @@ export async function getSchoolOrders(schoolId: string): Promise<
     // Récupérer toutes les commandes de l'école avec les IDs des étudiants
     const orders = await Order.find({ schoolId })
       .select(
-        "orderNumber studentIds totalAmount paymentMethod status notes createdAt items packs"
+        "orderNumber studentIds totalAmount paymentMethod status notes createdAt items packs stripePaymentIntentId"
       )
       .sort({ createdAt: -1 })
       .lean();

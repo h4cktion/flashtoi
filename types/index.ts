@@ -94,7 +94,8 @@ export type OrderStatus =
   | "print"
   | "processing"
   | "shipped"
-  | "completed";
+  | "completed"
+  | "refunded";
 
 export interface OrderItem {
   photoUrl: string;
@@ -136,6 +137,7 @@ export interface IOrder {
   validatedBy?: Types.ObjectId | string;
   validatedAt?: Date;
   notes?: string;
+  stripePaymentIntentId?: string;
   createdAt: Date;
   updatedAt: Date;
 }

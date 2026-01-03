@@ -90,7 +90,9 @@ export interface OrderWithDetails {
   paidAt: string | null;
   itemTypes: string[];
   items: OrderItemDetails[];
+
   packs: OrderPackDetails[];
+  stripePaymentIntentId?: string;
 }
 
 export interface OrderItemDetails {
@@ -499,6 +501,7 @@ export async function getAllOrdersForAdmin(): Promise<
           ...pack,
           _id: pack._id ? pack._id.toString() : undefined,
         })) as OrderPackDetails[],
+        stripePaymentIntentId: order.stripePaymentIntentId,
       };
     });
 
@@ -690,6 +693,7 @@ export async function getSchoolDetailsForAdmin(schoolId: string): Promise<
           ...pack,
           _id: pack._id ? pack._id.toString() : undefined,
         })) as OrderPackDetails[],
+        stripePaymentIntentId: order.stripePaymentIntentId,
       };
     });
 
@@ -852,6 +856,82 @@ export async function updateSchoolDetails(
     return {
       success: false,
       error: "Erreur lors de la mise à jour des informations",
+    };
+  }
+}
+
+/**
+ * Refund an order via Stripe
+ * Admin only
+ */
+export async function refundOrder(
+  orderId: string
+): Promise<ActionResponse<{ success: boolean }>> {
+  try {
+    // 1. Check authentication
+    const session = await auth();
+    if (!session || session.user.role !== "admin") {
+      return {
+        success: false,
+        error: "Non autorisé",
+      };
+    }
+
+    // 2. Connect to database
+    await connectDB();
+
+    // 3. Get order
+    const order = await Order.findById(orderId);
+    if (!order) {
+      return {
+        success: false,
+        error: "Commande non trouvée",
+      };
+    }
+
+    // 4. Check eligibility
+    if (!order.stripePaymentIntentId) {
+      return {
+        success: false,
+        error: "Aucun ID de paiement Stripe trouvé pour cette commande",
+      };
+    }
+
+    if (order.status === "refunded") {
+      return {
+        success: false,
+        error: "Cette commande est déjà remboursée",
+      };
+    }
+
+    // 5. Process refund with Stripe
+    const { stripe } = await import("@/lib/stripe/stripe");
+    try {
+      await stripe.refunds.create({
+        payment_intent: order.stripePaymentIntentId,
+      });
+
+      // 6. Update local order status
+      order.status = "refunded";
+      order.notes = (order.notes ? order.notes + "\n" : "") + `Remboursé le ${new Date().toLocaleDateString("fr-FR")} par admin`;
+      await order.save();
+
+      return {
+        success: true,
+        data: { success: true },
+      };
+    } catch (stripeError: any) {
+      console.error("Stripe refund error:", stripeError);
+      return {
+        success: false,
+        error: stripeError.message || "Erreur lors du remboursement Stripe",
+      };
+    }
+  } catch (error) {
+    console.error("refundOrder error:", error);
+    return {
+      success: false,
+      error: "Erreur lors du traitement du remboursement",
     };
   }
 }

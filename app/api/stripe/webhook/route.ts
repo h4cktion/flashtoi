@@ -59,12 +59,51 @@ export async function POST(request: NextRequest) {
         // Mettre à jour le statut de la commande dans MongoDB
         await connectDB();
 
+        // Check payment intent
+        const paymentIntent = session.payment_intent;
+        console.log('💳 Payment Intent Raw:', paymentIntent);
+        
+        let paymentIntentId: string | undefined;
+        if (typeof paymentIntent === 'string') {
+            paymentIntentId = paymentIntent;
+        } else if (paymentIntent && typeof paymentIntent === 'object') {
+            paymentIntentId = (paymentIntent as any).id;
+        }
+
+        console.log('💳 Payment Intent ID extracted:', paymentIntentId);
+
+        // Retrieve the session again to verify we have the payment_intent expanded or available
+        // This handles cases where the webhook payload might be partial or version-dependent
+        try {
+            const expandedSession = await stripe.checkout.sessions.retrieve(session.id, {
+                expand: ['payment_intent']
+            });
+            
+            const paymentIntent = expandedSession.payment_intent;
+            console.log('💳 Expanded Session Payment Intent:', paymentIntent ? (typeof paymentIntent === 'string' ? paymentIntent : paymentIntent.id) : 'NULL');
+
+            if (typeof paymentIntent === 'string') {
+                paymentIntentId = paymentIntent;
+            } else if (paymentIntent && typeof paymentIntent === 'object') {
+                paymentIntentId = paymentIntent.id;
+            }
+        } catch (err) {
+            console.error('❌ Error retrieving expanded session:', err);
+             // Fallback to strict extraction from original event
+            if (typeof session.payment_intent === 'string') {
+                 paymentIntentId = session.payment_intent;
+            }
+        }
+
+        console.log('💾 SAVING TO DB - Payment Intent ID:', paymentIntentId);
+
         const updatedOrder = await Order.findByIdAndUpdate(
           orderId,
           {
             status: 'paid',
             paymentMethod: 'online',
             paidAt: new Date(),
+            stripePaymentIntentId: paymentIntentId,
           },
           { new: true }
         );
@@ -174,7 +213,7 @@ export async function POST(request: NextRequest) {
           const updatedOrder = await Order.findByIdAndUpdate(
             orderId,
             {
-              status: 'pending', // Retour en pending après remboursement
+              status: 'refunded',
               notes: `Remboursé le ${new Date().toLocaleDateString('fr-FR')}`,
             },
             { new: true }

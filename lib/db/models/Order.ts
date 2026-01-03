@@ -146,6 +146,7 @@ const OrderSchema = new Schema<IOrder>(
         "processing",
         "shipped",
         "completed",
+        "refunded",
       ],
       default: "pending",
       required: true,
@@ -164,6 +165,9 @@ const OrderSchema = new Schema<IOrder>(
     notes: {
       type: String,
       trim: true,
+    },
+    stripePaymentIntentId: {
+      type: String,
     },
   },
   {
